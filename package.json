@@ -1,0 +1,73 @@
+{
+  "name": "webpack-boilerplate",
+  "version": "3.0.1",
+  "description": "Sensible webpack 5 boilerplate using Babel and PostCSS.",
+  "main": "index.js",
+  "author": "Tania Rascia",
+  "license": "MIT",
+  "scripts": {
+    "start": "cross-env NODE_ENV=development webpack serve --config config/webpack.dev.js",
+    "build": "cross-env NODE_ENV=production webpack --config config/webpack.prod.js",
+    "lint": "eslint 'src/**/*.js' || true",
+    "prettify": "prettier --write 'src/**/*.js'",
+    "dev": "NODE_ENV=development nodemon --trace-warnings --preserve-symlinks ./src/server.js"
+  },
+  "keywords": [
+    "webpack",
+    "webpack 5",
+    "webpack boilerplate"
+  ],
+  "devDependencies": {
+    "@babel/core": "^7.15.8",
+    "@babel/plugin-proposal-class-properties": "^7.14.5",
+    "@babel/polyfill": "^7.12.1",
+    "@babel/preset-env": "^7.15.8",
+    "@babel/preset-react": "^7.16.7",
+    "babel-loader": "^8.2.2",
+    "clean-webpack-plugin": "^4.0.0",
+    "copy-webpack-plugin": "^9.0.1",
+    "cross-env": "^7.0.3",
+    "css-loader": "^6.4.0",
+    "css-minimizer-webpack-plugin": "^3.1.1",
+    "eslint": "^7.28.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-import-resolver-webpack": "^0.13.1",
+    "eslint-plugin-prettier": "^4.0.0",
+    "html-webpack-plugin": "^5.3.2",
+    "mini-css-extract-plugin": "^2.4.2",
+    "nodemon": "^3.0.1",
+    "postcss-loader": "^6.2.0",
+    "postcss-preset-env": "^6.7.0",
+    "prettier": "^2.4.1",
+    "sass": "^1.43.5",
+    "sass-loader": "^12.2.0",
+    "style-loader": "^3.3.0",
+    "webpack": "^5.58.2",
+    "webpack-cli": "^4.9.0",
+    "webpack-dev-server": "^4.3.1",
+    "webpack-merge": "^5.8.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:taniarascia/webpack-boilerplate"
+  },
+  "dependencies": {
+    "apollo-server-express": "^3.12.1",
+    "body-parser": "^1.20.2",
+    "connect-session-sequelize": "^7.1.7",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "express-session": "^1.17.3",
+    "graphql-s2s": "^0.22.0",
+    "graphql-tools": "^9.0.0",
+    "graphql-upload": "^13.0.0",
+    "lodash": "^4.17.21",
+    "moment-timezone": "^0.5.43",
+    "morgan": "^1.10.0",
+    "passport": "^0.6.0",
+    "pg": "^8.11.3",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "uuid": "^9.0.1"
+  }
+}
