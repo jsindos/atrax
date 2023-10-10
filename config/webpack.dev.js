@@ -29,7 +29,17 @@ module.exports = merge(common, {
             loader: 'css-loader',
             options: { sourceMap: true, importLoaders: 1, modules: false }
           },
-          { loader: 'postcss-loader', options: { sourceMap: true } },
+          {
+            loader: 'postcss-loader',
+            options: {
+              postcssOptions: {
+                plugins: [
+                  require('tailwindcss'),
+                  require('autoprefixer'),
+                ],
+              },
+            },
+          },
           { loader: 'sass-loader', options: { sourceMap: true } }
         ]
       }
