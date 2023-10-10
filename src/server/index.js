@@ -17,9 +17,9 @@ moment.tz.setDefault('Australia/Sydney')
 // initalize sequelize with session store
 const SequelizeStore = require('connect-session-sequelize')(session.Store)
 
-const schema = require('./server/schema')
-const router = require('./server/router')
-const db = require('./server/models')
+const schema = require('./schema')
+const router = require('./router')
+const db = require('./models')
 // const { serializeUser, deserializeUser, localStrategy } = require('./passport')
 // const { getDomainNames, generateShortIdBasedOnUuid } = require('./src/utility')
 

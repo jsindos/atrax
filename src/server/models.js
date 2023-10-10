@@ -56,7 +56,7 @@ fs
     return (file.indexOf('.') !== 0) && (file !== basename) && (file.slice(-3) === '.js')
   })
   .forEach(file => {
-    const models = require(path.join(__dirname, file))(db, Sequelize.DataTypes)
+    const models = require(path.join(__dirname, 'models', file))(db, Sequelize.DataTypes)
     models.forEach(model => (db.models[model.modelName] = model))
   })
 
@@ -87,9 +87,11 @@ fs
 async function initialize () {
   if (process.env.NODE_ENV === 'development') {
     await db.sequelize.sync({
-      // force: true
+      force: true
     })
   }
 }
+
+initialize()
 
 module.exports = db
