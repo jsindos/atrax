@@ -34,7 +34,20 @@ const Query = `
 
   type Query {
     _empty: String
+    customers: [Customer]
   }
+
+  type Customer {
+    id: Int
+    name: String
+    workInstructions: [WorkInstruction]
+  }
+
+  type WorkInstruction {
+    id: Int
+    title: String
+  }
+
 
   type Mutation {
     _empty: String
@@ -43,7 +56,11 @@ const Query = `
 
 const resolvers = {
   Upload: GraphQLUpload,
-  Query: {},
+  Query: {
+    async customers (root, args, context) {
+      return context.models.Customers.findAll()
+    }
+  },
   Mutation: {}
 }
 

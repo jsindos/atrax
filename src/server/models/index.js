@@ -40,6 +40,7 @@ module.exports = ({ sequelize, models, services }, DataTypes) => {
       primaryKey: true,
       autoIncrement: true
     },
+    name: DataTypes.STRING,
   }, {
     timestamps: true,
     sequelize,
@@ -61,6 +62,7 @@ module.exports = ({ sequelize, models, services }, DataTypes) => {
       primaryKey: true,
       autoIncrement: true
     },
+    title: DataTypes.STRING,
   }, {
     timestamps: true,
     sequelize,

@@ -3,6 +3,7 @@
 const fs = require('fs')
 const path = require('path')
 const Sequelize = require('sequelize')
+const seed = require('./seed')
 const basename = path.basename(__filename)
 const env = process.env.NODE_ENV || 'development'
 let config = require(path.join(__dirname, '/../../settings.json'))[env]
@@ -89,6 +90,7 @@ async function initialize () {
     await db.sequelize.sync({
       force: true
     })
+    await seed(db)
   }
 }
 

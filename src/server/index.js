@@ -145,13 +145,12 @@ async function serve () {
   const server = new ApolloServer({
     schema,
     // always create a new Loader per request, otherwise the cache will build up over the lifetime of the deployed server
-    context: ({ req, res, next }) => ({ loaders: new Loaders(db), services: db.services, models: db.models, req, sequelize: db.sequelize, logging: db.logging, res }),
+    context: ({ req, res, next }) => ({ services: db.services, models: db.models, req, sequelize: db.sequelize, logging: db.logging, res }),
     plugins: [
       // https://www.apollographql.com/docs/apollo-server/testing/build-run-queries/#graphql-playground
       ApolloServerPluginLandingPageGraphQLPlayground({ settings: { 'schema.polling.enable': false } })
     ],
     formatError: (e) => {
-      if (e.extensions.code === 'INTERNAL_SERVER_ERROR') db.logging.message(JSON.stringify(e, null, 2))
       console.error(JSON.stringify(e, null, 2))
       return e
     }
