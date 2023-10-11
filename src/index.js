@@ -66,10 +66,10 @@ const App = () => {
     <ApolloProvider client={client}>
       <Router>
         <Routes>
-        <Route path='/work_instructions/:customerId' element={<WorkInstructionsPageWrapper />} />
-        <Route path='/' element={<Navigate to='/work_instructions/1' />} />
-        {/* Add more routes as needed */}
-      </Routes>
+          <Route path='/work_instructions/:customerId' element={<WorkInstructionsPageWrapper />} />
+          <Route path='/' element={<Navigate to='/work_instructions/1' />} />
+          {/* Add more routes as needed */}
+        </Routes>
       </Router>
     </ApolloProvider>
   )
