@@ -59,7 +59,7 @@ const Query = `
     warnings: [Warning]
   }
 
-  // used to associate an index for a procedure in a particular work instruction
+  # used to associate an index for a procedure in a particular work instruction
   type WorkInstructionProcedure {
     id: Int
     index: Int
@@ -82,7 +82,7 @@ const Query = `
   }
 
   type ChildStep {
-    id: int
+    id: Int
     title: String
     index: Int
   }

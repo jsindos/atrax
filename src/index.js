@@ -42,11 +42,17 @@ const Customers = gql`
         title
         procedures {
           id
-          steps {
+          index
+          procedure {
             id
-            childSteps {
-              name
+            title
+            steps {
+              title
               id
+              childSteps {
+                title
+                id
+              }
             }
           }
         }
@@ -58,13 +64,13 @@ const Customers = gql`
 const App = () => {
   return (
     <ApolloProvider client={client}>
-    <Router>
-      <Routes>
-        <Route path="/work_instructions/:customerId" element={<WorkInstructionsPageWrapper />} />
-        <Route path="/" element={<Navigate to="/work_instructions/1" />} />
+      <Router>
+        <Routes>
+        <Route path='/work_instructions/:customerId' element={<WorkInstructionsPageWrapper />} />
+        <Route path='/' element={<Navigate to='/work_instructions/1' />} />
         {/* Add more routes as needed */}
       </Routes>
-    </Router>
+      </Router>
     </ApolloProvider>
   )
 }

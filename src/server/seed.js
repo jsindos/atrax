@@ -19,6 +19,12 @@ module.exports = async db => {
    * exactly this seeded data is used for `models.test.js`
    * if we wish to change it, first copy this data into that test
    */
+
+  // bulkCreate
+  // { name: 'BAE' },
+  // { name: 'ACSSPO' },
+  // { name: 'DDGSPO' },
+  // { name: 'Raytheon' },
   const customer = await Customers.create({ name: 'name' })
 
   const workInstruction = await WorkInstructions.create({
