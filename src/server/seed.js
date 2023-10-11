@@ -1,18 +1,11 @@
 const env = process.env.NODE_ENV || 'development'
 const config = require('../../settings.json')[env]
 
-module.exports = async db => {
+module.exports = async (db) => {
   console.log('seeding database')
 
   const { models } = db
-  const {
-    Customers,
-    WorkInstructions,
-    Warnings,
-    Procedures,
-    Steps,
-    ChildSteps
-  } = models
+  const { Customers, WorkInstructions, Warnings, Procedures, Steps, ChildSteps } = models
 
   //
   /**
@@ -24,7 +17,7 @@ module.exports = async db => {
     { name: 'BAE' },
     { name: 'ACSSPO' },
     { name: 'DDGSPO' },
-    { name: 'Raytheon' }
+    { name: 'Raytheon' },
   ])
 
   const customer = customers[0]
@@ -39,14 +32,18 @@ module.exports = async db => {
     subsystem: 'subsystem',
     SYSCOM: 'SYSCOM',
     MIPSeries: 'MIPSeries',
-    activityNumber: 'activityNumber'
+    activityNumber: 'activityNumber',
   })
 
   /**
    * `type` is one of 'warning', 'caution', 'note'
    * `warningType` is an enum, unsure what the values are yet
    */
-  const warning = await Warnings.create({ type: 'warning', content: 'content', warningType: 'warningType' })
+  const warning = await Warnings.create({
+    type: 'warning',
+    content: 'content',
+    warningType: 'warningType',
+  })
   await warning.addWorkInstruction(workInstruction)
   await warning.setCustomer(customer)
 
@@ -54,7 +51,11 @@ module.exports = async db => {
   // add index to the through table
   await procedure.addWorkInstruction(workInstruction, { through: { procedureIndex: 1 } })
 
-  const step = await Steps.create({ title: 'title', images: `[${config.MEDIA_URL} + '/bee.png']`, index: 1 })
+  const step = await Steps.create({
+    title: 'title',
+    images: `[${config.MEDIA_URL} + '/bee.png']`,
+    index: 1,
+  })
   await step.setProcedure(procedure)
   await step.addWarning(warning)
 
