@@ -1,6 +1,7 @@
 import React from 'react'
 import { MoreHorizontal } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { Checkbox } from '@/components/ui/checkbox'
 
 import {
   DropdownMenu,

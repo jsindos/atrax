@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 
 // Import necessary modules
 import { flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
@@ -19,6 +19,19 @@ export function DataTable({ columns, data }) {
     columns,
     getCoreRowModel: getCoreRowModel(),
   })
+
+  // Use state to keep track of the selected row
+  const [selectedRow, setSelectedRow] = useState(null)
+
+  console.log(selectedRow)
+
+  // Use the useEffect hook to select the first row after the component has rendered
+  useEffect(() => {
+    if (table.getRowModel().rows?.length) {
+      table.getRowModel().rows[0].toggleSelected(true)
+      setSelectedRow(table.getRowModel().rows[0])
+    }
+  }, [table])
 
   return (
     <div className="rounded-md border">
@@ -41,7 +54,15 @@ export function DataTable({ columns, data }) {
         <TableBody>
           {table.getRowModel().rows?.length ? (
             table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
+              // Add an onClick event to the TableRow that toggles the selection of the row and updates the selectedRow state
+              <TableRow
+                key={row.id}
+                data-state={row.getIsSelected() && 'selected'}
+                onClick={() => {
+                  row.toggleSelected(!row.getIsSelected())
+                  setSelectedRow(row)
+                }}
+              >
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}

@@ -6,7 +6,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue
+  SelectValue,
 } from '@/components/ui/select'
 
 import { queries } from '@/queries'
@@ -27,31 +27,27 @@ const WorkInstructionsPage = () => {
 
   return (
     <div>
-      {
-        loading
-          ? (
-            <div className='loader' />
-            )
-          : (
-            <>
-              <Select value={customer?.id} onValueChange={handleSelectChange}>
-                <SelectTrigger className='w-[180px]'>
-                  <SelectValue placeholder={customer?.name || 'Customer'} />
-                </SelectTrigger>
-                <SelectContent>
-                  {customers.map((customer) => (
-                    <SelectItem key={customer.id} value={customer.id}>
-                      {customer.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <div className='container mx-auto py-10'>
-                <DataTable columns={columns} data={customer.workInstructions} />
-              </div>
-            </>
-            )
-      }
+      {loading ? (
+        <div className="loader" />
+      ) : (
+        <>
+          <Select value={customer?.id} onValueChange={handleSelectChange}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder={customer?.name || 'Customer'} />
+            </SelectTrigger>
+            <SelectContent>
+              {customers.map((customer) => (
+                <SelectItem key={customer.id} value={customer.id}>
+                  {customer.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <div className="container mx-auto py-10">
+            <DataTable columns={columns} data={customer.workInstructions} />
+          </div>
+        </>
+      )}
     </div>
   )
 }
