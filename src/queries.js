@@ -1,5 +1,33 @@
 import { gql } from '@apollo/client'
 
+const fields = {
+  WorkInstructionFields: gql`
+    fragment WorkInstructionFields on WorkInstruction {
+      id
+      title
+      draftingOrganisation
+      hoursToComplete
+      system
+      shipSystem
+      subsystem
+      SYSCOM
+      MIPSeries
+      activityNumber
+    }
+  `
+}
+
+export const mutations = {
+  SaveWorkInstruction: gql`
+    mutation SaveWorkInstruction($workInstruction: WorkInstructionInput!) {
+      saveWorkInstruction(workInstruction: $workInstruction) {
+        ...WorkInstructionFields
+      }
+    }
+    ${fields.WorkInstructionFields}
+  `
+}
+
 export const queries = {
   Customers: gql`
     query Customers {
@@ -7,16 +35,7 @@ export const queries = {
         id
         name
         workInstructions {
-          id
-          title
-          draftingOrganisation
-          hoursToComplete
-          system
-          shipSystem
-          subsystem
-          SYSCOM
-          MIPSeries
-          activityNumber
+          ...WorkInstructionFields
           procedures {
             id
             index
@@ -36,20 +55,12 @@ export const queries = {
         }
       }
     }
+    ${fields.WorkInstructionFields}
   `,
   WorkInstructions: gql`
     query WorkInstructions {
       workInstructions {
-        id
-        title
-        draftingOrganisation
-        hoursToComplete
-        system
-        shipSystem
-        subsystem
-        SYSCOM
-        MIPSeries
-        activityNumber
+        ...WorkInstructionFields
         customer {
           id
           name
@@ -72,5 +83,6 @@ export const queries = {
         }
       }
     }
+    ${fields.WorkInstructionFields}
   `
 }

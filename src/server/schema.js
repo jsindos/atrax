@@ -38,6 +38,24 @@ const Query = `
     workInstructions: [WorkInstruction]
   }
 
+  type Mutation {
+    _empty: String
+    saveWorkInstruction(workInstruction: WorkInstructionInput!): WorkInstruction
+  }
+
+  input WorkInstructionInput {
+    id: Int
+    title: String
+    draftingOrganisation: String
+    hoursToComplete: String
+    system: String
+    shipSystem: String
+    subsystem: String
+    SYSCOM: String
+    MIPSeries: String
+    activityNumber: String
+  }
+
   type Customer {
     id: Int
     name: String
@@ -95,14 +113,21 @@ const Query = `
     content: String
     warningType: String
   }
-
-  type Mutation {
-    _empty: String
-  }
 `
 
 const resolvers = {
   Upload: GraphQLUpload,
+  Mutation: {
+    async saveWorkInstruction (root, args, context) {
+      const { workInstruction: workInstructionFields } = args
+
+      // https://stackoverflow.com/a/40543424/3171685
+      const [number, updatedRows] = await context.models.WorkInstructions.update(workInstructionFields, { where: { id: workInstructionFields.id }, returning: true }) // eslint-disable-line no-unused-vars
+      const workInstruction = updatedRows[0]
+
+      return workInstruction
+    }
+  },
   Query: {
     async customers (root, args, context) {
       return context.models.Customers.findAll()
@@ -149,8 +174,7 @@ const resolvers = {
     warnings: async (step, args, context) => {
       return step.getWarnings()
     }
-  },
-  Mutation: {}
+  }
 }
 
 module.exports = makeExecutableSchema({

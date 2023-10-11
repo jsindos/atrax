@@ -45,7 +45,7 @@ export const columns = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Work Instruction</DropdownMenuLabel>
-            <DropdownMenuItem onClick={() => navigate(`/work_instruction/${workInstruction.id}`)}>
+            <DropdownMenuItem onClick={() => navigate(`/work_instructions/${workInstruction.id}`)}>
               Edit Work Instruction
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => navigate(`/work_instruction/${workInstruction.id}`)}>
@@ -57,7 +57,7 @@ export const columns = [
             <DropdownMenuLabel>Procedures</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={() => navigate(`/work_instruction/${workInstruction.id}/procedures`)}
+              onClick={() => navigate(`/work_instructions/${workInstruction.id}/procedures`)}
             >
               Edit Procedures
             </DropdownMenuItem>

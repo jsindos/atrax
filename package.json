@@ -13,7 +13,11 @@
     "dev": "NODE_ENV=development nodemon --trace-warnings --preserve-symlinks ./src/server/index.js",
     "test": "NODE_ENV=test BABEL_DISABLE_CACHE=1 node --trace-warnings ./test/RunTests.js --runInBand"
   },
-  "keywords": ["webpack", "webpack 5", "webpack boilerplate"],
+  "keywords": [
+    "webpack",
+    "webpack 5",
+    "webpack boilerplate"
+  ],
   "devDependencies": {
     "@babel/core": "^7.15.8",
     "@babel/plugin-proposal-class-properties": "^7.14.5",
@@ -64,6 +68,7 @@
     "@radix-ui/react-label": "^2.0.2",
     "@radix-ui/react-select": "^2.0.0",
     "@radix-ui/react-slot": "^1.0.2",
+    "@radix-ui/react-toast": "^1.1.5",
     "@tanstack/react-table": "^8.10.6",
     "apollo-server-express": "^3.12.1",
     "apollo-upload-client": "^17.0.0",

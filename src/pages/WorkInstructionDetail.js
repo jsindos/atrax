@@ -1,28 +1,81 @@
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { queries } from '@/queries'
+import { mutations, queries } from '@/queries'
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger
 } from '@/components/ui/dialog'
-import { useQuery } from '@apollo/client'
+import { useMutation, useQuery } from '@apollo/client'
 import React, { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
-import { Cross1Icon, Cross2Icon, ExitIcon, ReloadIcon } from '@radix-ui/react-icons'
+import { Cross2Icon, ReloadIcon } from '@radix-ui/react-icons'
+import { useToast } from '@/components/ui/use-toast'
 
 export default () => {
-  const { workInstructionId } = useParams()
+  const { id } = useParams()
+
   const { data: { customers } = {}, loading: loadingA } = useQuery(queries.Customers)
   const { data: { workInstructions } = {}, loading: loadingB } = useQuery(queries.WorkInstructions)
 
-  const workInstruction = workInstructions?.find(w => w.id === Number(workInstructionId))
+  const workInstruction = workInstructions?.find(w => w.id === Number(id))
 
   const loading = loadingA || loadingB
+
+  const [saveWorkInstructionMutation] = useMutation(mutations.SaveWorkInstruction)
+
+  const [isSaving, setIsSaving] = useState()
+
+  const { toast } = useToast()
+
+  const saveWorkInstruction = async () => {
+    setIsSaving(true)
+    try {
+      // eslint-disable-next-line no-async-promise-executor
+      const promise1 = new Promise(async (resolve, reject) => {
+        try {
+          await saveWorkInstructionMutation({
+            variables: {
+              workInstruction: {
+                id: Number(id),
+                title,
+                draftingOrganisation,
+                hoursToComplete,
+                system,
+                shipSystem,
+                subsystem,
+                SYSCOM,
+                MIPSeries,
+                activityNumber
+              }
+            }
+          })
+          resolve()
+        } catch (e) {
+          reject(e)
+        }
+      })
+      const promise2 = new Promise(resolve => {
+        setTimeout(async () => resolve(), 500)
+      })
+
+      // wait for at least 1 second
+      await Promise.all([promise1, promise2])
+
+      toast({
+        description: 'Changes saved'
+      })
+    } catch (e) {
+      console.log(e)
+    } finally {
+      setIsSaving(false)
+    }
+  }
 
   const [title, setTitle] = useState('')
   const [draftingOrganisation, setDraftingOrganisation] = useState('')
@@ -48,13 +101,13 @@ export default () => {
     }
   }, [workInstruction])
 
+  const navigate = useNavigate()
+
   return (
     <div className='container mx-auto px-4'>
       <div className='flex justify-between row pt-8'>
         <h3>Update Work Instruction Details</h3>
-        <Button variant='outline' size='icon'>
-          <Cross2Icon className='h-4 w-4' />
-        </Button>
+        <BackButton onClick={() => navigate(`/customers/${workInstruction.customer.id}/work_instructions`)} />
       </div>
       {
         loading
@@ -62,8 +115,17 @@ export default () => {
           : (
             <>
               <div className='flex-col flex pt-8'>
-                <Button className='self-end flex '>
-                  Save Changes
+                <Button disabled={isSaving} className='self-end flex' onClick={() => saveWorkInstruction()}>
+                  {
+                    isSaving
+                      ? (
+                        <>
+                          <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />
+                          Saving
+                        </>
+                        )
+                      : 'Save Changes'
+                  }
                 </Button>
               </div>
               <I label='Title' value={title} handleInputChange={(e) => setTitle(e.target.value)} />
@@ -79,6 +141,9 @@ export default () => {
                 <DialogContent className='Dialog'>
                   <DialogHeader>
                     <DialogTitle>Location Data</DialogTitle>
+                    <DialogDescription>
+                      Changes won't persist until the work instruction is saved.
+                    </DialogDescription>
                     <div className='flex flex-wrap'>
                       <div className='w-full md:w-1/2'>
                         <h6 className='pt-8'>ESWBS Codes</h6>
@@ -103,7 +168,15 @@ export default () => {
   )
 }
 
-const I = ({ className, label, value, handleInputChange }) => {
+export const BackButton = ({ onClick }) => {
+  return (
+    <Button variant='outline' size='icon' onClick={onClick}>
+      <Cross2Icon className='h-4 w-4' />
+    </Button>
+  )
+}
+
+export const I = ({ className, label, value, handleInputChange }) => {
   return (
     <div className={'pt-8 ' + className}>
       <div className='grid w-full max-w-sm items-center gap-3'>
@@ -114,7 +187,7 @@ const I = ({ className, label, value, handleInputChange }) => {
   )
 }
 
-const S = ({ label, className, currentValue, values, nameKey, valueKey, placeholder, handleSelectChange }) => {
+export const S = ({ label, className, currentValue, values, nameKey, valueKey, placeholder, handleSelectChange }) => {
   return (
     <div className={'pt-8 ' + className}>
       <div className='grid w-full max-w-sm items-center gap-3'>
