@@ -25,6 +25,24 @@ export const mutations = {
       }
     }
     ${fields.WorkInstructionFields}
+  `,
+  SaveStep: gql`
+    mutation SaveStep($step: StepInput!) {
+      saveStep(step: $step) {
+        id
+        title
+        index
+      }
+    }
+  `,
+  SaveChildStep: gql`
+    mutation SaveChildStep($childStep: ChildStepInput!) {
+      saveChildStep(childStep: $childStep) {
+        id
+        title
+        index
+      }
+    }
   `
 }
 
@@ -84,5 +102,45 @@ export const queries = {
       }
     }
     ${fields.WorkInstructionFields}
+  `,
+  WorkInstruction: gql`
+    query WorkInstruction($id: Int!) {
+      workInstruction(id: $id) {
+        ...WorkInstructionFields
+        customer {
+          id
+          name
+        }
+        procedures {
+          id
+          index
+          procedure {
+            id
+            title
+            steps {
+              title
+              id
+              childSteps {
+                title
+                id
+              }
+            }
+          }
+        }
+      }
+    }
+    ${fields.WorkInstructionFields}
+  `,
+  Step: gql`
+    query Step($id: Int!) {
+      step(id: $id) {
+        title
+        id
+        childSteps {
+          title
+          id
+        }
+      }
+    }
   `
 }

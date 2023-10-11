@@ -17,7 +17,7 @@ module.exports = async (db) => {
     { name: 'BAE' },
     { name: 'ACSSPO' },
     { name: 'DDGSPO' },
-    { name: 'Raytheon' },
+    { name: 'Raytheon' }
   ])
 
   const customer = customers[0]
@@ -32,7 +32,7 @@ module.exports = async (db) => {
     subsystem: 'subsystem',
     SYSCOM: 'SYSCOM',
     MIPSeries: 'MIPSeries',
-    activityNumber: 'activityNumber',
+    activityNumber: 'activityNumber'
   })
 
   /**
@@ -42,7 +42,7 @@ module.exports = async (db) => {
   const warning = await Warnings.create({
     type: 'warning',
     content: 'content',
-    warningType: 'warningType',
+    warningType: 'warningType'
   })
   await warning.addWorkInstruction(workInstruction)
   await warning.setCustomer(customer)
@@ -52,14 +52,17 @@ module.exports = async (db) => {
   await procedure.addWorkInstruction(workInstruction, { through: { procedureIndex: 1 } })
 
   const step = await Steps.create({
-    title: 'title',
+    title: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
     images: `[${config.MEDIA_URL} + '/bee.png']`,
-    index: 1,
+    index: 1
   })
   await step.setProcedure(procedure)
   await step.addWarning(warning)
 
-  const childStep = await ChildSteps.create({ title: 'title', index: 1 })
+  const childStep = await ChildSteps.create({
+    title: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+    index: 1
+  })
   await childStep.setStep(step)
 
   console.log('successfully seeded')

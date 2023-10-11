@@ -22,7 +22,7 @@ const WorkInstructionsPage = () => {
   const navigate = useNavigate()
 
   const handleSelectChange = (selectedCustomerId) => {
-    navigate(`/customer/${selectedCustomerId}/work_instructions`)
+    navigate(`/customers/${selectedCustomerId}/work_instructions`)
   }
 
   return (

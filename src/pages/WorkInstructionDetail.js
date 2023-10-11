@@ -16,6 +16,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Cross2Icon, ReloadIcon } from '@radix-ui/react-icons'
 import { useToast } from '@/components/ui/use-toast'
+import { minDelayPromise } from '@/utils'
 
 export default () => {
   const { id } = useParams()
@@ -36,41 +37,33 @@ export default () => {
   const saveWorkInstruction = async () => {
     setIsSaving(true)
     try {
-      // eslint-disable-next-line no-async-promise-executor
-      const promise1 = new Promise(async (resolve, reject) => {
-        try {
-          await saveWorkInstructionMutation({
-            variables: {
-              workInstruction: {
-                id: Number(id),
-                title,
-                draftingOrganisation,
-                hoursToComplete,
-                system,
-                shipSystem,
-                subsystem,
-                SYSCOM,
-                MIPSeries,
-                activityNumber
-              }
+      await minDelayPromise(500, () =>
+        saveWorkInstructionMutation({
+          variables: {
+            workInstruction: {
+              id: Number(id),
+              title,
+              draftingOrganisation,
+              hoursToComplete,
+              system,
+              shipSystem,
+              subsystem,
+              SYSCOM,
+              MIPSeries,
+              activityNumber
             }
-          })
-          resolve()
-        } catch (e) {
-          reject(e)
-        }
-      })
-      const promise2 = new Promise(resolve => {
-        setTimeout(async () => resolve(), 500)
-      })
-
-      // wait for at least 1 second
-      await Promise.all([promise1, promise2])
+          }
+        })
+      )
 
       toast({
         description: 'Changes saved'
       })
     } catch (e) {
+      toast({
+        title: 'Uh oh! Something went wrong.',
+        description: 'There was a problem with your request.'
+      })
       console.log(e)
     } finally {
       setIsSaving(false)

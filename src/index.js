@@ -10,6 +10,7 @@ import WorkInstructionsPage from './pages/work_instructions/WorkInstructions.js'
 import WorkInstructionDetail from './pages/WorkInstructionDetail.js'
 import ProceduresPage from './pages/procedures/Procedures.js'
 import { Toaster } from './components/ui/toaster.js'
+import StepDetail from './pages/StepDetail.js'
 
 const BASE_URL = 'http://localhost:8080'
 
@@ -29,7 +30,8 @@ const App = () => {
       <Router>
         <Routes>
           <Route path='/work_instructions/:id' element={<WorkInstructionDetail />} />
-          <Route path='/' element={<Navigate to='/customer/1/work_instructions' />} />
+          <Route path='/steps/:id' element={<StepDetail />} />
+          <Route path='/' element={<Navigate to='/customers/1/work_instructions' />} />
           <Route
             path='/customers/:customerId/work_instructions'
             element={<WorkInstructionsPage />}

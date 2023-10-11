@@ -36,11 +36,15 @@ const Query = `
     _empty: String
     customers: [Customer]
     workInstructions: [WorkInstruction]
+    workInstruction(id: Int!): WorkInstruction
+    step(id: Int!): Step
   }
 
   type Mutation {
     _empty: String
     saveWorkInstruction(workInstruction: WorkInstructionInput!): WorkInstruction
+    saveChildStep(childStep: ChildStepInput!): ChildStep
+    saveStep(step: StepInput!): Step
   }
 
   input WorkInstructionInput {
@@ -54,6 +58,17 @@ const Query = `
     SYSCOM: String
     MIPSeries: String
     activityNumber: String
+  }
+
+  input StepInput {
+    id: Int
+    title: String
+  }
+
+  input ChildStepInput {
+    id: Int
+    title: String
+    index: Int
   }
 
   type Customer {
@@ -122,10 +137,31 @@ const resolvers = {
       const { workInstruction: workInstructionFields } = args
 
       // https://stackoverflow.com/a/40543424/3171685
-      const [number, updatedRows] = await context.models.WorkInstructions.update(workInstructionFields, { where: { id: workInstructionFields.id }, returning: true }) // eslint-disable-line no-unused-vars
+      // eslint-disable-next-line no-unused-vars
+      const [number, updatedRows] = await context.models.WorkInstructions.update(workInstructionFields, { where: { id: workInstructionFields.id }, returning: true })
       const workInstruction = updatedRows[0]
 
       return workInstruction
+    },
+    async saveStep (root, args, context) {
+      const { step: stepFields } = args
+
+      // https://stackoverflow.com/a/40543424/3171685
+      // eslint-disable-next-line no-unused-vars
+      const [number, updatedRows] = await context.models.Steps.update(stepFields, { where: { id: stepFields.id }, returning: true })
+      const step = updatedRows[0]
+
+      return step
+    },
+    async saveChildStep (root, args, context) {
+      const { childStep: childStepFields } = args
+
+      // https://stackoverflow.com/a/40543424/3171685
+      // eslint-disable-next-line no-unused-vars
+      const [number, updatedRows] = await context.models.ChildSteps.update(childStepFields, { where: { id: childStepFields.id }, returning: true })
+      const childStep = updatedRows[0]
+
+      return childStep
     }
   },
   Query: {
@@ -134,6 +170,12 @@ const resolvers = {
     },
     async workInstructions (root, args, context) {
       return context.models.WorkInstructions.findAll()
+    },
+    async workInstruction (root, args, context) {
+      return context.models.WorkInstructions.findByPk(args.id)
+    },
+    async step (root, args, context) {
+      return context.models.Steps.findByPk(args.id)
     }
   },
   Customer: {
