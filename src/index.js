@@ -7,6 +7,7 @@ import { BrowserRouter as Router, Route, Routes, Navigate, useParams } from 'rea
 
 import '@/styles/index.css'
 import WorkInstructionsPage from './pages/work_instructions/page.js'
+import WorkInstructionDetail from './pages/WorkInstructionDetail.js'
 
 const WorkInstructionsPageWrapper = () => {
   const { customerId } = useParams()
@@ -32,7 +33,8 @@ const App = () => {
       <Router>
         <Routes>
           <Route path='/customer/:customerId/work_instructions' element={<WorkInstructionsPageWrapper />} />
-          <Route path='/' element={<Navigate to='/work_instructions/1' />} />
+          <Route path='/' element={<Navigate to='/work_instructions/:workInstructionId' />} />
+          <Route path='/work_instructions/:workInstructionId' element={<WorkInstructionDetail />} />
           {/* Add more routes as needed */}
         </Routes>
       </Router>

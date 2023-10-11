@@ -36,5 +36,41 @@ export const queries = {
         }
       }
     }
+  `,
+  WorkInstructions: gql`
+    query WorkInstructions {
+      workInstructions {
+        id
+        title
+        draftingOrganisation
+        hoursToComplete
+        system
+        shipSystem
+        subsystem
+        SYSCOM
+        MIPSeries
+        activityNumber
+        customer {
+          id
+          name
+        }
+        procedures {
+          id
+          index
+          procedure {
+            id
+            title
+            steps {
+              title
+              id
+              childSteps {
+                title
+                id
+              }
+            }
+          }
+        }
+      }
+    }
   `
 }

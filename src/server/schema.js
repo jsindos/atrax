@@ -35,6 +35,7 @@ const Query = `
   type Query {
     _empty: String
     customers: [Customer]
+    workInstructions: [WorkInstruction]
   }
 
   type Customer {
@@ -55,6 +56,7 @@ const Query = `
     SYSCOM: String
     MIPSeries: String
     activityNumber: String
+    customer: Customer
     procedures: [WorkInstructionProcedure]
     warnings: [Warning]
   }
@@ -104,6 +106,9 @@ const resolvers = {
   Query: {
     async customers (root, args, context) {
       return context.models.Customers.findAll()
+    },
+    async workInstructions (root, args, context) {
+      return context.models.WorkInstructions.findAll()
     }
   },
   Customer: {
@@ -122,6 +127,9 @@ const resolvers = {
     },
     warnings: async (workInstruction, args, context) => {
       return workInstruction.getWarnings()
+    },
+    customer: async (workInstruction, args, context) => {
+      return workInstruction.getCustomer()
     }
   },
   WorkInstructionProcedure: {
