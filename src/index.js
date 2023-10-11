@@ -1,7 +1,7 @@
 // App.js
 import React from 'react'
 import ReactDOM from 'react-dom'
-import { ApolloClient, InMemoryCache, ApolloProvider, gql, useQuery } from '@apollo/client'
+import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client'
 import { createUploadLink } from 'apollo-upload-client'
 import { BrowserRouter as Router, Route, Routes, Navigate, useParams } from 'react-router-dom'
 
@@ -11,14 +11,8 @@ import WorkInstructionsPage from './pages/work_instructions/page.js'
 const WorkInstructionsPageWrapper = () => {
   const { customerId } = useParams()
 
-  const { data: { customers } = {}, loading } = useQuery(Customers)
-
   return <WorkInstructionsPage customerId={customerId} />
 }
-// const WorkInstructionPageWrapper = () => {
-//   const { id } = useParams()
-//   return <WorkInstructionsPage id={customerd} />
-// }
 
 const BASE_URL = 'http://localhost:8080'
 
@@ -32,41 +26,12 @@ const client = new ApolloClient({
   cache: new InMemoryCache()
 })
 
-const Customers = gql`
-  query Customers {
-    customers {
-      id
-      name
-      workInstructions {
-        id
-        title
-        procedures {
-          id
-          index
-          procedure {
-            id
-            title
-            steps {
-              title
-              id
-              childSteps {
-                title
-                id
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-`
-
 const App = () => {
   return (
     <ApolloProvider client={client}>
       <Router>
         <Routes>
-          <Route path='/work_instructions/:customerId' element={<WorkInstructionsPageWrapper />} />
+          <Route path='/customer/:customerId/work_instructions' element={<WorkInstructionsPageWrapper />} />
           <Route path='/' element={<Navigate to='/work_instructions/1' />} />
           {/* Add more routes as needed */}
         </Routes>

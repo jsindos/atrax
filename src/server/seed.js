@@ -20,12 +20,14 @@ module.exports = async db => {
    * if we wish to change it, first copy this data into that test
    */
 
-  // bulkCreate
-  // { name: 'BAE' },
-  // { name: 'ACSSPO' },
-  // { name: 'DDGSPO' },
-  // { name: 'Raytheon' },
-  const customer = await Customers.create({ name: 'name' })
+  const customers = await Customers.bulkCreate([
+    { name: 'BAE' },
+    { name: 'ACSSPO' },
+    { name: 'DDGSPO' },
+    { name: 'Raytheon' }
+  ])
+
+  const customer = customers[0]
 
   const workInstruction = await WorkInstructions.create({
     customerId: customer.id,
