@@ -2,7 +2,7 @@ const fs = require('fs')
 const path = require('path')
 const router = require('express').Router()
 
-const db = require('./models.js')
+const db = require('./db.js')
 
 fs
   .readdirSync(__dirname)

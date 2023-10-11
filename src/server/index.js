@@ -19,7 +19,7 @@ const SequelizeStore = require('connect-session-sequelize')(session.Store)
 
 const schema = require('./schema')
 const router = require('./router')
-const db = require('./models')
+const db = require('./db')
 // const { serializeUser, deserializeUser, localStrategy } = require('./passport')
 // const { getDomainNames, generateShortIdBasedOnUuid } = require('./src/utility')
 

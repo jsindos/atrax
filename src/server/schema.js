@@ -7,8 +7,8 @@ const { makeExecutableSchema } = require('graphql-tools')
 const { merge } = require('lodash')
 const { GraphQLUpload } = require('graphql-upload')
 
-const { AuthenticationError } = require('apollo-server-express')
-const { Op } = require('sequelize')
+// const { AuthenticationError } = require('apollo-server-express')
+// const { Op } = require('sequelize')
 
 const schemaParts = {}
 
@@ -41,13 +41,58 @@ const Query = `
     id: Int
     name: String
     workInstructions: [WorkInstruction]
+    warnings: [Warning]
   }
 
   type WorkInstruction {
     id: Int
     title: String
+    draftingOrganisation: String
+    hoursToComplete: String
+    system: String
+    shipSystem: String
+    subsystem: String
+    SYSCOM: String
+    MIPSeries: String
+    activityNumber: String
+    procedures: [WorkInstructionProcedure]
+    warnings: [Warning]
   }
 
+  // used to associate an index for a procedure in a particular work instruction
+  type WorkInstructionProcedure {
+    id: Int
+    index: Int
+    procedure: Procedure
+  }
+
+  type Procedure {
+    id: Int
+    title: String
+    steps: [Step]
+  }
+
+  type Step {
+    id: Int
+    title: String
+    images: String
+    index: Int
+    childSteps: [ChildStep]
+    warnings: [Warning]
+  }
+
+  type ChildStep {
+    id: int
+    title: String
+    index: Int
+  }
+
+  type Warning {
+    id: Int
+    type: String
+    content: String
+    warningType: String
+  }
 
   type Mutation {
     _empty: String
@@ -59,6 +104,42 @@ const resolvers = {
   Query: {
     async customers (root, args, context) {
       return context.models.Customers.findAll()
+    }
+  },
+  Customer: {
+    workInstructions: async (customer, args, context) => {
+      return customer.getWorkInstructions()
+    },
+    warnings: async (customer, args, context) => {
+      return customer.getWarnings()
+    }
+  },
+  WorkInstruction: {
+    procedures: async (workInstruction, args, context) => {
+      const procedures = await workInstruction.getProcedures()
+      procedures.forEach(p => p.setDataValue('index', p.workInstructionsProcedures.procedureIndex))
+      return procedures
+    },
+    warnings: async (workInstruction, args, context) => {
+      return workInstruction.getWarnings()
+    }
+  },
+  WorkInstructionProcedure: {
+    procedure: async (workInstructionProcedure, args, context) => {
+      return workInstructionProcedure
+    }
+  },
+  Procedure: {
+    steps: async (procedure, args, context) => {
+      return procedure.getSteps()
+    }
+  },
+  Step: {
+    childSteps: async (step, args, context) => {
+      return step.getChildSteps()
+    },
+    warnings: async (step, args, context) => {
+      return step.getWarnings()
     }
   },
   Mutation: {}
