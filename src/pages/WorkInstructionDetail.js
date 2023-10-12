@@ -16,7 +16,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Cross2Icon, ReloadIcon } from '@radix-ui/react-icons'
 import { useToast } from '@/components/ui/use-toast'
-import { minDelayPromise } from '@/utils'
+import { saveWithToast } from '@/utils'
 
 export default () => {
   const { id } = useParams()
@@ -34,41 +34,26 @@ export default () => {
 
   const { toast } = useToast()
 
-  const saveWorkInstruction = async () => {
-    setIsSaving(true)
-    try {
-      await minDelayPromise(500, () =>
-        saveWorkInstructionMutation({
-          variables: {
-            workInstruction: {
-              id: Number(id),
-              title,
-              draftingOrganisation,
-              hoursToComplete,
-              system,
-              shipSystem,
-              subsystem,
-              SYSCOM,
-              MIPSeries,
-              activityNumber
-            }
-          }
-        })
-      )
-
-      toast({
-        description: 'Changes saved'
-      })
-    } catch (e) {
-      toast({
-        title: 'Uh oh! Something went wrong.',
-        description: 'There was a problem with your request.'
-      })
-      console.log(e)
-    } finally {
-      setIsSaving(false)
-    }
-  }
+  const saveWorkInstruction = async () => saveWithToast(
+    saveWorkInstructionMutation({
+      variables: {
+        workInstruction: {
+          id: Number(id),
+          title,
+          draftingOrganisation,
+          hoursToComplete,
+          system,
+          shipSystem,
+          subsystem,
+          SYSCOM,
+          MIPSeries,
+          activityNumber
+        }
+      }
+    }),
+    setIsSaving,
+    toast
+  )
 
   const [title, setTitle] = useState('')
   const [draftingOrganisation, setDraftingOrganisation] = useState('')

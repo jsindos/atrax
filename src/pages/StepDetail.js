@@ -24,7 +24,7 @@ import {
   DialogTitle,
   DialogTrigger
 } from '@/components/ui/dialog'
-import { minDelayPromise } from '@/utils'
+import { saveWithToast } from '@/utils'
 
 export default () => {
   const { id } = useParams()
@@ -45,33 +45,18 @@ export default () => {
 
   const { toast } = useToast()
 
-  const saveStep = async () => {
-    setIsSaving(true)
-    try {
-      await minDelayPromise(500, () =>
-        saveStepMutation({
-          variables: {
-            step: {
-              id: step.id,
-              title: content
-            }
-          }
-        })
-      )
-
-      toast({
-        description: 'Changes saved'
-      })
-    } catch (e) {
-      toast({
-        title: 'Uh oh! Something went wrong.',
-        description: 'There was a problem with your request.'
-      })
-      console.log(e)
-    } finally {
-      setIsSaving(false)
-    }
-  }
+  const saveStep = async () => saveWithToast(
+    saveStepMutation({
+      variables: {
+        step: {
+          id: step.id,
+          title: content
+        }
+      }
+    }),
+    setIsSaving,
+    toast
+  )
 
   return (
     <div className='container mx-auto px-4'>
@@ -155,33 +140,18 @@ const EditChildStepDialog = ({ childStep, children }) => {
     setContent(childStep.title)
   }, [childStep])
 
-  const saveChildStep = async () => {
-    setIsSaving(true)
-    try {
-      await minDelayPromise(500, () =>
-        saveChildStepMutation({
-          variables: {
-            childStep: {
-              id: childStep.id,
-              title: content
-            }
-          }
-        })
-      )
-
-      toast({
-        description: 'Changes saved'
-      })
-    } catch (e) {
-      toast({
-        title: 'Uh oh! Something went wrong.',
-        description: 'There was a problem with your request.'
-      })
-      console.log(e)
-    } finally {
-      setIsSaving(false)
-    }
-  }
+  const saveChildStep = async () => saveWithToast(
+    saveChildStepMutation({
+      variables: {
+        childStep: {
+          id: childStep.id,
+          title: content
+        }
+      }
+    }),
+    setIsSaving,
+    toast
+  )
 
   return (
     <Dialog>
