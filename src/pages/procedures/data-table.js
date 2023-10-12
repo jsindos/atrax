@@ -13,17 +13,12 @@ import {
 } from '@/components/ui/table'
 
 // Define the DataTable function
-export function DataTable({ columns, data }) {
+export function DataTable({ columns, data, setSelectedRow }) {
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
   })
-
-  // Use state to keep track of the selected row
-  const [selectedRow, setSelectedRow] = useState(null)
-
-  console.log(selectedRow)
 
   // Use the useEffect hook to select the first row after the component has rendered
   useEffect(() => {
