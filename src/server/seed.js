@@ -7,13 +7,21 @@ module.exports = async (db) => {
   const { models } = db
   const { Customers, WorkInstructions, Warnings, Procedures, Steps, ChildSteps } = models
 
+  let customers
+  customers = await Customers.findAll()
+
+  if (customers.length > 0) {
+    console.log('already seeded')
+    return
+  }
+
   //
   /**
    * exactly this seeded data is used for `models.test.js`
    * if we wish to change it, first copy this data into that test
    */
 
-  const customers = await Customers.bulkCreate([
+  customers = await Customers.bulkCreate([
     { name: 'BAE' },
     { name: 'ACSSPO' },
     { name: 'DDGSPO' },

@@ -45,7 +45,7 @@ export default () => {
 
   const { toast } = useToast()
 
-  const saveStep = async () => saveWithToast(
+  const saveStep = () => saveWithToast(
     saveStepMutation({
       variables: {
         step: {
@@ -140,7 +140,7 @@ const EditChildStepDialog = ({ childStep, children }) => {
     setContent(childStep.title)
   }, [childStep])
 
-  const saveChildStep = async () => saveWithToast(
+  const saveChildStep = () => saveWithToast(
     saveChildStepMutation({
       variables: {
         childStep: {

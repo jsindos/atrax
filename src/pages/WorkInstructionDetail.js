@@ -34,7 +34,7 @@ export default () => {
 
   const { toast } = useToast()
 
-  const saveWorkInstruction = async () => saveWithToast(
+  const saveWorkInstruction = () => saveWithToast(
     saveWorkInstructionMutation({
       variables: {
         workInstruction: {
