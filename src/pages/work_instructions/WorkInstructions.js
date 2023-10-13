@@ -191,7 +191,10 @@ const WorkInstructionsPage = () => {
 
   const { toast } = useToast()
 
+  console.log('1', customer)
+
   const createWorkInstruction = async () => {
+    console.log('2', customer)
     const result = await saveWithToast(
       () =>
         createWorkInstructionMutation({
@@ -206,11 +209,11 @@ const WorkInstructionsPage = () => {
       setIsCreating
     )
     let workInstructions = result.data.createWorkInstruction.workInstructions
-    let highest_id_work_instruction = workInstructions.reduce((max, obj) =>
+    let latest_id_work_instruction = workInstructions.reduce((max, obj) =>
       max.id > obj.id ? max : obj
     )
 
-    navigate(`/work_instructions/${highest_id_work_instruction}`)
+    navigate(`/work_instructions/${latest_id_work_instruction.id}`)
   }
 
   const columns = [
