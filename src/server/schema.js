@@ -205,6 +205,8 @@ const Mutation = `
     SYSCOM: String
     MIPSeries: String
     activityNumber: String
+
+    warningIds: [Int]
   }
 
   input StepInput {
@@ -241,7 +243,7 @@ const mutations = {
       return warning
     },
     async saveWorkInstruction (root, args, context) {
-      const { workInstruction: workInstructionFields } = args
+      const { workInstruction: { warningIds, ...workInstructionFields } } = args
 
       // https://stackoverflow.com/a/40543424/3171685
       // eslint-disable-next-line no-unused-vars
@@ -250,6 +252,13 @@ const mutations = {
         { where: { id: workInstructionFields.id }, returning: true }
       )
       const workInstruction = updatedRows[0]
+
+      if (warningIds) {
+        await context.models.WorkInstructionsWarnings.destroy({
+          where: { workInstructionId: workInstruction.id }
+        })
+        await workInstruction.addWarnings(warningIds)
+      }
 
       return workInstruction
     },

@@ -193,6 +193,17 @@ export const queries = {
     query WorkInstruction($id: Int!) {
       workInstruction(id: $id) {
         ...WorkInstructionFields
+        warnings {
+          id
+          isDefault
+          type
+          content
+          warningType
+          customer {
+            id
+            name
+          }
+        }
         customer {
           id
           name

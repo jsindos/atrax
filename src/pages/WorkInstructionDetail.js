@@ -10,7 +10,7 @@ import {
   DialogTitle,
   DialogTrigger
 } from '@/components/ui/dialog'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   Table,
   TableBody,
@@ -35,9 +35,8 @@ export default () => {
 
   const { data: { customers } = {}, loading: loadingA } = useQuery(queries.Customers)
   const { data: { workInstruction } = {}, loading: loadingB } = useQuery(queries.WorkInstruction, { variables: { id: Number(id) } })
-  const { data: { warnings } = {}, loading: loadingC } = useQuery(queries.Warnings)
 
-  const loading = loadingA || loadingB || loadingC
+  const loading = loadingA || loadingB
 
   const [saveWorkInstructionMutation] = useMutation(mutations.SaveWorkInstruction)
 
@@ -213,49 +212,8 @@ export default () => {
 const Warnings = () => {
   const { id } = useParams()
 
-  const { data: { customers } = {} } = useQuery(queries.Customers)
   const { data: { warnings } = {} } = useQuery(queries.Warnings)
-
-  return (
-    <WarningsBody />
-    // <Dialog>
-    //   <DialogTrigger className='pt-8'>
-    //     <Button>
-    //       Warnings, Cautions and Notes
-    //     </Button>
-    //   </DialogTrigger>
-    //   <DialogContent className='Dialog'>
-    //     <DialogHeader>
-    //       <DialogTitle>{workInstruction.title} Warnings, Cautions and Notes</DialogTitle>
-    //       <WarningsBody />
-    //     </DialogHeader>
-    //     <DialogFooter>
-    //       <div className='flex-col flex pt-8'>
-    //         {/* <Button disabled={isSavingLocationFields} className='self-end flex' onClick={() => saveWorkInstructionLocationFields()}>
-    //         {
-    //           isSavingLocationFields
-    //             ? (
-    //               <>
-    //                 <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />
-    //                 Saving
-    //               </>
-    //               )
-    //             : 'Save Changes'
-    //         }
-    //       </Button> */}
-    //       </div>
-    //     </DialogFooter>
-    //   </DialogContent>
-    // </Dialog>
-  )
-}
-
-const WarningsBody = () => {
-  const { id } = useParams()
-
-  const { data: { customers } = {} } = useQuery(queries.Customers)
   const { data: { workInstruction } = {} } = useQuery(queries.WorkInstruction, { variables: { id: Number(id) } })
-  const { data: { warnings } = {} } = useQuery(queries.Warnings)
 
   const [warningsAdded, setWarningsAdded] = useState()
 
@@ -267,38 +225,118 @@ const WarningsBody = () => {
     }
   }, [warnings])
 
+  const [saveWorkInstructionMutation] = useMutation(mutations.SaveWorkInstruction)
+
+  const [isSaving, setIsSaving] = useState()
+
+  const { toast } = useToast()
+
+  const saveWarnings = async () => {
+    await saveWithToast(
+      () => saveWorkInstructionMutation({
+        variables: {
+          workInstruction: {
+            id: Number(id),
+            warningIds: warningsAdded.map(w => w.id)
+          }
+        }
+      }),
+      toast,
+      null,
+      setIsSaving
+    )
+    setShowDialog(false)
+  }
+
+  const [showDialog, setShowDialog] = useState(false)
+
+  return (
+  // <>
+  //   <WarningsBody {...{ setWarningsAdded, warningsAdded }} />
+  //   <Button disabled={isSaving} className='self-end flex' onClick={() => saveWarnings()}>
+  //     {
+  //       isSaving
+  //         ? (
+  //           <>
+  //             <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />
+  //             Saving
+  //           </>
+  //           )
+  //         : 'Save Changes'
+  //     }
+  //   </Button>
+  // </>
+    <Dialog open={showDialog} onOpenChange={setShowDialog}>
+      <DialogTrigger className='pt-8'>
+        <Button>
+          Warnings, Cautions and Notes
+        </Button>
+      </DialogTrigger>
+      <DialogContent className='Dialog'>
+        <DialogHeader>
+          <DialogTitle>{workInstruction.title} Warnings, Cautions and Notes</DialogTitle>
+          <WarningsBody {...{ setWarningsAdded, warningsAdded }} />
+        </DialogHeader>
+        <DialogFooter>
+          <div className='flex-col flex pt-8'>
+            <Button disabled={isSaving} className='self-end flex' onClick={() => saveWarnings()}>
+              {
+                isSaving
+                  ? (
+                    <>
+                      <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />
+                      Saving
+                    </>
+                    )
+                  : 'Save Changes'
+              }
+            </Button>
+          </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+const WarningsBody = ({ setWarningsAdded, warningsAdded }) => {
   // one of 'warning', 'caution', 'note'
   const [tab, setTab] = useState('warning')
+
+  const [isByCustomer, setIsByCustomer] = useState(false)
+  const [isByDefaults, setIsByDefaults] = useState(false)
 
   return (
     <>
       <div className='flex items-center row space-x-4 pt-8 pb-8'>
         <div className='flex items-center space-x-2'>
-          <Switch id='airplane-mode' />
-          <Label htmlFor='airplane-mode'>Limit to customer</Label>
+          <Switch checked={isByCustomer} onCheckedChange={setIsByCustomer} />
+          <Label>Limit to customer</Label>
         </div>
         <div className='flex items-center space-x-2'>
-          <Switch id='airplane-mode' />
+          <Switch checked={isByDefaults} onCheckedChange={setIsByDefaults} id='airplane-mode' />
           <Label htmlFor='airplane-mode'>Limit to defaults</Label>
         </div>
       </div>
-      <Tabs value={tab} onValueChange={v => setTab(v)} defaultValue='children' className='mt-8 w-full mb-8'>
+      <Tabs value={tab} onValueChange={v => setTab(v)} className='w-full'>
         <TabsList>
           <TabsTrigger value='warning'>Warnings</TabsTrigger>
           <TabsTrigger value='caution'>Cautions</TabsTrigger>
           <TabsTrigger value='note'>Notes</TabsTrigger>
         </TabsList>
       </Tabs>
-      <div className='flex w-full space-x-10 mb-40'>
-        <WarningsToAdd {...{ setWarningsAdded, warningsAdded }} typeSelected={tab} />
+      <div className='flex w-full space-x-10 pt-8'>
+        <WarningsToAdd {...{ setWarningsAdded, warningsAdded, isByCustomer, isByDefaults }} typeSelected={tab} />
         <WarningsAdded warnings={warningsAdded} {...{ setWarningsAdded }} typeSelected={tab} />
       </div>
     </>
   )
 }
 
-const WarningsToAdd = ({ setWarningsAdded, warningsAdded, typeSelected }) => {
+const WarningsToAdd = ({ setWarningsAdded, warningsAdded, typeSelected, isByCustomer, isByDefaults }) => {
+  const { id } = useParams()
+
   const { data: { warnings } = {} } = useQuery(queries.Warnings)
+  const { data: { workInstruction } = {} } = useQuery(queries.WorkInstruction, { variables: { id: Number(id) } })
 
   return (
     <div className='w-full' style={{ display: 'flex', rowGap: '0.75rem', flexDirection: 'column' }}>
@@ -314,23 +352,33 @@ const WarningsToAdd = ({ setWarningsAdded, warningsAdded, typeSelected }) => {
         </TableHeader>
         <TableBody>
           {
-            warnings?.filter(w => w.type === typeSelected).map((w, i) => {
-              return (
-                <TableRow key={i}>
-                  <TableCell>
-                    <EditWarning id={w.id} />
-                  </TableCell>
-                  <TableCell>{w.content}</TableCell>
-                  <TableCell>{w.customer?.name}</TableCell>
-                  <TableCell><Checkbox checked={w.isDefault} disabled /></TableCell>
-                  <TableCell>
-                    <Button variant='ghost' size='icon' disabled={warningsAdded?.find(ww => ww.id === w.id)} onClick={() => setWarningsAdded(wa => [...wa, w])}>
-                      <ArrowRightIcon className='h-4 w-4' />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              )
-            })
+            warnings
+              ?.filter(w => (
+                (isByDefaults
+                  ? w.isDefault
+                  : true) &&
+                (isByCustomer
+                  ? w.customer?.id === workInstruction.customer.id
+                  : true) &&
+                w.type === typeSelected
+              ))
+              .map((w, i) => {
+                return (
+                  <TableRow key={i}>
+                    <TableCell>
+                      <EditWarning id={w.id} />
+                    </TableCell>
+                    <TableCell>{w.content}</TableCell>
+                    <TableCell>{w.customer?.name}</TableCell>
+                    <TableCell><Checkbox checked={w.isDefault} disabled /></TableCell>
+                    <TableCell>
+                      <Button variant='ghost' size='icon' disabled={warningsAdded?.find(ww => ww.id === w.id)} onClick={() => setWarningsAdded(wa => [...wa, w])}>
+                        <ArrowRightIcon className='h-4 w-4' />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                )
+              })
           }
         </TableBody>
       </Table>
