@@ -14,7 +14,7 @@ const fields = {
       MIPSeries
       activityNumber
     }
-  `,
+  `
 }
 
 export const mutations = {
@@ -54,7 +54,7 @@ export const mutations = {
       }
     }
     ${fields.WorkInstructionFields}
-  `,
+  `
 }
 
 export const queries = {
@@ -94,7 +94,7 @@ export const queries = {
         type
         content
         warningType
-        customers {
+        customer {
           id
           name
         }
@@ -171,5 +171,5 @@ export const queries = {
         }
       }
     }
-  `,
+  `
 }

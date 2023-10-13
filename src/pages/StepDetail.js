@@ -46,7 +46,7 @@ export default () => {
   const { toast } = useToast()
 
   const saveStep = () => saveWithToast(
-    saveStepMutation({
+    () => saveStepMutation({
       variables: {
         step: {
           id: step.id,
@@ -104,11 +104,7 @@ export default () => {
                             <TableRow key={i}>
                               <TableCell>{c.title}</TableCell>
                               <TableCell className='flex justify-end'>
-                                <EditChildStepDialog childStep={c}>
-                                  <Button variant='outline' size='icon'>
-                                    <Pencil1Icon className='h-4 w-4' />
-                                  </Button>
-                                </EditChildStepDialog>
+                                <EditChildStepDialog childStep={c} />
                               </TableCell>
                             </TableRow>
                           )
@@ -129,27 +125,35 @@ export default () => {
 }
 
 const EditChildStepDialog = ({ childStep, children }) => {
-  const [content, setContent] = useState('')
-
   const [saveChildStepMutation] = useMutation(mutations.SaveChildStep)
+
+  const mutation = title => (
+    saveChildStepMutation({
+      variables: {
+        childStep: {
+          id: childStep.id,
+          title
+        }
+      }
+    })
+  )
+
+  return <EditTextDialog initialText={childStep.title} mutation={mutation} />
+}
+
+export const EditTextDialog = ({ initialText, mutation }) => {
+  const [text, setText] = useState('')
 
   const [isSaving, setIsSaving] = useState()
 
   const { toast } = useToast()
 
   useEffect(() => {
-    setContent(childStep.title)
-  }, [childStep])
+    setText(initialText)
+  }, [initialText])
 
-  const saveChildStep = () => saveWithToast(
-    saveChildStepMutation({
-      variables: {
-        childStep: {
-          id: childStep.id,
-          title: content
-        }
-      }
-    }),
+  const save = () => saveWithToast(
+    () => mutation(text),
     toast,
     null,
     setIsSaving
@@ -158,16 +162,18 @@ const EditChildStepDialog = ({ childStep, children }) => {
   return (
     <Dialog>
       <DialogTrigger>
-        {children}
+        <Button variant='outline' size='icon'>
+          <Pencil1Icon className='h-4 w-4' />
+        </Button>
       </DialogTrigger>
       <DialogContent className='Dialog'>
         <DialogHeader>
           <DialogTitle>Edit text</DialogTitle>
-          <Textarea className='mt-8' style={{ minHeight: 100 }} value={content} onChange={(e) => setContent(e.target.value)} />
+          <Textarea className='mt-8' style={{ minHeight: 100 }} value={text} onChange={(e) => setText(e.target.value)} />
         </DialogHeader>
         <DialogFooter>
           <div className='flex-col flex pt-8'>
-            <Button disabled={isSaving} className='self-end flex' onClick={() => saveChildStep()}>
+            <Button disabled={isSaving} className='self-end flex' onClick={() => save()}>
               {
                 isSaving
                   ? (

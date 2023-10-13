@@ -32,11 +32,12 @@ export async function minDelayPromise (delay, fn) {
 export const saveWithToast = async (fn, toast, toastSuccessMessage, setIsSaving) => {
   setIsSaving && setIsSaving(true)
   try {
-    await minDelayPromise(500, () => fn)
+    const result = await minDelayPromise(500, fn)
 
     toast({
       description: toastSuccessMessage || 'Changes saved'
     })
+    return result
   } catch (e) {
     toast({
       title: 'Uh oh! Something went wrong.',

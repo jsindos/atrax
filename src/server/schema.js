@@ -54,7 +54,7 @@ const Query = `
     type: String
     content: String
     warningType: String
-    customers: [Customer]
+    customer: Customer
     workInstructions: [WorkInstruction]
   }
 
@@ -101,7 +101,77 @@ const Query = `
     title: String
     index: Int
   }
+`
 
+const resolvers = {
+  Upload: GraphQLUpload,
+  Query: {
+    async customers (root, args, context) {
+      return context.models.Customers.findAll()
+    },
+    async workInstructions (root, args, context) {
+      return context.models.WorkInstructions.findAll()
+    },
+    async workInstruction (root, args, context) {
+      return context.models.WorkInstructions.findByPk(args.id)
+    },
+    async step (root, args, context) {
+      return context.models.Steps.findByPk(args.id)
+    },
+    async warnings (root, args, context) {
+      return context.models.Warnings.findAll()
+    }
+  },
+  Customer: {
+    workInstructions: async (customer, args, context) => {
+      return customer.getWorkInstructions()
+    },
+    warnings: async (customer, args, context) => {
+      return customer.getWarnings()
+    }
+  },
+  Warning: {
+    customer: async (warning, args, context) => {
+      return warning.getCustomer()
+    },
+    workInstructions: async (warning, args, context) => {
+      return warning.getWorkInstructions()
+    }
+  },
+  WorkInstruction: {
+    procedures: async (workInstruction, args, context) => {
+      const procedures = await workInstruction.getProcedures()
+      procedures.forEach(p => p.setDataValue('index', p.workInstructionsProcedures.procedureIndex))
+      return procedures
+    },
+    warnings: async (workInstruction, args, context) => {
+      return workInstruction.getWarnings()
+    },
+    customer: async (workInstruction, args, context) => {
+      return workInstruction.getCustomer()
+    }
+  },
+  WorkInstructionProcedure: {
+    procedure: async (workInstructionProcedure, args, context) => {
+      return workInstructionProcedure
+    }
+  },
+  Procedure: {
+    steps: async (procedure, args, context) => {
+      return procedure.getSteps()
+    }
+  },
+  Step: {
+    childSteps: async (step, args, context) => {
+      return step.getChildSteps()
+    },
+    warnings: async (step, args, context) => {
+      return step.getWarnings()
+    }
+  }
+}
+
+const Mutation = `
   type Mutation {
     _empty: String
     saveWorkInstruction(workInstruction: WorkInstructionInput!): WorkInstruction
@@ -138,8 +208,7 @@ const Query = `
   }
 `
 
-const resolvers = {
-  Upload: GraphQLUpload,
+const mutations = {
   Mutation: {
     async createWorkInstruction (root, args, context) {
       const { workInstruction: workInstructionFields } = args
@@ -180,66 +249,10 @@ const resolvers = {
 
       return childStep
     }
-  },
-  Query: {
-    async customers (root, args, context) {
-      return context.models.Customers.findAll()
-    },
-    async workInstructions (root, args, context) {
-      return context.models.WorkInstructions.findAll()
-    },
-    async workInstruction (root, args, context) {
-      return context.models.WorkInstructions.findByPk(args.id)
-    },
-    async step (root, args, context) {
-      return context.models.Steps.findByPk(args.id)
-    },
-    async warnings (root, args, context) {
-      return context.models.Warnings.findAll()
-    }
-  },
-  Customer: {
-    workInstructions: async (customer, args, context) => {
-      return customer.getWorkInstructions()
-    },
-    warnings: async (customer, args, context) => {
-      return customer.getWarnings()
-    }
-  },
-  WorkInstruction: {
-    procedures: async (workInstruction, args, context) => {
-      const procedures = await workInstruction.getProcedures()
-      procedures.forEach(p => p.setDataValue('index', p.workInstructionsProcedures.procedureIndex))
-      return procedures
-    },
-    warnings: async (workInstruction, args, context) => {
-      return workInstruction.getWarnings()
-    },
-    customer: async (workInstruction, args, context) => {
-      return workInstruction.getCustomer()
-    }
-  },
-  WorkInstructionProcedure: {
-    procedure: async (workInstructionProcedure, args, context) => {
-      return workInstructionProcedure
-    }
-  },
-  Procedure: {
-    steps: async (procedure, args, context) => {
-      return procedure.getSteps()
-    }
-  },
-  Step: {
-    childSteps: async (step, args, context) => {
-      return step.getChildSteps()
-    },
-    warnings: async (step, args, context) => {
-      return step.getWarnings()
-    }
   }
 }
 
 module.exports = makeExecutableSchema({
-  typeDefs: [Query, ...Object.values(schemaParts).map(({ typeDef }) => transpileSchema(typeDef))],
-  resolvers: merge(resolvers, ...Object.values(schemaParts).map(({ resolvers }) => resolvers))
+  typeDefs: [Query, Mutation, ...Object.values(schemaParts).map(({ typeDef }) => transpileSchema(typeDef))],
+  resolvers: merge(resolvers, mutations, ...Object.values(schemaParts).map(({ resolvers }) => resolvers))
 })

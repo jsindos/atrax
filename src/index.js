@@ -16,12 +16,12 @@ const BASE_URL = 'http://localhost:8080'
 
 const link = createUploadLink({
   uri: `${BASE_URL}/graphql`,
-  credentials: 'include',
+  credentials: 'include'
 })
 
 const client = new ApolloClient({
   link,
-  cache: new InMemoryCache(),
+  cache: new InMemoryCache()
 })
 
 const App = () => {
@@ -33,10 +33,10 @@ const App = () => {
           <Route path='/steps/:id' element={<StepDetail />} />
           <Route path='/' element={<Navigate to='/customers/1/work_instructions' />} />
           <Route
-            path="/customers/:customerId/work_instructions"
+            path='/customers/:customerId/work_instructions'
             element={<WorkInstructionsPage />}
           />
-          <Route path="/work_instructions/:id/procedures" element={<ProceduresPage />} />
+          <Route path='/work_instructions/:id/procedures' element={<ProceduresPage />} />
         </Routes>
       </Router>
     </ApolloProvider>

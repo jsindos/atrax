@@ -23,9 +23,10 @@ import { useMutation, useQuery } from '@apollo/client'
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
-import { Cross2Icon, ReloadIcon } from '@radix-ui/react-icons'
+import { ArrowRightIcon, Cross2Icon, ReloadIcon } from '@radix-ui/react-icons'
 import { useToast } from '@/components/ui/use-toast'
 import { saveWithToast } from '@/utils'
+import { Switch } from '@/components/ui/switch'
 
 export default () => {
   const { id } = useParams()
@@ -46,7 +47,7 @@ export default () => {
   const { toast } = useToast()
 
   const saveWorkInstructionMainFields = () => saveWithToast(
-    saveWorkInstructionMutation({
+    () => saveWorkInstructionMutation({
       variables: {
         workInstruction: {
           id: Number(id),
@@ -63,7 +64,7 @@ export default () => {
   )
 
   const saveWorkInstructionLocationFields = () => saveWithToast(
-    saveWorkInstructionMutation({
+    () => saveWorkInstructionMutation({
       variables: {
         workInstruction: {
           id: Number(id),
@@ -214,69 +215,144 @@ const Warnings = () => {
   const workInstruction = workInstructions?.find(w => w.id === Number(id))
 
   return (
-    <Dialog>
-      <DialogTrigger className='pt-8'>
-        <Button>
-          Warnings, Cautions and Notes
-        </Button>
-      </DialogTrigger>
-      <DialogContent className='Dialog'>
-        <DialogHeader>
-          <DialogTitle>{workInstruction.title} Warnings, Cautions and Notes</DialogTitle>
-          <Tabs defaultValue='children' className='mt-8'>
-            <TabsList>
-              <TabsTrigger value='children'>Child Steps</TabsTrigger>
-              <TabsTrigger value='password'>Images</TabsTrigger>
-            </TabsList>
-            <TabsContent value='children' className='mt-8'>
+    <WarningsBody />
+    // <Dialog>
+    //   <DialogTrigger className='pt-8'>
+    //     <Button>
+    //       Warnings, Cautions and Notes
+    //     </Button>
+    //   </DialogTrigger>
+    //   <DialogContent className='Dialog'>
+    //     <DialogHeader>
+    //       <DialogTitle>{workInstruction.title} Warnings, Cautions and Notes</DialogTitle>
+    //       <WarningsBody />
+    //     </DialogHeader>
+    //     <DialogFooter>
+    //       <div className='flex-col flex pt-8'>
+    //         {/* <Button disabled={isSavingLocationFields} className='self-end flex' onClick={() => saveWorkInstructionLocationFields()}>
+    //         {
+    //           isSavingLocationFields
+    //             ? (
+    //               <>
+    //                 <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />
+    //                 Saving
+    //               </>
+    //               )
+    //             : 'Save Changes'
+    //         }
+    //       </Button> */}
+    //       </div>
+    //     </DialogFooter>
+    //   </DialogContent>
+    // </Dialog>
+  )
+}
+
+const WarningsBody = () => {
+  const { id } = useParams()
+
+  const { data: { customers } = {} } = useQuery(queries.Customers)
+  const { data: { workInstructions } = {} } = useQuery(queries.WorkInstructions)
+  const { data: { warnings } = {} } = useQuery(queries.Warnings)
+
+  const workInstruction = workInstructions?.find(w => w.id === Number(id))
+  return (
+    <>
+      <div className='flex items-center row space-x-4 pt-8 pb-8'>
+        <div className='flex items-center space-x-2'>
+          <Switch id='airplane-mode' />
+          <Label htmlFor='airplane-mode'>Limit to customer</Label>
+        </div>
+        <div className='flex items-center space-x-2'>
+          <Switch id='airplane-mode' />
+          <Label htmlFor='airplane-mode'>Limit to defaults</Label>
+        </div>
+      </div>
+      <Tabs defaultValue='children' className='mt-8 w-full mb-8'>
+        <TabsList>
+          <TabsTrigger value='children'>Warnings</TabsTrigger>
+          <TabsTrigger value='password'>Cautions</TabsTrigger>
+          <TabsTrigger value='password'>Notes</TabsTrigger>
+        </TabsList>
+        <TabsContent value='children' className='mt-8'>
+
+          <div className='flex w-full space-x-10'>
+            <div className='grid w-full items-center gap-3'>
+              <Label>All</Label>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Step Text</TableHead>
+                    <TableHead>Text</TableHead>
+                    <TableHead>Customer</TableHead>
+                    <TableHead>Default</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {
-                        step.childSteps.map((c, i) => {
-                          return (
-                            <TableRow key={i}>
-                              <TableCell>{c.title}</TableCell>
-                              <TableCell className='flex justify-end'>
-                                <EditChildStepDialog childStep={c}>
-                                  <Button variant='outline' size='icon'>
-                                    <Pencil1Icon className='h-4 w-4' />
-                                  </Button>
-                                </EditChildStepDialog>
-                              </TableCell>
-                            </TableRow>
-                          )
-                        })
-                      }
+            warnings.map((c, i) => {
+              return (
+                <TableRow key={i}>
+                  <TableCell>{c.content}</TableCell>
+                  <TableCell>{c.customer?.name}</TableCell>
+                  <TableCell>{c.isDefault}</TableCell>
+                  <TableCell />
+                  {/* <TableCell className='flex justify-end'>
+                    <EditChildStepDialog childStep={c}>
+                      <Button variant='outline' size='icon'>
+                        <Pencil1Icon className='h-4 w-4' />
+                      </Button>
+                    </EditChildStepDialog>
+                  </TableCell> */}
+                  <TableCell>
+                    <Button variant='outline' size='icon'>
+                      <ArrowRightIcon className='h-4 w-4' />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              )
+            })
+          }
                 </TableBody>
               </Table>
-
-            </TabsContent>
-            <TabsContent className='mt-8' value='password'>Upload your images here.</TabsContent>
-          </Tabs>
-        </DialogHeader>
-        <DialogFooter>
-          <div className='flex-col flex pt-8'>
-            {/* <Button disabled={isSavingLocationFields} className='self-end flex' onClick={() => saveWorkInstructionLocationFields()}>
-            {
-              isSavingLocationFields
-                ? (
-                  <>
-                    <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />
-                    Saving
-                  </>
-                  )
-                : 'Save Changes'
-            }
-          </Button> */}
+            </div>
+            <div className='grid w-full items-center gap-3'>
+              <Label>Selected</Label>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Text</TableHead>
+                    <TableHead>Customer</TableHead>
+                    <TableHead>Default</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {
+            warnings.map((c, i) => {
+              return (
+                <TableRow key={i}>
+                  <TableCell>{c.content}</TableCell>
+                  <TableCell>{c.customer?.name}</TableCell>
+                  <TableCell>{c.isDefault}</TableCell>
+                  {/* <TableCell className='flex justify-end'>
+                    <EditChildStepDialog childStep={c}>
+                      <Button variant='outline' size='icon'>
+                        <Pencil1Icon className='h-4 w-4' />
+                      </Button>
+                    </EditChildStepDialog>
+                  </TableCell> */}
+                </TableRow>
+              )
+            })
+          }
+                </TableBody>
+              </Table>
+            </div>
           </div>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+
+        </TabsContent>
+        <TabsContent className='mt-8' value='password'>Upload your images here.</TabsContent>
+      </Tabs>
+    </>
   )
 }
 
