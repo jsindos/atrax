@@ -12,18 +12,16 @@ const { GraphQLUpload } = require('graphql-upload')
 
 const schemaParts = {}
 
-fs
-  .readdirSync(__dirname)
-  .filter(file => {
-    return (file.indexOf('.') === -1) && (file !== 'db') && (file !== 'models')
+fs.readdirSync(__dirname)
+  .filter((file) => {
+    return file.indexOf('.') === -1 && file !== 'db' && file !== 'models'
   })
-  .forEach(directory => {
-    fs
-      .readdirSync(path.join(__dirname, directory))
-      .filter(file => {
+  .forEach((directory) => {
+    fs.readdirSync(path.join(__dirname, directory))
+      .filter((file) => {
         return file.slice(-10) === 'graphql.js'
       })
-      .forEach(file => {
+      .forEach((file) => {
         const { typeDef, resolvers } = require(path.join(__dirname, directory, file))
         schemaParts[file.slice(0, -11)] = { typeDef, resolvers }
       })
@@ -106,21 +104,21 @@ const Query = `
 const resolvers = {
   Upload: GraphQLUpload,
   Query: {
-    async customers (root, args, context) {
+    async customers(root, args, context) {
       return context.models.Customers.findAll()
     },
-    async workInstructions (root, args, context) {
+    async workInstructions(root, args, context) {
       return context.models.WorkInstructions.findAll()
     },
-    async workInstruction (root, args, context) {
+    async workInstruction(root, args, context) {
       return context.models.WorkInstructions.findByPk(args.id)
     },
-    async step (root, args, context) {
+    async step(root, args, context) {
       return context.models.Steps.findByPk(args.id)
     },
-    async warnings (root, args, context) {
+    async warnings(root, args, context) {
       return context.models.Warnings.findAll()
-    }
+    },
   },
   Customer: {
     workInstructions: async (customer, args, context) => {
@@ -128,7 +126,7 @@ const resolvers = {
     },
     warnings: async (customer, args, context) => {
       return customer.getWarnings()
-    }
+    },
   },
   Warning: {
     customer: async (warning, args, context) => {
@@ -136,12 +134,14 @@ const resolvers = {
     },
     workInstructions: async (warning, args, context) => {
       return warning.getWorkInstructions()
-    }
+    },
   },
   WorkInstruction: {
     procedures: async (workInstruction, args, context) => {
       const procedures = await workInstruction.getProcedures()
-      procedures.forEach(p => p.setDataValue('index', p.workInstructionsProcedures.procedureIndex))
+      procedures.forEach((p) =>
+        p.setDataValue('index', p.workInstructionsProcedures.procedureIndex)
+      )
       return procedures
     },
     warnings: async (workInstruction, args, context) => {
@@ -149,17 +149,17 @@ const resolvers = {
     },
     customer: async (workInstruction, args, context) => {
       return workInstruction.getCustomer()
-    }
+    },
   },
   WorkInstructionProcedure: {
     procedure: async (workInstructionProcedure, args, context) => {
       return workInstructionProcedure
-    }
+    },
   },
   Procedure: {
     steps: async (procedure, args, context) => {
       return procedure.getSteps()
-    }
+    },
   },
   Step: {
     childSteps: async (step, args, context) => {
@@ -167,8 +167,8 @@ const resolvers = {
     },
     warnings: async (step, args, context) => {
       return step.getWarnings()
-    }
-  }
+    },
+  },
 }
 
 const Mutation = `
@@ -178,6 +178,7 @@ const Mutation = `
     saveChildStep(childStep: ChildStepInput!): ChildStep
     saveStep(step: StepInput!): Step
     createWorkInstruction(workInstruction: WorkInstructionInput!): Customer
+    deleteWorkInstruction(id: ID!): Customer
   }
 
   input WorkInstructionInput {
@@ -210,7 +211,7 @@ const Mutation = `
 
 const mutations = {
   Mutation: {
-    async createWorkInstruction (root, args, context) {
+    async createWorkInstruction(root, args, context) {
       const { workInstruction: workInstructionFields } = args
 
       await context.models.WorkInstructions.create(workInstructionFields)
@@ -219,40 +220,75 @@ const mutations = {
 
       return customer
     },
-    async saveWorkInstruction (root, args, context) {
+    async saveWorkInstruction(root, args, context) {
       const { workInstruction: workInstructionFields } = args
 
       // https://stackoverflow.com/a/40543424/3171685
       // eslint-disable-next-line no-unused-vars
-      const [number, updatedRows] = await context.models.WorkInstructions.update(workInstructionFields, { where: { id: workInstructionFields.id }, returning: true })
+      const [number, updatedRows] = await context.models.WorkInstructions.update(
+        workInstructionFields,
+        { where: { id: workInstructionFields.id }, returning: true }
+      )
       const workInstruction = updatedRows[0]
 
       return workInstruction
     },
-    async saveStep (root, args, context) {
+    async deleteWorkInstruction(root, args, context) {
+      const { id } = args
+
+      const workInstruction = await context.models.WorkInstructions.findByPk(id)
+
+      if (!workInstruction) {
+        throw new Error('WorkInstruction not found')
+      }
+
+      await context.models.WorkInstructions.destroy({
+        where: { id },
+      })
+
+      const customer = await context.models.Customers.findByPk(workInstruction.customerId)
+
+      return customer
+    },
+
+    async saveStep(root, args, context) {
       const { step: stepFields } = args
 
       // https://stackoverflow.com/a/40543424/3171685
       // eslint-disable-next-line no-unused-vars
-      const [number, updatedRows] = await context.models.Steps.update(stepFields, { where: { id: stepFields.id }, returning: true })
+      const [number, updatedRows] = await context.models.Steps.update(stepFields, {
+        where: { id: stepFields.id },
+        returning: true,
+      })
       const step = updatedRows[0]
 
       return step
     },
-    async saveChildStep (root, args, context) {
+    async saveChildStep(root, args, context) {
       const { childStep: childStepFields } = args
 
       // https://stackoverflow.com/a/40543424/3171685
       // eslint-disable-next-line no-unused-vars
-      const [number, updatedRows] = await context.models.ChildSteps.update(childStepFields, { where: { id: childStepFields.id }, returning: true })
+      const [number, updatedRows] = await context.models.ChildSteps.update(childStepFields, {
+        where: { id: childStepFields.id },
+        returning: true,
+      })
       const childStep = updatedRows[0]
 
       return childStep
-    }
-  }
+    },
+  },
 }
 
 module.exports = makeExecutableSchema({
-  typeDefs: [Query, Mutation, ...Object.values(schemaParts).map(({ typeDef }) => transpileSchema(typeDef))],
-  resolvers: merge(resolvers, mutations, ...Object.values(schemaParts).map(({ resolvers }) => resolvers))
+  typeDefs: [
+    Query,
+    Mutation,
+    ...Object.values(schemaParts).map(({ typeDef }) => transpileSchema(typeDef)),
+  ],
+  resolvers: merge(
+    resolvers,
+    mutations,
+    ...Object.values(schemaParts).map(({ resolvers }) => resolvers)
+  ),
 })

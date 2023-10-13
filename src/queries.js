@@ -14,7 +14,7 @@ const fields = {
       MIPSeries
       activityNumber
     }
-  `
+  `,
 }
 
 export const mutations = {
@@ -54,7 +54,18 @@ export const mutations = {
       }
     }
     ${fields.WorkInstructionFields}
-  `
+  `,
+  DeleteWorkInstruction: gql`
+    mutation DeleteWorkInstruction($id: ID!) {
+      deleteWorkInstruction(id: $id) {
+        id
+        workInstructions {
+          ...WorkInstructionFields
+        }
+      }
+    }
+    ${fields.WorkInstructionFields}
+  `,
 }
 
 export const queries = {
@@ -171,5 +182,5 @@ export const queries = {
         }
       }
     }
-  `
+  `,
 }

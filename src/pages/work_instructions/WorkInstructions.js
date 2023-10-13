@@ -64,6 +64,31 @@ const DialogComponent = ({ customers, selectedCustomer, workInstruction }) => {
     setShowNewCustomerDialog(false)
   }
 
+  const [deleteWorkInstructionMutation] = useMutation(mutations.DeleteWorkInstruction)
+
+  const [isDeleting, setIsDeleting] = useState()
+  const { toast } = useToast()
+
+  const deleteWorkInstruction = async (id) => {
+    setIsDeleting(true)
+    try {
+      await saveWithToast(
+        () =>
+          deleteWorkInstructionMutation({
+            variables: {
+              id,
+            },
+          }),
+        toast,
+        'Work Instruction Deleted',
+        setIsDeleting
+      )
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setIsDeleting(false)
+    }
+  }
   const navigate = useNavigate()
 
   return (
@@ -80,8 +105,15 @@ const DialogComponent = ({ customers, selectedCustomer, workInstruction }) => {
           <DropdownMenuItem onClick={() => navigate(`/work_instructions/${workInstruction.id}`)}>
             Edit Work Instruction
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => navigate(`/work_instruction/${workInstruction.id}`)}>
-            Delete Work Instruction
+          <DropdownMenuItem onClick={() => deleteWorkInstruction(workInstruction.id)}>
+            {isDeleting ? (
+              <>
+                <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+                Deleting
+              </>
+            ) : (
+              'Delete Work Instruction'
+            )}
           </DropdownMenuItem>
           <DialogTrigger asChild>
             <DropdownMenuItem>Duplicate Work Instruction</DropdownMenuItem>
@@ -159,20 +191,27 @@ const WorkInstructionsPage = () => {
 
   const { toast } = useToast()
 
-  // save
-  const createWorkInstruction = () =>
-    saveWithToast(
-      createWorkInstructionMutation({
-        variables: {
-          workInstruction: {
-            customerId: customer.id,
+  const createWorkInstruction = async () => {
+    const result = await saveWithToast(
+      () =>
+        createWorkInstructionMutation({
+          variables: {
+            workInstruction: {
+              customerId: customer.id,
+            },
           },
-        },
-      }),
+        }),
       toast,
-      'Procedure Created',
+      'Work Instruction Created',
       setIsCreating
     )
+    let workInstructions = result.data.createWorkInstruction.workInstructions
+    let highest_id_work_instruction = workInstructions.reduce((max, obj) =>
+      max.id > obj.id ? max : obj
+    )
+
+    navigate(`/work_instructions/${highest_id_work_instruction}`)
+  }
 
   const columns = [
     {
@@ -218,7 +257,9 @@ const WorkInstructionsPage = () => {
           <Button
             disabled={isCreating}
             className="self-end flex"
-            onClick={() => createWorkInstruction()}
+            onClick={() => {
+              createWorkInstruction()
+            }}
           >
             {isCreating ? (
               <>
