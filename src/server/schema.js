@@ -181,6 +181,8 @@ const Mutation = `
     saveWarning(warning: WarningInput!): Warning
     deleteWorkInstruction(id: ID!): Customer
     createWarning(warning : WarningInput!): Warning
+    duplicateWorkInstruction(existingWorkInstructionId: ID!, customerId: ID!, newActivityNumber: String!): Customer
+    createProcedure(procedure: ProcedureInput!): Procedure
   }
 
   input WarningInput {
@@ -208,6 +210,13 @@ const Mutation = `
     activityNumber: String
 
     warningIds: [Int]
+  }
+
+  input ProcedureInput {
+      id: Int
+      workInstructionId: Int
+      title: String
+      steps: [StepInput]
   }
 
   input StepInput {
@@ -245,7 +254,10 @@ const mutations = {
 
       // https://stackoverflow.com/a/40543424/3171685
       // eslint-disable-next-line no-unused-vars
-      const [number, updatedRows] = await context.models.Warnings.update(warningFields, { where: { id: warningFields.id }, returning: true })
+      const [number, updatedRows] = await context.models.Warnings.update(warningFields, {
+        where: { id: warningFields.id },
+        returning: true
+      })
       const warning = updatedRows[0]
 
       return warning
@@ -286,6 +298,47 @@ const mutations = {
       const customer = await context.models.Customers.findByPk(workInstruction.customerId)
 
       return customer
+    },
+
+    async duplicateWorkInstruction (root, args, context) {
+      const { existingWorkInstructionId, customerId, newActivityNumber } = args
+
+      // Find the existing work instruction
+      const existingWorkInstruction = await context.models.WorkInstructions.findByPk(
+        existingWorkInstructionId
+      )
+
+      if (!existingWorkInstruction) {
+        throw new Error(`WorkInstruction with id ${existingWorkInstructionId} not found`)
+      }
+
+      // Create a new work instruction based on the existing one
+      const newWorkInstructionFields = {
+        ...existingWorkInstruction.dataValues,
+        customerId: customerId,
+        activityNumber: newActivityNumber
+      }
+
+      // Delete the id field to ensure a new id is generated
+      delete newWorkInstructionFields.id
+
+      // Create the new work instruction
+      await context.models.WorkInstructions.create(newWorkInstructionFields)
+
+      // Return the customer associated with the new work instruction
+      const customer = await context.models.Customers.findByPk(customerId)
+
+      return customer
+    },
+
+    // All that needs to pass into this thing is workinstruction.id
+    async createProcedure (root, args, context) {
+      const { procedure: procedureFields } = args
+
+      // Create the new procedure
+      const newProcedure = await context.models.Procedures.create(procedureFields)
+
+      return newProcedure
     },
 
     async saveStep (root, args, context) {
