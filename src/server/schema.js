@@ -117,7 +117,7 @@ const resolvers = {
       return context.models.Steps.findByPk(args.id)
     },
     async warnings(root, args, context) {
-      return context.models.Warnings.findAll()
+      return context.models.Warnings.findAll({ order: [['id', 'ASC']] })
     },
   },
   Customer: {
@@ -178,8 +178,19 @@ const Mutation = `
     saveChildStep(childStep: ChildStepInput!): ChildStep
     saveStep(step: StepInput!): Step
     createWorkInstruction(workInstruction: WorkInstructionInput!): Customer
+    saveWarning(warning: WarningInput!): Warning
     deleteWorkInstruction(id: ID!): Customer
     duplicateWorkInstruction(existingWorkInstructionId: ID!, customerId: ID!, newActivityNumber: String!): Customer
+    createProcedure(procedure: ProcedureInput!): Procedure
+  }
+
+  input WarningInput {
+    id: Int
+    isDefault: Boolean
+    type: String
+    content: String
+    warningType: String
+    customerId: Int
   }
 
   input WorkInstructionInput {
@@ -196,6 +207,13 @@ const Mutation = `
     SYSCOM: String
     MIPSeries: String
     activityNumber: String
+  }
+
+  input ProcedureInput {
+      id: Int
+      workInstructionId: Int
+      title: String
+      steps: [StepInput]
   }
 
   input StepInput {
@@ -220,6 +238,19 @@ const mutations = {
       const customer = await context.models.Customers.findByPk(workInstructionFields.customerId)
 
       return customer
+    },
+    async saveWarning(root, args, context) {
+      const { warning: warningFields } = args
+
+      // https://stackoverflow.com/a/40543424/3171685
+      // eslint-disable-next-line no-unused-vars
+      const [number, updatedRows] = await context.models.Warnings.update(warningFields, {
+        where: { id: warningFields.id },
+        returning: true,
+      })
+      const warning = updatedRows[0]
+
+      return warning
     },
     async saveWorkInstruction(root, args, context) {
       const { workInstruction: workInstructionFields } = args
@@ -281,6 +312,16 @@ const mutations = {
       const customer = await context.models.Customers.findByPk(customerId)
 
       return customer
+    },
+
+    // All that needs to pass into this thing is workinstruction.id
+    async createProcedure(root, args, context) {
+      const { procedure: procedureFields } = args
+
+      // Create the new procedure
+      const newProcedure = await context.models.Procedures.create(procedureFields)
+
+      return newProcedure
     },
 
     async saveStep(root, args, context) {

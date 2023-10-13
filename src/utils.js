@@ -16,7 +16,7 @@ export async function minDelayPromise (delay, fn) {
   })
 
   const promise2 = new Promise(resolve => {
-    setTimeout(async () => resolve(), 500)
+    setTimeout(async () => resolve(), delay)
   })
 
   // wait for at least 1 second
@@ -32,7 +32,7 @@ export async function minDelayPromise (delay, fn) {
 export const saveWithToast = async (fn, toast, toastSuccessMessage, setIsSaving) => {
   setIsSaving && setIsSaving(true)
   try {
-    const result = await minDelayPromise(500, fn)
+    const result = await minDelayPromise(200, fn)
 
     toast({
       description: toastSuccessMessage || 'Changes saved'

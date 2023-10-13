@@ -34,9 +34,8 @@ import { ReloadIcon } from '@radix-ui/react-icons'
 import { useToast } from '@/components/ui/use-toast'
 
 import { queries, mutations } from '@/queries'
-import { useQuery } from '@apollo/client'
+import { useQuery, useMutation } from '@apollo/client'
 import { useNavigate, useParams } from 'react-router-dom'
-import { useMutation } from '@apollo/client'
 import { saveWithToast } from '@/utils'
 
 const DialogComponent = ({ customers, selectedCustomer, workInstruction }) => {
@@ -205,6 +204,7 @@ const DialogComponent = ({ customers, selectedCustomer, workInstruction }) => {
             ) : (
               'Save changes'
             )}
+            Save changes
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -248,8 +248,8 @@ const WorkInstructionsPage = () => {
       'Work Instruction Created',
       setIsCreating
     )
-    let workInstructions = result.data.createWorkInstruction.workInstructions
-    let latest_id_work_instruction = workInstructions.reduce((max, obj) =>
+    const workInstructions = result.data.createWorkInstruction.workInstructions
+    const latest_id_work_instruction = workInstructions.reduce((max, obj) =>
       max.id > obj.id ? max : obj
     )
 
