@@ -119,7 +119,7 @@ const resolvers = {
       return context.models.Steps.findByPk(args.id)
     },
     async warnings (root, args, context) {
-      return context.models.Warnings.findAll()
+      return context.models.Warnings.findAll({ order: [['id', 'ASC']] })
     }
   },
   Customer: {
@@ -178,6 +178,16 @@ const Mutation = `
     saveChildStep(childStep: ChildStepInput!): ChildStep
     saveStep(step: StepInput!): Step
     createWorkInstruction(workInstruction: WorkInstructionInput!): Customer
+    saveWarning(warning: WarningInput!): Warning
+  }
+
+  input WarningInput {
+    id: Int
+    isDefault: Boolean
+    type: String
+    content: String
+    warningType: String
+    customerId: Int
   }
 
   input WorkInstructionInput {
@@ -218,6 +228,16 @@ const mutations = {
       const customer = await context.models.Customers.findByPk(workInstructionFields.customerId)
 
       return customer
+    },
+    async saveWarning (root, args, context) {
+      const { warning: warningFields } = args
+
+      // https://stackoverflow.com/a/40543424/3171685
+      // eslint-disable-next-line no-unused-vars
+      const [number, updatedRows] = await context.models.Warnings.update(warningFields, { where: { id: warningFields.id }, returning: true })
+      const warning = updatedRows[0]
+
+      return warning
     },
     async saveWorkInstruction (root, args, context) {
       const { workInstruction: workInstructionFields } = args

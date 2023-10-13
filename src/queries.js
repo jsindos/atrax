@@ -18,6 +18,21 @@ const fields = {
 }
 
 export const mutations = {
+  SaveWarning: gql`
+    mutation SaveWarning($warning: WarningInput!) {
+      saveWarning(warning: $warning) {
+        id
+        isDefault
+        type
+        content
+        warningType
+        customer {
+          id
+          name
+        }
+      }
+    }
+  `,
   SaveWorkInstruction: gql`
     mutation SaveWorkInstruction($workInstruction: WorkInstructionInput!) {
       saveWorkInstruction(workInstruction: $workInstruction) {
@@ -108,6 +123,17 @@ export const queries = {
     query WorkInstructions {
       workInstructions {
         ...WorkInstructionFields
+        warnings {
+          id
+          isDefault
+          type
+          content
+          warningType
+          customer {
+            id
+            name
+          }
+        }
         customer {
           id
           name
