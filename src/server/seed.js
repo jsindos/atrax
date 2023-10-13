@@ -52,6 +52,11 @@ module.exports = async (db) => {
     content: 'content',
     warningType: 'warningType'
   })
+  await Warnings.create({
+    type: 'warning',
+    content: 'content2',
+    warningType: 'warningType'
+  })
   await warning.addWorkInstruction(workInstruction)
   await warning.setCustomer(customer)
 

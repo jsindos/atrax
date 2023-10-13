@@ -54,8 +54,9 @@ export default () => {
         }
       }
     }),
-    setIsSaving,
-    toast
+    toast,
+    null,
+    setIsSaving
   )
 
   return (
@@ -149,8 +150,9 @@ const EditChildStepDialog = ({ childStep, children }) => {
         }
       }
     }),
-    setIsSaving,
-    toast
+    toast,
+    null,
+    setIsSaving
   )
 
   return (

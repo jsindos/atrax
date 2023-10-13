@@ -75,6 +75,24 @@ export const queries = {
     }
     ${fields.WorkInstructionFields}
   `,
+  Warnings: gql`
+    query Warnings {
+      warnings {
+        id
+        isDefault
+        type
+        content
+        warningType
+        customers {
+          id
+          name
+        }
+        workInstructions {
+          id
+        }
+      }
+    }
+  `,
   WorkInstructions: gql`
     query WorkInstructions {
       workInstructions {

@@ -113,7 +113,10 @@ module.exports = ({ sequelize, models, services }, DataTypes) => {
     // warning, caution or note
     type: DataTypes.STRING,
     // additional enum, may or may not only apply to 'type: warning'
-    warningType: DataTypes.STRING
+    warningType: DataTypes.STRING,
+
+    // `isDefault` for a customer, at the moment warnings-customers is many-to-one, if it becomes many-to-many this will have to live on the through table
+    isDefault: DataTypes.BOOLEAN
   }, {
     timestamps: true,
     sequelize,

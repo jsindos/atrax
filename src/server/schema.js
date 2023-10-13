@@ -38,37 +38,7 @@ const Query = `
     workInstructions: [WorkInstruction]
     workInstruction(id: Int!): WorkInstruction
     step(id: Int!): Step
-  }
-
-  type Mutation {
-    _empty: String
-    saveWorkInstruction(workInstruction: WorkInstructionInput!): WorkInstruction
-    saveChildStep(childStep: ChildStepInput!): ChildStep
-    saveStep(step: StepInput!): Step
-  }
-
-  input WorkInstructionInput {
-    id: Int
-    title: String
-    draftingOrganisation: String
-    hoursToComplete: String
-    system: String
-    shipSystem: String
-    subsystem: String
-    SYSCOM: String
-    MIPSeries: String
-    activityNumber: String
-  }
-
-  input StepInput {
-    id: Int
-    title: String
-  }
-
-  input ChildStepInput {
-    id: Int
-    title: String
-    index: Int
+    warnings: [Warning]
   }
 
   type Customer {
@@ -76,6 +46,16 @@ const Query = `
     name: String
     workInstructions: [WorkInstruction]
     warnings: [Warning]
+  }
+
+  type Warning {
+    id: Int
+    isDefault: Boolean
+    type: String
+    content: String
+    warningType: String
+    customers: [Customer]
+    workInstructions: [WorkInstruction]
   }
 
   type WorkInstruction {
@@ -122,17 +102,54 @@ const Query = `
     index: Int
   }
 
-  type Warning {
+  type Mutation {
+    _empty: String
+    saveWorkInstruction(workInstruction: WorkInstructionInput!): WorkInstruction
+    saveChildStep(childStep: ChildStepInput!): ChildStep
+    saveStep(step: StepInput!): Step
+    createWorkInstruction(workInstruction: WorkInstructionInput!): Customer
+  }
+
+  input WorkInstructionInput {
     id: Int
-    type: String
-    content: String
-    warningType: String
+    
+    title: String
+    draftingOrganisation: String
+    hoursToComplete: String
+    customerId: Int
+
+    system: String
+    shipSystem: String
+    subsystem: String
+    SYSCOM: String
+    MIPSeries: String
+    activityNumber: String
+  }
+
+  input StepInput {
+    id: Int
+    title: String
+  }
+
+  input ChildStepInput {
+    id: Int
+    title: String
+    index: Int
   }
 `
 
 const resolvers = {
   Upload: GraphQLUpload,
   Mutation: {
+    async createWorkInstruction (root, args, context) {
+      const { workInstruction: workInstructionFields } = args
+
+      await context.models.WorkInstructions.create(workInstructionFields)
+
+      const customer = await context.models.Customers.findByPk(workInstructionFields.customerId)
+
+      return customer
+    },
     async saveWorkInstruction (root, args, context) {
       const { workInstruction: workInstructionFields } = args
 
@@ -176,6 +193,9 @@ const resolvers = {
     },
     async step (root, args, context) {
       return context.models.Steps.findByPk(args.id)
+    },
+    async warnings (root, args, context) {
+      return context.models.Warnings.findAll()
     }
   },
   Customer: {
