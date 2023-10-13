@@ -63,24 +63,27 @@ export default () => {
     setIsSaving
   )
 
-  const saveWorkInstructionLocationFields = () => saveWithToast(
-    () => saveWorkInstructionMutation({
-      variables: {
-        workInstruction: {
-          id: Number(id),
-          system,
-          shipSystem,
-          subsystem,
-          SYSCOM,
-          MIPSeries,
-          activityNumber
+  const saveWorkInstructionLocationFields = async () => {
+    await saveWithToast(
+      () => saveWorkInstructionMutation({
+        variables: {
+          workInstruction: {
+            id: Number(id),
+            system,
+            shipSystem,
+            subsystem,
+            SYSCOM,
+            MIPSeries,
+            activityNumber
+          }
         }
-      }
-    }),
-    toast,
-    'Location Data saved',
-    setIsSavingLocationFields
-  )
+      }),
+      toast,
+      'Location Data saved',
+      setIsSavingLocationFields
+    )
+    setShowLocationDialog(false)
+  }
 
   const [title, setTitle] = useState('')
   const [draftingOrganisation, setDraftingOrganisation] = useState('')
@@ -109,6 +112,8 @@ export default () => {
   }, [workInstruction])
 
   const navigate = useNavigate()
+
+  const [showLocationDialog, setShowLocationDialog] = useState()
 
   return (
     <div className='container mx-auto px-4'>
@@ -154,7 +159,7 @@ export default () => {
                   alignItems: 'flex-start'
                 }}
               >
-                <Dialog>
+                <Dialog open={showLocationDialog} onOpenChange={setShowLocationDialog}>
                   <DialogTrigger className='pt-8'>
                     <Button>
                       Location Data
@@ -255,8 +260,15 @@ const WarningsBody = () => {
   const [warningsAdded, setWarningsAdded] = useState()
 
   useEffect(() => {
-    setWarningsAdded(workInstruction?.warnings)
-  }, [])
+    if (warningsAdded?.length) {
+      setWarningsAdded(warningsAdded.map(w => warnings.find(ww => ww.id === w.id)))
+    } else {
+      setWarningsAdded(workInstruction?.warnings || [])
+    }
+  }, [warnings])
+
+  // one of 'warning', 'caution', 'note'
+  const [tab, setTab] = useState('warning')
 
   return (
     <>
@@ -270,27 +282,22 @@ const WarningsBody = () => {
           <Label htmlFor='airplane-mode'>Limit to defaults</Label>
         </div>
       </div>
-      <Tabs defaultValue='children' className='mt-8 w-full mb-40'>
+      <Tabs value={tab} onValueChange={v => setTab(v)} defaultValue='children' className='mt-8 w-full mb-8'>
         <TabsList>
-          <TabsTrigger value='children'>Warnings</TabsTrigger>
-          <TabsTrigger value='password'>Cautions</TabsTrigger>
-          <TabsTrigger value='password'>Notes</TabsTrigger>
+          <TabsTrigger value='warning'>Warnings</TabsTrigger>
+          <TabsTrigger value='caution'>Cautions</TabsTrigger>
+          <TabsTrigger value='note'>Notes</TabsTrigger>
         </TabsList>
-        <TabsContent value='children' className='mt-8'>
-
-          <div className='flex w-full space-x-10'>
-            <WarningsToAdd {...{ setWarningsAdded }} />
-            <WarningsAdded warnings={warningsAdded} />
-          </div>
-
-        </TabsContent>
-        <TabsContent className='mt-8' value='password'>Upload your images here.</TabsContent>
       </Tabs>
+      <div className='flex w-full space-x-10 mb-40'>
+        <WarningsToAdd {...{ setWarningsAdded, warningsAdded }} typeSelected={tab} />
+        <WarningsAdded warnings={warningsAdded} {...{ setWarningsAdded }} typeSelected={tab} />
+      </div>
     </>
   )
 }
 
-const WarningsToAdd = ({ setWarningsAdded }) => {
+const WarningsToAdd = ({ setWarningsAdded, warningsAdded, typeSelected }) => {
   const { data: { warnings } = {} } = useQuery(queries.Warnings)
 
   return (
@@ -307,7 +314,7 @@ const WarningsToAdd = ({ setWarningsAdded }) => {
         </TableHeader>
         <TableBody>
           {
-            warnings?.map((w, i) => {
+            warnings?.filter(w => w.type === typeSelected).map((w, i) => {
               return (
                 <TableRow key={i}>
                   <TableCell>
@@ -316,15 +323,8 @@ const WarningsToAdd = ({ setWarningsAdded }) => {
                   <TableCell>{w.content}</TableCell>
                   <TableCell>{w.customer?.name}</TableCell>
                   <TableCell><Checkbox checked={w.isDefault} disabled /></TableCell>
-                  {/* <TableCell className='flex justify-end'>
-                    <EditChildStepDialog childStep={c}>
-                      <Button variant='outline' size='icon'>
-                        <Pencil1Icon className='h-4 w-4' />
-                      </Button>
-                    </EditChildStepDialog>
-                  </TableCell> */}
                   <TableCell>
-                    <Button variant='outline' size='icon' onClick={() => setWarningsAdded(wa => [...wa, w])}>
+                    <Button variant='ghost' size='icon' disabled={warningsAdded?.find(ww => ww.id === w.id)} onClick={() => setWarningsAdded(wa => [...wa, w])}>
                       <ArrowRightIcon className='h-4 w-4' />
                     </Button>
                   </TableCell>
@@ -338,35 +338,32 @@ const WarningsToAdd = ({ setWarningsAdded }) => {
   )
 }
 
-const WarningsAdded = ({ warnings }) => {
+const WarningsAdded = ({ warnings, setWarningsAdded, typeSelected }) => {
   return (
     <div className='w-full' style={{ display: 'flex', rowGap: '0.75rem', flexDirection: 'column' }}>
       <Label>Selected</Label>
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead />
             <TableHead>Text</TableHead>
             <TableHead>Customer</TableHead>
-            <TableHead>Default</TableHead>
+            <TableHead>Is default</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {
-            warnings?.map((w, i) => {
+            warnings?.filter(w => w.type === typeSelected).map((w, i) => {
               return (
                 <TableRow key={i}>
+                  <TableCell>
+                    <EditWarning id={w.id} />
+                  </TableCell>
                   <TableCell>{w.content}</TableCell>
                   <TableCell>{w.customer?.name}</TableCell>
-                  <TableCell>{w.isDefault}</TableCell>
-                  {/* <TableCell className='flex justify-end'>
-                    <EditChildStepDialog childStep={c}>
-                      <Button variant='outline' size='icon'>
-                        <Pencil1Icon className='h-4 w-4' />
-                      </Button>
-                    </EditChildStepDialog>
-                  </TableCell> */}
+                  <TableCell><Checkbox checked={w.isDefault} disabled /></TableCell>
                   <TableCell>
-                    <Button variant='outline' size='icon'>
+                    <Button variant='ghost' size='icon' onClick={() => setWarningsAdded(wa => wa.filter(ww => ww.id !== w.id))}>
                       <Cross2Icon className='h-4 w-4' />
                     </Button>
                   </TableCell>
@@ -426,7 +423,7 @@ const EditWarning = ({ id }) => {
   return (
     <Dialog open={showDialog} onOpenChange={setShowDialog}>
       <DialogTrigger>
-        <Button variant='outline' size='icon'>
+        <Button variant='ghost' size='icon'>
           <Pencil1Icon className='h-4 w-4' />
         </Button>
       </DialogTrigger>
