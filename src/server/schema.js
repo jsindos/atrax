@@ -12,18 +12,16 @@ const { GraphQLUpload } = require('graphql-upload')
 
 const schemaParts = {}
 
-fs
-  .readdirSync(__dirname)
-  .filter(file => {
-    return (file.indexOf('.') === -1) && (file !== 'db') && (file !== 'models')
+fs.readdirSync(__dirname)
+  .filter((file) => {
+    return file.indexOf('.') === -1 && file !== 'db' && file !== 'models'
   })
-  .forEach(directory => {
-    fs
-      .readdirSync(path.join(__dirname, directory))
-      .filter(file => {
+  .forEach((directory) => {
+    fs.readdirSync(path.join(__dirname, directory))
+      .filter((file) => {
         return file.slice(-10) === 'graphql.js'
       })
-      .forEach(file => {
+      .forEach((file) => {
         const { typeDef, resolvers } = require(path.join(__dirname, directory, file))
         schemaParts[file.slice(0, -11)] = { typeDef, resolvers }
       })
@@ -141,7 +139,9 @@ const resolvers = {
   WorkInstruction: {
     procedures: async (workInstruction, args, context) => {
       const procedures = await workInstruction.getProcedures()
-      procedures.forEach(p => p.setDataValue('index', p.workInstructionsProcedures.procedureIndex))
+      procedures.forEach((p) =>
+        p.setDataValue('index', p.workInstructionsProcedures.procedureIndex)
+      )
       return procedures
     },
     warnings: async (workInstruction, args, context) => {
@@ -179,6 +179,7 @@ const Mutation = `
     saveStep(step: StepInput!): Step
     createWorkInstruction(workInstruction: WorkInstructionInput!): Customer
     saveWarning(warning: WarningInput!): Warning
+    deleteWorkInstruction(id: ID!): Customer
   }
 
   input WarningInput {
@@ -244,17 +245,41 @@ const mutations = {
 
       // https://stackoverflow.com/a/40543424/3171685
       // eslint-disable-next-line no-unused-vars
-      const [number, updatedRows] = await context.models.WorkInstructions.update(workInstructionFields, { where: { id: workInstructionFields.id }, returning: true })
+      const [number, updatedRows] = await context.models.WorkInstructions.update(
+        workInstructionFields,
+        { where: { id: workInstructionFields.id }, returning: true }
+      )
       const workInstruction = updatedRows[0]
 
       return workInstruction
     },
+    async deleteWorkInstruction (root, args, context) {
+      const { id } = args
+
+      const workInstruction = await context.models.WorkInstructions.findByPk(id)
+
+      if (!workInstruction) {
+        throw new Error('WorkInstruction not found')
+      }
+
+      await context.models.WorkInstructions.destroy({
+        where: { id }
+      })
+
+      const customer = await context.models.Customers.findByPk(workInstruction.customerId)
+
+      return customer
+    },
+
     async saveStep (root, args, context) {
       const { step: stepFields } = args
 
       // https://stackoverflow.com/a/40543424/3171685
       // eslint-disable-next-line no-unused-vars
-      const [number, updatedRows] = await context.models.Steps.update(stepFields, { where: { id: stepFields.id }, returning: true })
+      const [number, updatedRows] = await context.models.Steps.update(stepFields, {
+        where: { id: stepFields.id },
+        returning: true
+      })
       const step = updatedRows[0]
 
       return step
@@ -264,7 +289,10 @@ const mutations = {
 
       // https://stackoverflow.com/a/40543424/3171685
       // eslint-disable-next-line no-unused-vars
-      const [number, updatedRows] = await context.models.ChildSteps.update(childStepFields, { where: { id: childStepFields.id }, returning: true })
+      const [number, updatedRows] = await context.models.ChildSteps.update(childStepFields, {
+        where: { id: childStepFields.id },
+        returning: true
+      })
       const childStep = updatedRows[0]
 
       return childStep
@@ -273,6 +301,14 @@ const mutations = {
 }
 
 module.exports = makeExecutableSchema({
-  typeDefs: [Query, Mutation, ...Object.values(schemaParts).map(({ typeDef }) => transpileSchema(typeDef))],
-  resolvers: merge(resolvers, mutations, ...Object.values(schemaParts).map(({ resolvers }) => resolvers))
+  typeDefs: [
+    Query,
+    Mutation,
+    ...Object.values(schemaParts).map(({ typeDef }) => transpileSchema(typeDef))
+  ],
+  resolvers: merge(
+    resolvers,
+    mutations,
+    ...Object.values(schemaParts).map(({ resolvers }) => resolvers)
+  )
 })

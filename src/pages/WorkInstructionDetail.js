@@ -34,10 +34,8 @@ export default () => {
   const { id } = useParams()
 
   const { data: { customers } = {}, loading: loadingA } = useQuery(queries.Customers)
-  const { data: { workInstructions } = {}, loading: loadingB } = useQuery(queries.WorkInstructions)
+  const { data: { workInstruction } = {}, loading: loadingB } = useQuery(queries.WorkInstruction, { variables: { id: Number(id) } })
   const { data: { warnings } = {}, loading: loadingC } = useQuery(queries.Warnings)
-
-  const workInstruction = workInstructions?.find(w => w.id === Number(id))
 
   const loading = loadingA || loadingB || loadingC
 
@@ -211,10 +209,7 @@ const Warnings = () => {
   const { id } = useParams()
 
   const { data: { customers } = {} } = useQuery(queries.Customers)
-  const { data: { workInstructions } = {} } = useQuery(queries.WorkInstructions)
   const { data: { warnings } = {} } = useQuery(queries.Warnings)
-
-  const workInstruction = workInstructions?.find(w => w.id === Number(id))
 
   return (
     <WarningsBody />
@@ -254,15 +249,13 @@ const WarningsBody = () => {
   const { id } = useParams()
 
   const { data: { customers } = {} } = useQuery(queries.Customers)
-  const { data: { workInstructions } = {} } = useQuery(queries.WorkInstructions)
+  const { data: { workInstruction } = {} } = useQuery(queries.WorkInstruction, { variables: { id: Number(id) } })
   const { data: { warnings } = {} } = useQuery(queries.Warnings)
-
-  const workInstruction = workInstructions?.find(w => w.id === Number(id))
 
   const [warningsAdded, setWarningsAdded] = useState()
 
   useEffect(() => {
-    setWarningsAdded(workInstruction.warnings)
+    setWarningsAdded(workInstruction?.warnings)
   }, [])
 
   return (
@@ -314,7 +307,7 @@ const WarningsToAdd = ({ setWarningsAdded }) => {
         </TableHeader>
         <TableBody>
           {
-            warnings.map((w, i) => {
+            warnings?.map((w, i) => {
               return (
                 <TableRow key={i}>
                   <TableCell>

@@ -65,6 +65,37 @@ export const mutations = {
         id
         workInstructions {
           ...WorkInstructionFields
+          customer {
+            id
+            name
+          }
+          procedures {
+            id
+            index
+            procedure {
+              id
+              title
+              steps {
+                title
+                id
+                childSteps {
+                  title
+                  id
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    ${fields.WorkInstructionFields}
+  `,
+  DeleteWorkInstruction: gql`
+    mutation DeleteWorkInstruction($id: ID!) {
+      deleteWorkInstruction(id: $id) {
+        id
+        workInstructions {
+          ...WorkInstructionFields
         }
       }
     }
