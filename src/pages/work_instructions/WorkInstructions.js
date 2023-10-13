@@ -30,17 +30,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { ReloadIcon } from '@radix-ui/react-icons'
+import { useToast } from '@/components/ui/use-toast'
 
-import { queries } from '@/queries'
+import { queries, mutations } from '@/queries'
 import { useQuery } from '@apollo/client'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useMutation } from '@apollo/client'
+import { createWithToast } from '@/utils'
 
 const DialogComponent = ({ customers, selectedCustomer, workInstruction }) => {
   const [localCustomer, setLocalCustomer] = useState(
     customers && customers.length > 0 ? selectedCustomer : null
   )
-
-  console.log(workInstruction)
 
   const [inputValue, setInputValue] = useState('')
 
@@ -151,6 +153,27 @@ const WorkInstructionsPage = () => {
     navigate(`/customers/${selectedCustomerId}/work_instructions`)
   }
 
+  const [createWorkInstructionMutation] = useMutation(mutations.CreateWorkInstruction)
+
+  const [isCreating, setIsCreating] = useState()
+
+  const { toast } = useToast()
+
+  const createWorkInstruction = () =>
+    createWithToast(
+      createWorkInstructionMutation({
+        variables: {
+          workInstruction: {
+            customer: {
+              id: Number(customer.id),
+            },
+          },
+        },
+      }),
+      setIsCreating,
+      toast
+    )
+
   const columns = [
     {
       accessorKey: 'CMC',
@@ -192,6 +215,20 @@ const WorkInstructionsPage = () => {
         <div className="loader" />
       ) : (
         <>
+          <Button
+            disabled={isCreating}
+            className="self-end flex"
+            onClick={() => createWorkInstruction()}
+          >
+            {isCreating ? (
+              <>
+                <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+                Creating
+              </>
+            ) : (
+              'Create Work Instruction'
+            )}
+          </Button>
           <Select value={customer?.id} onValueChange={handleSelectChange}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder={customer?.name || 'Customer'} />
