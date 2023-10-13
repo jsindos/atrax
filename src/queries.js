@@ -66,6 +66,25 @@ export const mutations = {
     }
     ${fields.WorkInstructionFields}
   `,
+  DuplicateWorkInstruction: gql`
+    mutation DuplicateWorkInstruction(
+      $existingWorkInstructionId: ID!
+      $customerId: ID!
+      $newActivityNumber: String!
+    ) {
+      duplicateWorkInstruction(
+        existingWorkInstructionId: $existingWorkInstructionId
+        customerId: $customerId
+        newActivityNumber: $newActivityNumber
+      ) {
+        id
+        workInstructions {
+          ...WorkInstructionFields
+        }
+      }
+    }
+    ${fields.WorkInstructionFields}
+  `,
 }
 
 export const queries = {

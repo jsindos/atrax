@@ -179,6 +179,7 @@ const Mutation = `
     saveStep(step: StepInput!): Step
     createWorkInstruction(workInstruction: WorkInstructionInput!): Customer
     deleteWorkInstruction(id: ID!): Customer
+    duplicateWorkInstruction(existingWorkInstructionId: ID!, customerId: ID!, newActivityNumber: String!): Customer
   }
 
   input WorkInstructionInput {
@@ -247,6 +248,37 @@ const mutations = {
       })
 
       const customer = await context.models.Customers.findByPk(workInstruction.customerId)
+
+      return customer
+    },
+
+    async duplicateWorkInstruction(root, args, context) {
+      const { existingWorkInstructionId, customerId, newActivityNumber } = args
+
+      // Find the existing work instruction
+      const existingWorkInstruction = await context.models.WorkInstructions.findByPk(
+        existingWorkInstructionId
+      )
+
+      if (!existingWorkInstruction) {
+        throw new Error(`WorkInstruction with id ${existingWorkInstructionId} not found`)
+      }
+
+      // Create a new work instruction based on the existing one
+      const newWorkInstructionFields = {
+        ...existingWorkInstruction.dataValues,
+        customerId: customerId,
+        activityNumber: newActivityNumber,
+      }
+
+      // Delete the id field to ensure a new id is generated
+      delete newWorkInstructionFields.id
+
+      // Create the new work instruction
+      await context.models.WorkInstructions.create(newWorkInstructionFields)
+
+      // Return the customer associated with the new work instruction
+      const customer = await context.models.Customers.findByPk(customerId)
 
       return customer
     },

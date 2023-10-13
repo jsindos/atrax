@@ -44,7 +44,7 @@ const DialogComponent = ({ customers, selectedCustomer, workInstruction }) => {
     customers && customers.length > 0 ? selectedCustomer : null
   )
 
-  const [inputValue, setInputValue] = useState('')
+  const [activityNumber, setActivityNumber] = useState('')
 
   const [showNewCustomerDialog, setShowNewCustomerDialog] = useState(false)
 
@@ -54,14 +54,16 @@ const DialogComponent = ({ customers, selectedCustomer, workInstruction }) => {
   }
 
   const handleInputChangeDialog = (event) => {
-    setInputValue(event.target.value) // Update input value state
+    setActivityNumber(event.target.value) // Update input value state
   }
 
   const handleSaveChangesClick = () => {
     console.log(localCustomer)
-    console.log(inputValue)
+    console.log(activityNumber)
     console.log(workInstruction)
+    duplicateWorkInstruction(workInstruction.id, localCustomer.id, activityNumber)
     setShowNewCustomerDialog(false)
+    navigate(`/customers/${localCustomer.id}/work_instructions`)
   }
 
   const [deleteWorkInstructionMutation] = useMutation(mutations.DeleteWorkInstruction)
@@ -90,6 +92,37 @@ const DialogComponent = ({ customers, selectedCustomer, workInstruction }) => {
     }
   }
   const navigate = useNavigate()
+
+  const [duplicateWorkInstructionMutation] = useMutation(mutations.DuplicateWorkInstruction)
+
+  const [isDuplicating, setIsDuplicating] = useState()
+
+  const duplicateWorkInstruction = async (
+    existingWorkInstructionId,
+    customerId,
+    newActivityNumber
+  ) => {
+    setIsDuplicating(true)
+    try {
+      await saveWithToast(
+        () =>
+          duplicateWorkInstructionMutation({
+            variables: {
+              existingWorkInstructionId,
+              customerId,
+              newActivityNumber,
+            },
+          }),
+        toast,
+        'Work Instruction Duplicated',
+        setIsDuplicating
+      )
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setIsDuplicating(false)
+    }
+  }
 
   return (
     <Dialog open={showNewCustomerDialog} onOpenChange={setShowNewCustomerDialog}>
@@ -164,7 +197,14 @@ const DialogComponent = ({ customers, selectedCustomer, workInstruction }) => {
         </div>
         <DialogFooter>
           <Button type="submit" onClick={handleSaveChangesClick}>
-            Save changes
+            {isDuplicating ? (
+              <>
+                <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+                Duplicating
+              </>
+            ) : (
+              'Save changes'
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>
