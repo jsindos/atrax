@@ -18,6 +18,21 @@ const fields = {
 }
 
 export const mutations = {
+  CreateWarning: gql`
+    mutation CreateWarning($warning: WarningInput!) {
+      createWarning(warning: $warning) {
+        id
+        isDefault
+        type
+        content
+        warningType
+        customer {
+          id
+          name
+        }
+      }
+    }
+  `,
   SaveWarning: gql`
     mutation SaveWarning($warning: WarningInput!) {
       saveWarning(warning: $warning) {

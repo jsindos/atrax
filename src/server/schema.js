@@ -180,6 +180,7 @@ const Mutation = `
     createWorkInstruction(workInstruction: WorkInstructionInput!): Customer
     saveWarning(warning: WarningInput!): Warning
     deleteWorkInstruction(id: ID!): Customer
+    createWarning(warning : WarningInput!): Warning
   }
 
   input WarningInput {
@@ -223,6 +224,13 @@ const Mutation = `
 
 const mutations = {
   Mutation: {
+    async createWarning (root, args, context) {
+      const { warning: warningFields } = args
+
+      const warning = await context.models.Warnings.create(warningFields)
+
+      return warning
+    },
     async createWorkInstruction (root, args, context) {
       const { workInstruction: workInstructionFields } = args
 

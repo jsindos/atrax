@@ -19,7 +19,7 @@ import {
   TableHeader,
   TableRow
 } from '@/components/ui/table'
-import { useMutation, useQuery } from '@apollo/client'
+import { gql, useApolloClient, useMutation, useQuery } from '@apollo/client'
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
@@ -275,6 +275,7 @@ const Warnings = () => {
       <DialogContent className='Dialog'>
         <DialogHeader>
           <DialogTitle>{workInstruction.title} Warnings, Cautions and Notes</DialogTitle>
+          <CreateNewWarning />
           <WarningsBody {...{ setWarningsAdded, warningsAdded }} />
         </DialogHeader>
         <DialogFooter>
@@ -422,6 +423,135 @@ const WarningsAdded = ({ warnings, setWarningsAdded, typeSelected }) => {
         </TableBody>
       </Table>
     </div>
+  )
+}
+
+const CreateNewWarning = () => {
+  const { id } = useParams()
+
+  const { data: { workInstruction } = {} } = useQuery(queries.WorkInstruction, { variables: { id: Number(id) } })
+  const { data: { customers } = {} } = useQuery(queries.Customers)
+
+  const [customer, setCustomer] = useState()
+  const [content, setContent] = useState('')
+  const [isDefault, setIsDefault] = useState()
+  // one of 'warning', 'caution', 'note'
+  const [type, setType] = useState({ name: 'Warning', id: 'warning' })
+
+  useEffect(() => {
+    setCustomer(workInstruction.customer)
+  }, [])
+
+  const [createWarningMutation] = useMutation(mutations.CreateWarning)
+
+  const [isSaving, setIsSaving] = useState()
+
+  const { toast } = useToast()
+
+  const saveWarning = async () => {
+    await saveWithToast(
+      () => createWarningMutation({
+        variables: {
+          warning: {
+            type: type.id,
+            isDefault,
+            content,
+            customerId: customer?.id
+          }
+        },
+        update (cache, { data: { createWarning: warning } }) {
+          cache.modify({
+            fields: {
+              warnings (existingWarnings = []) {
+                const newWarningRef = cache.writeFragment({
+                  data: warning,
+                  fragment: gql`
+                    fragment NewWarning on Warning {
+                      id
+                    }
+                  `
+                })
+                return [...existingWarnings, newWarningRef]
+              }
+            }
+          })
+        }
+      }),
+      toast,
+      'Warning saved',
+      setIsSaving
+    )
+    setCustomer()
+    setContent('')
+    setIsDefault()
+    setShowDialog(false)
+  }
+
+  const [showDialog, setShowDialog] = useState(false)
+
+  return (
+    <Dialog open={showDialog} onOpenChange={setShowDialog}>
+      <DialogTrigger>
+        <Button className='self-end flex max-w-sm' style={{ marginTop: '1rem' }}>
+          Create new
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Create Warning, Caution or Note</DialogTitle>
+          <S
+            currentValue={type}
+            handleSelectChange={id => setType({ id, name: id })}
+            values={[
+              { id: 'warning', name: 'Warning' },
+              { id: 'caution', name: 'Caution' },
+              { id: 'note', name: 'Note' }
+            ]}
+            nameKey='name'
+            valueKey='id'
+            placeholder='Type...'
+            label='Type'
+          />
+          <S
+            currentValue={customer}
+            handleSelectChange={id => setCustomer(customers.find(c => c.id === id))}
+            values={customers}
+            nameKey='name'
+            valueKey='id'
+            placeholder='Select customer...'
+            label='Customer'
+          />
+          <div className='pt-8'>
+            <div className='grid w-full items-center gap-3'>
+              <Label>Text</Label>
+              <Textarea style={{ minHeight: 100 }} value={content} onChange={(e) => setContent(e.target.value)} />
+            </div>
+          </div>
+          <div className='pt-8'>
+            <div className='grid w-full items-center gap-3'>
+              <Label>Is default</Label>
+              <Checkbox onCheckedChange={v => setIsDefault(v)} checked={isDefault} />
+            </div>
+          </div>
+        </DialogHeader>
+        <DialogFooter>
+          <div className='flex-col flex pt-8'>
+            <Button disabled={isSaving} className='self-end flex' onClick={() => saveWarning()}>
+              {
+                isSaving
+                  ? (
+                    <>
+                      <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />
+                      Creating
+                    </>
+                    )
+                  : 'Create'
+              }
+            </Button>
+          </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }
 
