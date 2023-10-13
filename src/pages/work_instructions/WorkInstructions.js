@@ -37,7 +37,7 @@ import { queries, mutations } from '@/queries'
 import { useQuery } from '@apollo/client'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation } from '@apollo/client'
-import { createWithToast } from '@/utils'
+import { saveWithToast } from '@/utils'
 
 const DialogComponent = ({ customers, selectedCustomer, workInstruction }) => {
   const [localCustomer, setLocalCustomer] = useState(
@@ -159,19 +159,19 @@ const WorkInstructionsPage = () => {
 
   const { toast } = useToast()
 
+  // save
   const createWorkInstruction = () =>
-    createWithToast(
+    saveWithToast(
       createWorkInstructionMutation({
         variables: {
           workInstruction: {
-            customer: {
-              id: Number(customer.id),
-            },
+            customerId: customer.id,
           },
         },
       }),
-      setIsCreating,
-      toast
+      toast,
+      'Procedure Created',
+      setIsCreating
     )
 
   const columns = [
