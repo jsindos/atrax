@@ -56,6 +56,22 @@ export const mutations = {
     }
     ${fields.WorkInstructionFields}
   `,
+  CreateStep: gql`
+    mutation CreateStep($step: StepInput!) {
+      createStep(step: $step) {
+        id
+        title
+        steps {
+          title
+          id
+          childSteps {
+            title
+            id
+          }
+        }
+      }
+    }
+  `,
   SaveStep: gql`
     mutation SaveStep($step: StepInput!) {
       saveStep(step: $step) {

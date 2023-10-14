@@ -183,6 +183,7 @@ const Mutation = `
     createWarning(warning : WarningInput!): Warning
     duplicateWorkInstruction(existingWorkInstructionId: ID!, customerId: ID!, newActivityNumber: String!): Customer
     createProcedure(procedure: ProcedureInput!): WorkInstruction
+    createStep(step: StepInput!): Procedure 
   }
 
   input WarningInput {
@@ -220,6 +221,7 @@ const Mutation = `
   }
 
   input StepInput {
+    procedureId: Int
     id: Int
     title: String
   }
@@ -358,6 +360,29 @@ const mutations = {
 
       // Return the updated work instruction.
       return updatedWorkInstruction
+    },
+
+    async createStep(root, args, context) {
+      const { step: stepFields } = args
+
+      // Create the new step
+      const newStep = await context.models.Steps.create(stepFields)
+
+      // Find the procedure
+      const procedure = await context.models.Procedures.findByPk(stepFields.procedureId)
+
+      // Associate the step with the procedure
+      if (procedure) {
+        await procedure.addStep(newStep)
+      }
+
+      // Fetch the updated procedure with all associated steps.
+      const updatedProcedure = await context.models.Procedures.findByPk(stepFields.procedureId, {
+        include: context.models.Steps,
+      })
+
+      // Return the updated procedure.
+      return updatedProcedure
     },
 
     async saveStep(root, args, context) {

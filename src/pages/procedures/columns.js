@@ -19,3 +19,10 @@ export const columns = [
     header: 'Procedure',
   },
 ]
+
+export const columnsSteps = [
+  {
+    accessorKey: 'title',
+    header: 'Steps',
+  },
+]

@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 
-// Import necessary modules
-import { flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
+import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 
 import {
   Table,
@@ -12,21 +11,12 @@ import {
   TableRow,
 } from '@/components/ui/table'
 
-// Define the DataTable function
-export function DataTable({ columns, data, setSelectedRow }) {
+export function DataTableSteps({ columns, data }) {
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
   })
-
-  // Use the useEffect hook to select the first row after the component has rendered
-  useEffect(() => {
-    if (table.getRowModel().rows?.length) {
-      table.getRowModel().rows[0].toggleSelected(true)
-      setSelectedRow(table.getRowModel().rows[0].original)
-    }
-  }, [table])
 
   return (
     <div className="rounded-md border">
@@ -49,17 +39,7 @@ export function DataTable({ columns, data, setSelectedRow }) {
         <TableBody>
           {table.getRowModel().rows?.length ? (
             table.getRowModel().rows.map((row) => (
-              // Add an onClick event to the TableRow that toggles the selection of the row and updates the selectedRow state
-              <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() && 'selected'}
-                onClick={() => {
-                  table.getRowModel().rows.forEach((r) => r.toggleSelected(false)) // Deselect all rows
-                  row.toggleSelected(true) // Select the clicked row
-                  // HERE how do i get the data associated with this row rather than just row variable
-                  setSelectedRow(row.original)
-                }}
-              >
+              <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
