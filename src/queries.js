@@ -135,6 +135,16 @@ export const mutations = {
     }
     ${fields.WorkInstructionFields}
   `,
+  CreateProcedure: gql`
+    mutation CreateProcedure($procedure: ProcedureInput!) {
+      createProcedure(procedure: $procedure) {
+        id
+        procedures {
+          id
+        }
+      }
+    }
+  `,
 }
 
 export const queries = {

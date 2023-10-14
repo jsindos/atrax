@@ -54,7 +54,8 @@ export function DataTable({ columns, data, setSelectedRow }) {
                 key={row.id}
                 data-state={row.getIsSelected() && 'selected'}
                 onClick={() => {
-                  row.toggleSelected(!row.getIsSelected())
+                  table.getRowModel().rows.forEach((r) => r.toggleSelected(false)) // Deselect all rows
+                  row.toggleSelected(true) // Select the clicked row
                   setSelectedRow(row)
                 }}
               >

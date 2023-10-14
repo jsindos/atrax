@@ -16,6 +16,6 @@ import { Button } from '@/components/ui/button'
 export const columns = [
   {
     accessorKey: 'title',
-    header: 'Title',
+    header: 'Procedure',
   },
 ]

@@ -104,21 +104,21 @@ const Query = `
 const resolvers = {
   Upload: GraphQLUpload,
   Query: {
-    async customers (root, args, context) {
+    async customers(root, args, context) {
       return context.models.Customers.findAll()
     },
-    async workInstructions (root, args, context) {
+    async workInstructions(root, args, context) {
       return context.models.WorkInstructions.findAll()
     },
-    async workInstruction (root, args, context) {
+    async workInstruction(root, args, context) {
       return context.models.WorkInstructions.findByPk(args.id)
     },
-    async step (root, args, context) {
+    async step(root, args, context) {
       return context.models.Steps.findByPk(args.id)
     },
-    async warnings (root, args, context) {
+    async warnings(root, args, context) {
       return context.models.Warnings.findAll({ order: [['id', 'ASC']] })
-    }
+    },
   },
   Customer: {
     workInstructions: async (customer, args, context) => {
@@ -126,7 +126,7 @@ const resolvers = {
     },
     warnings: async (customer, args, context) => {
       return customer.getWarnings()
-    }
+    },
   },
   Warning: {
     customer: async (warning, args, context) => {
@@ -134,7 +134,7 @@ const resolvers = {
     },
     workInstructions: async (warning, args, context) => {
       return warning.getWorkInstructions()
-    }
+    },
   },
   WorkInstruction: {
     procedures: async (workInstruction, args, context) => {
@@ -149,17 +149,17 @@ const resolvers = {
     },
     customer: async (workInstruction, args, context) => {
       return workInstruction.getCustomer()
-    }
+    },
   },
   WorkInstructionProcedure: {
     procedure: async (workInstructionProcedure, args, context) => {
       return workInstructionProcedure
-    }
+    },
   },
   Procedure: {
     steps: async (procedure, args, context) => {
       return procedure.getSteps()
-    }
+    },
   },
   Step: {
     childSteps: async (step, args, context) => {
@@ -167,8 +167,8 @@ const resolvers = {
     },
     warnings: async (step, args, context) => {
       return step.getWarnings()
-    }
-  }
+    },
+  },
 }
 
 const Mutation = `
@@ -182,7 +182,7 @@ const Mutation = `
     deleteWorkInstruction(id: ID!): Customer
     createWarning(warning : WarningInput!): Warning
     duplicateWorkInstruction(existingWorkInstructionId: ID!, customerId: ID!, newActivityNumber: String!): Customer
-    createProcedure(procedure: ProcedureInput!): Procedure
+    createProcedure(procedure: ProcedureInput!): WorkInstruction
   }
 
   input WarningInput {
@@ -233,14 +233,14 @@ const Mutation = `
 
 const mutations = {
   Mutation: {
-    async createWarning (root, args, context) {
+    async createWarning(root, args, context) {
       const { warning: warningFields } = args
 
       const warning = await context.models.Warnings.create(warningFields)
 
       return warning
     },
-    async createWorkInstruction (root, args, context) {
+    async createWorkInstruction(root, args, context) {
       const { workInstruction: workInstructionFields } = args
 
       await context.models.WorkInstructions.create(workInstructionFields)
@@ -249,21 +249,23 @@ const mutations = {
 
       return customer
     },
-    async saveWarning (root, args, context) {
+    async saveWarning(root, args, context) {
       const { warning: warningFields } = args
 
       // https://stackoverflow.com/a/40543424/3171685
       // eslint-disable-next-line no-unused-vars
       const [number, updatedRows] = await context.models.Warnings.update(warningFields, {
         where: { id: warningFields.id },
-        returning: true
+        returning: true,
       })
       const warning = updatedRows[0]
 
       return warning
     },
-    async saveWorkInstruction (root, args, context) {
-      const { workInstruction: { warningIds, ...workInstructionFields } } = args
+    async saveWorkInstruction(root, args, context) {
+      const {
+        workInstruction: { warningIds, ...workInstructionFields },
+      } = args
 
       // https://stackoverflow.com/a/40543424/3171685
       // eslint-disable-next-line no-unused-vars
@@ -275,14 +277,14 @@ const mutations = {
 
       if (warningIds) {
         await context.models.WorkInstructionsWarnings.destroy({
-          where: { workInstructionId: workInstruction.id }
+          where: { workInstructionId: workInstruction.id },
         })
         await workInstruction.addWarnings(warningIds)
       }
 
       return workInstruction
     },
-    async deleteWorkInstruction (root, args, context) {
+    async deleteWorkInstruction(root, args, context) {
       const { id } = args
 
       const workInstruction = await context.models.WorkInstructions.findByPk(id)
@@ -292,7 +294,7 @@ const mutations = {
       }
 
       await context.models.WorkInstructions.destroy({
-        where: { id }
+        where: { id },
       })
 
       const customer = await context.models.Customers.findByPk(workInstruction.customerId)
@@ -300,7 +302,7 @@ const mutations = {
       return customer
     },
 
-    async duplicateWorkInstruction (root, args, context) {
+    async duplicateWorkInstruction(root, args, context) {
       const { existingWorkInstructionId, customerId, newActivityNumber } = args
 
       // Find the existing work instruction
@@ -316,7 +318,7 @@ const mutations = {
       const newWorkInstructionFields = {
         ...existingWorkInstruction.dataValues,
         customerId: customerId,
-        activityNumber: newActivityNumber
+        activityNumber: newActivityNumber,
       }
 
       // Delete the id field to ensure a new id is generated
@@ -332,53 +334,70 @@ const mutations = {
     },
 
     // All that needs to pass into this thing is workinstruction.id
-    async createProcedure (root, args, context) {
+    async createProcedure(root, args, context) {
       const { procedure: procedureFields } = args
 
       // Create the new procedure
       const newProcedure = await context.models.Procedures.create(procedureFields)
 
-      return newProcedure
+      // Find the work instruction
+      const workInstruction = await context.models.WorkInstructions.findByPk(
+        procedureFields.workInstructionId
+      )
+
+      // Associate the procedure with the work instruction
+      if (workInstruction) {
+        await workInstruction.addProcedure(newProcedure)
+      }
+
+      // Fetch the updated work instruction with all associated procedures.
+      const updatedWorkInstruction = await context.models.WorkInstructions.findByPk(
+        procedureFields.workInstructionId,
+        { include: context.models.Procedures }
+      )
+
+      // Return the updated work instruction.
+      return updatedWorkInstruction
     },
 
-    async saveStep (root, args, context) {
+    async saveStep(root, args, context) {
       const { step: stepFields } = args
 
       // https://stackoverflow.com/a/40543424/3171685
       // eslint-disable-next-line no-unused-vars
       const [number, updatedRows] = await context.models.Steps.update(stepFields, {
         where: { id: stepFields.id },
-        returning: true
+        returning: true,
       })
       const step = updatedRows[0]
 
       return step
     },
-    async saveChildStep (root, args, context) {
+    async saveChildStep(root, args, context) {
       const { childStep: childStepFields } = args
 
       // https://stackoverflow.com/a/40543424/3171685
       // eslint-disable-next-line no-unused-vars
       const [number, updatedRows] = await context.models.ChildSteps.update(childStepFields, {
         where: { id: childStepFields.id },
-        returning: true
+        returning: true,
       })
       const childStep = updatedRows[0]
 
       return childStep
-    }
-  }
+    },
+  },
 }
 
 module.exports = makeExecutableSchema({
   typeDefs: [
     Query,
     Mutation,
-    ...Object.values(schemaParts).map(({ typeDef }) => transpileSchema(typeDef))
+    ...Object.values(schemaParts).map(({ typeDef }) => transpileSchema(typeDef)),
   ],
   resolvers: merge(
     resolvers,
     mutations,
     ...Object.values(schemaParts).map(({ resolvers }) => resolvers)
-  )
+  ),
 })

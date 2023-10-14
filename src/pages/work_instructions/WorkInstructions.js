@@ -231,10 +231,7 @@ const WorkInstructionsPage = () => {
 
   const { toast } = useToast()
 
-  console.log('1', customer)
-
   const createWorkInstruction = async () => {
-    console.log('2', customer)
     const result = await saveWithToast(
       () =>
         createWorkInstructionMutation({
