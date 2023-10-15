@@ -90,10 +90,11 @@ const ProceduresPage = () => {
 
   const [isCreatingStep, setIsCreatingStep] = useState()
 
-  const createStep = async (stepTitle, procedureId) => {
+  const createStep = async (stepTitle) => {
     const stepInput = {
       title: stepTitle,
       procedureId: selectedProcedure.id,
+      index: selectedProcedure.steps.length + 1,
     }
 
     setIsCreatingStep(true)

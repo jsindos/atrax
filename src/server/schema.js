@@ -184,6 +184,7 @@ const Mutation = `
     duplicateWorkInstruction(existingWorkInstructionId: ID!, customerId: ID!, newActivityNumber: String!): Customer
     createProcedure(procedure: ProcedureInput!): WorkInstruction
     createStep(step: StepInput!): Procedure 
+    updateStepIndices(steps: [StepInput!]!): [Step]
   }
 
   input WarningInput {
@@ -223,9 +224,11 @@ const Mutation = `
   input StepInput {
     procedureId: Int
     id: Int
+    index: Int
     title: String
+    childSteps: [ChildStepInput]
   }
-
+  
   input ChildStepInput {
     id: Int
     title: String
@@ -410,6 +413,28 @@ const mutations = {
       const childStep = updatedRows[0]
 
       return childStep
+    },
+
+    async updateStepIndices(root, args, context) {
+      const { steps } = args
+      const updatedSteps = []
+
+      // Update the index property of each step to match its position in the array
+      for (let i = 0; i < steps.length; i++) {
+        const stepFields = steps[i]
+        const step = await context.models.Steps.findByPk(stepFields.id)
+        if (!step) {
+          throw new Error(`Step with id ${stepFields.id} not found`)
+        }
+        step.index = i + 1 // assuming index starts from 1
+        await step.save()
+
+        // Add the updated step to the array of updated steps
+        updatedSteps.push(step)
+      }
+
+      // Return the array of updated steps
+      return updatedSteps
     },
   },
 }

@@ -161,6 +161,15 @@ export const mutations = {
       }
     }
   `,
+  UpdateStepIndices: gql`
+    mutation UpdateStepIndices($steps: [StepInput!]!) {
+      updateStepIndices(steps: $steps) {
+        id
+        title
+        index
+      }
+    }
+  `,
 }
 
 export const queries = {
@@ -277,6 +286,7 @@ export const queries = {
             steps {
               title
               id
+              index
               childSteps {
                 title
                 id
