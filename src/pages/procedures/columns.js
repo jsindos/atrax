@@ -1,7 +1,11 @@
 import React from 'react'
 import { MoreHorizontal } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import { Checkbox } from '@/components/ui/checkbox'
+import { useToast } from '@/components/ui/use-toast'
+import { saveWithToast } from '@/utils'
+import { useMutation } from '@apollo/client'
+import { mutations } from '@/queries'
+import { useState } from 'react'
 
 import {
   DropdownMenu,
@@ -12,13 +16,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
-
-export const columns = [
-  {
-    accessorKey: 'title',
-    header: 'Procedure',
-  },
-]
+import { ReloadIcon } from '@radix-ui/react-icons'
 
 export const columnsSteps = [
   {

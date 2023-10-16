@@ -185,6 +185,7 @@ const Mutation = `
     createProcedure(procedure: ProcedureInput!): WorkInstruction
     createStep(step: StepInput!): Procedure 
     updateStepIndices(steps: [StepInput!]!): [Step]
+    deleteProcedure(id: ID!): WorkInstruction
   }
 
   input WarningInput {
@@ -358,6 +359,31 @@ const mutations = {
       // Fetch the updated work instruction with all associated procedures.
       const updatedWorkInstruction = await context.models.WorkInstructions.findByPk(
         procedureFields.workInstructionId,
+        { include: context.models.Procedures }
+      )
+
+      // Return the updated work instruction.
+      return updatedWorkInstruction
+    },
+
+    async deleteProcedure(root, args, context) {
+      const { id } = args
+
+      // Find the procedure
+      const procedure = await context.models.Procedures.findByPk(id)
+
+      if (!procedure) {
+        throw new Error('Procedure not found')
+      }
+
+      // Delete the procedure
+      await context.models.Procedures.destroy({
+        where: { id },
+      })
+
+      // Fetch the updated work instruction with all associated procedures.
+      const updatedWorkInstruction = await context.models.WorkInstructions.findByPk(
+        procedure.workInstructionId,
         { include: context.models.Procedures }
       )
 

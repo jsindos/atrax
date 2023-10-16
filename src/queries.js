@@ -161,6 +161,16 @@ export const mutations = {
       }
     }
   `,
+  DeleteProcedure: gql`
+    mutation DeleteProcedure($id: ID!) {
+      deleteProcedure(id: $id) {
+        id
+        procedures {
+          id
+        }
+      }
+    }
+  `,
   UpdateStepIndices: gql`
     mutation UpdateStepIndices($steps: [StepInput!]!) {
       updateStepIndices(steps: $steps) {

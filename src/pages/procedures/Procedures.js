@@ -2,7 +2,7 @@ import React from 'react'
 import { saveWithToast } from '@/utils'
 import { DataTable } from './data-table'
 import { DataTableSteps } from './data-table-steps'
-import { columns, columnsSteps } from './columns'
+import { columnsSteps } from './columns'
 import { useQuery } from '@apollo/client'
 import { queries, mutations } from '@/queries'
 import { useState } from 'react'
@@ -24,11 +24,24 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Slack } from 'lucide-react'
+
+import { MoreHorizontal } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 const ProceduresPage = () => {
   const { id } = useParams()
-  const { data: { workInstruction } = {}, loading } = useQuery(queries.WorkInstruction, {
+  const {
+    data: { workInstruction } = {},
+    loading,
+    refetch,
+  } = useQuery(queries.WorkInstruction, {
     variables: { id: Number(id) },
   })
 
@@ -118,6 +131,69 @@ const ProceduresPage = () => {
     }
   }
 
+  const columns = [
+    {
+      accessorKey: 'title',
+      header: 'Procedure',
+    },
+    {
+      id: 'actions',
+      cell: ({ row }) => {
+        const navigate = useNavigate()
+
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => deleteProcedure(row.original.id)}>
+                {isDeletingProcedure ? (
+                  <>
+                    <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+                    Deleting
+                  </>
+                ) : (
+                  'Delete Procedure'
+                )}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )
+      },
+    },
+  ]
+  const [isDeletingProcedure, setIsDeletingProcedure] = useState()
+
+  const [deleteProcedureMutation] = useMutation(mutations.DeleteProcedure)
+
+  const deleteProcedure = async (id) => {
+    setIsDeletingProcedure(true)
+    try {
+      await saveWithToast(
+        () =>
+          deleteProcedureMutation({
+            variables: {
+              id,
+            },
+          }),
+        toast,
+        'Procedure Deleted',
+        setIsDeletingProcedure
+      )
+      // After successful deletion, refetch the data
+
+      refetch()
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setIsDeletingProcedure(false)
+    }
+  }
+
   if (workInstruction && workInstruction.procedures.length === 0) {
     // return 'No procedures for this work instruction yet ...'
   }
@@ -179,7 +255,12 @@ const ProceduresPage = () => {
           </Dialog>
 
           {procedures && procedures.length > 0 && (
-            <DataTable setSelectedRow={setSelectedRow} columns={columns} data={procedures} />
+            <DataTable
+              setSelectedRow={setSelectedRow}
+              columns={columns}
+              data={procedures}
+              isDeletingProcedure={isDeletingProcedure}
+            />
           )}
         </div>
         <div className="w-3/5 pl-2">
