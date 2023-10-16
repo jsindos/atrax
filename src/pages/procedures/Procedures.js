@@ -2,7 +2,6 @@ import React from 'react'
 import { saveWithToast } from '@/utils'
 import { DataTable } from './data-table'
 import { DataTableSteps } from './data-table-steps'
-import { columnsSteps } from './columns'
 import { useQuery } from '@apollo/client'
 import { queries, mutations } from '@/queries'
 import { useState } from 'react'
@@ -166,6 +165,7 @@ const ProceduresPage = () => {
       },
     },
   ]
+
   const [isDeletingProcedure, setIsDeletingProcedure] = useState()
 
   const [deleteProcedureMutation] = useMutation(mutations.DeleteProcedure)
@@ -194,9 +194,72 @@ const ProceduresPage = () => {
     }
   }
 
-  if (workInstruction && workInstruction.procedures.length === 0) {
-    // return 'No procedures for this work instruction yet ...'
+  const [isDeletingStep, setIsDeletingStep] = useState()
+
+  const [deleteStepMutation] = useMutation(mutations.DeleteStep)
+
+  const deleteStep = async (id) => {
+    setIsDeletingStep(true)
+    try {
+      await saveWithToast(
+        () =>
+          deleteStepMutation({
+            variables: {
+              id,
+            },
+          }),
+        toast,
+        'Step Deleted',
+        setIsDeletingStep
+      )
+      // After successful deletion, refetch the data
+      refetch()
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setIsDeletingStep(false)
+    }
   }
+
+  const columnsSteps = [
+    {
+      accessorKey: 'title',
+      header: 'Steps',
+    },
+    {
+      id: 'actions',
+      cell: ({ row }) => {
+        const navigate = useNavigate()
+
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => navigate(`/steps/${row.original.id}`)}>
+                Child Steps
+              </DropdownMenuItem>
+
+              <DropdownMenuItem onClick={() => deleteStep(row.original.id)}>
+                {isDeletingStep ? (
+                  <>
+                    <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+                    Deleting
+                  </>
+                ) : (
+                  'Delete Step'
+                )}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )
+      },
+    },
+  ]
 
   return (
     <div className="container mx-auto px-4">
@@ -305,6 +368,7 @@ const ProceduresPage = () => {
               setSelectedRow={setSelectedRow}
               columns={columnsSteps}
               data={selectedProcedure.steps}
+              isDeletingStep={isDeletingStep}
             />
           )}
         </div>
