@@ -1,4 +1,5 @@
-// App.js
+/* global __DEV__ */
+
 import React from 'react'
 import ReactDOM from 'react-dom'
 import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client'
@@ -12,6 +13,8 @@ import ProceduresPage from './pages/procedures/Procedures.js'
 import { Toaster } from './components/ui/toaster.js'
 import StepDetail from './pages/StepDetail.js'
 
+import { loadErrorMessages, loadDevMessages } from '@apollo/client/dev'
+
 const BASE_URL = 'http://localhost:8080'
 
 const link = createUploadLink({
@@ -23,6 +26,9 @@ const client = new ApolloClient({
   link,
   cache: new InMemoryCache()
 })
+
+loadDevMessages()
+loadErrorMessages()
 
 const App = () => {
   return (
