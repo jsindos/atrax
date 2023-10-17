@@ -45,7 +45,7 @@ const ProceduresPage = () => {
   const { toast } = useToast()
 
   const procedures = workInstruction?.procedures.map((item) => {
-    const procedure = { ...item.procedure }
+    const procedure = { ...item.procedure, index: item.index }
     return procedure
   })
 

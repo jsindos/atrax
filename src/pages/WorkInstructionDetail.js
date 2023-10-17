@@ -19,7 +19,7 @@ import {
   TableHeader,
   TableRow
 } from '@/components/ui/table'
-import { gql, useApolloClient, useMutation, useQuery } from '@apollo/client'
+import { gql, useMutation, useQuery } from '@apollo/client'
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'

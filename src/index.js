@@ -1,5 +1,3 @@
-/* global __DEV__ */
-
 import React from 'react'
 import ReactDOM from 'react-dom'
 import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client'

@@ -14,7 +14,7 @@ const fields = {
       MIPSeries
       activityNumber
     }
-  `,
+  `
 }
 
 export const mutations = {
@@ -173,14 +173,12 @@ export const mutations = {
   `,
 
   UpdateProcedureIndices: gql`
-    mutation UpdateProcedureIndices($procedures: [ProcedureInput!]!) {
-      updateProcedureIndices(procedures: $procedures) {
+    mutation UpdateProcedureIndices($procedures: [ProcedureInput!]!, $workInstructionId: ID!) {
+      updateProcedureIndices(procedures: $procedures, workInstructionId: $workInstructionId) {
         id
-        title
-        index
-        steps {
+        procedures {
           id
-          title
+          index
         }
       }
     }
@@ -209,7 +207,7 @@ export const mutations = {
         }
       }
     }
-  `,
+  `
 }
 
 export const queries = {
@@ -349,5 +347,5 @@ export const queries = {
         }
       }
     }
-  `,
+  `
 }
