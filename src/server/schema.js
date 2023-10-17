@@ -83,6 +83,7 @@ const Query = `
     id: Int
     title: String
     steps: [Step]
+    index: Int
   }
 
   type Step {
@@ -185,7 +186,9 @@ const Mutation = `
     createProcedure(procedure: ProcedureInput!): WorkInstruction
     createStep(step: StepInput!): Procedure 
     updateStepIndices(steps: [StepInput!]!): [Step]
+    updateProcedureIndices(procedures: [ProcedureInput!]!): [Procedure]
     deleteProcedure(id: ID!): WorkInstruction
+    deleteStep(id: ID!): Procedure
   }
 
   input WarningInput {
@@ -220,6 +223,7 @@ const Mutation = `
       workInstructionId: Int
       title: String
       steps: [StepInput]
+      index: Int
   }
 
   input StepInput {
@@ -441,6 +445,30 @@ const mutations = {
       return childStep
     },
 
+    async deleteStep(root, args, context) {
+      const { id } = args
+
+      // Find the step
+      const step = await context.models.Steps.findByPk(id)
+
+      if (!step) {
+        throw new Error('Step not found')
+      }
+
+      // Delete the step
+      await context.models.Steps.destroy({
+        where: { id },
+      })
+
+      // Fetch the updated procedure with all associated steps.
+      const updatedProcedure = await context.models.Procedures.findByPk(step.procedureId, {
+        include: context.models.Steps,
+      })
+
+      // Return the updated procedure.
+      return updatedProcedure
+    },
+
     async updateStepIndices(root, args, context) {
       const { steps } = args
       const updatedSteps = []
@@ -461,6 +489,27 @@ const mutations = {
 
       // Return the array of updated steps
       return updatedSteps
+    },
+    async updateProcedureIndices(root, args, context) {
+      const { procedures } = args
+      const updatedProcedures = []
+
+      // Update the index property of each procedure to match its position in the array
+      for (let i = 0; i < procedures.length; i++) {
+        const procedureFields = procedures[i]
+        const procedure = await context.models.Procedures.findByPk(procedureFields.id)
+        if (!procedure) {
+          throw new Error(`Procedure with id ${procedureFields.id} not found`)
+        }
+        procedure.index = i + 1 // assuming index starts from 1
+        await procedure.save()
+
+        // Add the updated procedure to the array of updated procedures
+        updatedProcedures.push(procedure)
+      }
+
+      // Return the array of updated procedures
+      return updatedProcedures
     },
   },
 }

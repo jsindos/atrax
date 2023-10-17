@@ -171,12 +171,42 @@ export const mutations = {
       }
     }
   `,
+
+  UpdateProcedureIndices: gql`
+    mutation UpdateProcedureIndices($procedures: [ProcedureInput!]!) {
+      updateProcedureIndices(procedures: $procedures) {
+        id
+        title
+        index
+        steps {
+          id
+          title
+        }
+      }
+    }
+  `,
+
   UpdateStepIndices: gql`
     mutation UpdateStepIndices($steps: [StepInput!]!) {
       updateStepIndices(steps: $steps) {
         id
         title
         index
+      }
+    }
+  `,
+  DeleteStep: gql`
+    mutation DeleteStep($id: ID!) {
+      deleteStep(id: $id) {
+        id
+        steps {
+          id
+          title
+          childSteps {
+            id
+            title
+          }
+        }
       }
     }
   `,
