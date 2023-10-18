@@ -28,6 +28,7 @@ import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
 import { BackButton, S } from '../WorkInstructionDetail'
+import WarningsTablePagination from './WarningsTablePagination'
 
 export default () => {
   const { id } = useParams()
@@ -73,24 +74,26 @@ export default () => {
   const [showDialog, setShowDialog] = useState(false)
 
   return (
-    <div className='container mx-auto px-4'>
+    <div className='container mx-auto px-4 pb-8'>
       <div className='flex justify-between row pt-8'>
         <h3>{workInstruction?.title} Warnings, Cautions and Notes</h3>
         <BackButton onClick={() => navigate(`/work_instructions/${id}`)} />
       </div>
+      <div className='flex-col flex pt-8'>
+        <Button disabled={isSaving} className='self-end flex' onClick={() => saveWarnings()}>
+          {
+            isSaving
+              ? (
+                <>
+                  <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />
+                  Saving
+                </>
+                )
+              : 'Save Changes'
+          }
+        </Button>
+      </div>
       <WarningsBody {...{ setWarningsAdded, warningsAdded }} />
-      <Button disabled={isSaving} className='self-end flex' onClick={() => saveWarnings()}>
-        {
-          isSaving
-            ? (
-              <>
-                <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />
-                Saving
-              </>
-              )
-            : 'Save Changes'
-        }
-      </Button>
     </div>
   // <Dialog open={showDialog} onOpenChange={setShowDialog}>
   //   <DialogTrigger className='pt-8'>
@@ -160,11 +163,31 @@ const WarningsBody = ({ setWarningsAdded, warningsAdded }) => {
   )
 }
 
+const PAGE_SIZE = 8
+
 const WarningsToAdd = ({ setWarningsAdded, warningsAdded, typeSelected, isByCustomer, isByDefaults }) => {
   const { id } = useParams()
 
   const { data: { warnings } = {} } = useQuery(queries.Warnings)
   const { data: { workInstruction } = {} } = useQuery(queries.WorkInstruction, { variables: { id: Number(id) } })
+
+  const [pageIndex, setPageIndex] = useState(0)
+  const pageCount = Math.ceil(warnings?.length / PAGE_SIZE)
+
+  const nextPage = () => {
+    if (pageIndex < pageCount - 1) {
+      setPageIndex(pageIndex + 1)
+    }
+  }
+
+  const previousPage = () => {
+    if (pageIndex > 0) {
+      setPageIndex(pageIndex - 1)
+    }
+  }
+
+  const canGetNextPage = pageIndex < pageCount - 1
+  const canGetPreviousPage = pageIndex > 0
 
   return (
     <div className='w-full' style={{ display: 'flex', rowGap: '0.75rem', flexDirection: 'column' }}>
@@ -190,6 +213,7 @@ const WarningsToAdd = ({ setWarningsAdded, warningsAdded, typeSelected, isByCust
                   : true) &&
                 w.type === typeSelected
               ))
+              .slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE)
               .map((w, i) => {
                 return (
                   <TableRow key={i}>
@@ -210,11 +234,30 @@ const WarningsToAdd = ({ setWarningsAdded, warningsAdded, typeSelected, isByCust
           }
         </TableBody>
       </Table>
+      <WarningsTablePagination pageIndex={pageIndex} setPageIndex={setPageIndex} pageCount={pageCount} nextPage={nextPage} previousPage={previousPage} canGetNextPage={canGetNextPage} canGetPreviousPage={canGetPreviousPage} />
     </div>
   )
 }
 
 const WarningsAdded = ({ warnings, setWarningsAdded, typeSelected }) => {
+  const [pageIndex, setPageIndex] = useState(0)
+  const pageCount = Math.ceil(warnings?.length / PAGE_SIZE)
+
+  const nextPage = () => {
+    if (pageIndex < pageCount - 1) {
+      setPageIndex(pageIndex + 1)
+    }
+  }
+
+  const previousPage = () => {
+    if (pageIndex > 0) {
+      setPageIndex(pageIndex - 1)
+    }
+  }
+
+  const canGetNextPage = pageIndex < pageCount - 1
+  const canGetPreviousPage = pageIndex > 0
+
   return (
     <div className='w-full' style={{ display: 'flex', rowGap: '0.75rem', flexDirection: 'column' }}>
       <Label>Selected</Label>
@@ -229,7 +272,7 @@ const WarningsAdded = ({ warnings, setWarningsAdded, typeSelected }) => {
         </TableHeader>
         <TableBody>
           {
-            warnings?.filter(w => w.type === typeSelected).map((w, i) => {
+            warnings?.filter(w => w.type === typeSelected).slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE).map((w, i) => {
               return (
                 <TableRow key={i}>
                   <TableCell>
@@ -249,6 +292,7 @@ const WarningsAdded = ({ warnings, setWarningsAdded, typeSelected }) => {
           }
         </TableBody>
       </Table>
+      <WarningsTablePagination pageIndex={pageIndex} setPageIndex={setPageIndex} pageCount={pageCount} nextPage={nextPage} previousPage={previousPage} canGetNextPage={canGetNextPage} canGetPreviousPage={canGetPreviousPage} />
     </div>
   )
 }
@@ -307,7 +351,7 @@ const CreateNewWarning = () => {
         }
       }),
       toast,
-      'Warning saved',
+      'Warning created',
       setIsSaving
     )
     setCustomer()
@@ -321,7 +365,7 @@ const CreateNewWarning = () => {
   return (
     <Dialog open={showDialog} onOpenChange={setShowDialog}>
       <DialogTrigger>
-        <Button className='self-end flex max-w-sm' style={{ marginTop: '1rem' }}>
+        <Button className='self-end flex max-w-sm mt-4 mb-4'>
           Create new
         </Button>
       </DialogTrigger>
