@@ -301,12 +301,11 @@ export const queries = {
       procedures {
         id
         title
-        steps {
-          title
+        workInstructions {
           id
-          childSteps {
-            title
+          customer {
             id
+            name
           }
         }
       }
