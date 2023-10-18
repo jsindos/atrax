@@ -14,7 +14,7 @@ const fields = {
       MIPSeries
       activityNumber
     }
-  `
+  `,
 }
 
 export const mutations = {
@@ -207,7 +207,7 @@ export const mutations = {
         }
       }
     }
-  `
+  `,
 }
 
 export const queries = {
@@ -296,6 +296,22 @@ export const queries = {
     }
     ${fields.WorkInstructionFields}
   `,
+  Procedures: gql`
+    query Procedures {
+      procedures {
+        id
+        title
+        steps {
+          title
+          id
+          childSteps {
+            title
+            id
+          }
+        }
+      }
+    }
+  `,
   WorkInstruction: gql`
     query WorkInstruction($id: Int!) {
       workInstruction(id: $id) {
@@ -347,5 +363,5 @@ export const queries = {
         }
       }
     }
-  `
+  `,
 }
