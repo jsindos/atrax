@@ -12,6 +12,7 @@ import { Toaster } from './components/ui/toaster.js'
 import StepDetail from './pages/StepDetail.js'
 
 import { loadErrorMessages, loadDevMessages } from '@apollo/client/dev'
+import WorkInstructionWarnings from './pages/WorkInstructionWarnings/WorkInstructionWarnings.js'
 
 const BASE_URL = 'http://localhost:8080'
 
@@ -34,6 +35,7 @@ const App = () => {
       <Router>
         <Routes>
           <Route path='/work_instructions/:id' element={<WorkInstructionDetail />} />
+          <Route path='/work_instructions/:id/warnings' element={<WorkInstructionWarnings />} />
           <Route path='/steps/:id' element={<StepDetail />} />
           <Route path='/' element={<Navigate to='/customers/1/work_instructions' />} />
           <Route
