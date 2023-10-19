@@ -211,7 +211,7 @@ const WarningsToAdd = ({ setWarningsAdded, warningsAdded, typeSelected, isByCust
                 (isByCustomer
                   ? w.customer?.id === workInstruction.customer.id
                   : true) &&
-                w.type === typeSelected
+                w.warningType === typeSelected
               ))
               .slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE)
               .map((w, i) => {
@@ -272,7 +272,7 @@ const WarningsAdded = ({ warnings, setWarningsAdded, typeSelected }) => {
         </TableHeader>
         <TableBody>
           {
-            warnings?.filter(w => w.type === typeSelected).slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE).map((w, i) => {
+            warnings?.filter(w => w.warningType === typeSelected).slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE).map((w, i) => {
               return (
                 <TableRow key={i}>
                   <TableCell>
@@ -326,7 +326,7 @@ const CreateNewWarning = () => {
       () => createWarningMutation({
         variables: {
           warning: {
-            type: type.id,
+            warningType: type.id,
             isDefault,
             content,
             customerId: customer?.id

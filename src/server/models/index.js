@@ -110,9 +110,9 @@ module.exports = ({ sequelize, models, services }, DataTypes) => {
       autoIncrement: true
     },
     content: DataTypes.TEXT,
-    // warning, caution or note
-    type: DataTypes.STRING,
     // additional enum, may or may not only apply to 'type: warning'
+    type: DataTypes.STRING,
+    // warning, caution or note
     warningType: DataTypes.STRING,
 
     // `isDefault` for a customer, at the moment warnings-customers is many-to-one, if it becomes many-to-many this will have to live on the through table
