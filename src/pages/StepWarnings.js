@@ -12,7 +12,7 @@ import { WarningsBody } from './WorkInstructionWarnings/WorkInstructionWarnings'
 export default () => {
   const { workInstructionId, stepId } = useParams()
 
-  const { data: { step } = {}, loading } = useQuery(queries.Step, { variables: { id: Number(stepId) } })
+  const { data: { step } = {} } = useQuery(queries.Step, { variables: { id: Number(stepId) } })
 
   const [warningsAdded, setWarningsAdded] = useState([])
 

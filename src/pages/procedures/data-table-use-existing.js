@@ -19,7 +19,7 @@ import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 
-export function DataTableUseExisting({ columns, data }) {
+export function DataTableUseExisting({ columns, data, setSelectedDialogRow }) {
   const [selectedRowId, setSelectedRowId] = useState(null)
   const [columnFilters, setColumnFilters] = useState([])
 
@@ -30,7 +30,11 @@ export function DataTableUseExisting({ columns, data }) {
         cell: ({ row }) => (
           <Checkbox
             checked={row.id === selectedRowId}
-            onCheckedChange={(value) => setSelectedRowId(value ? row.id : null)}
+            onCheckedChange={(value) => {
+              setSelectedRowId(value ? row.id : null)
+              setSelectedDialogRow(row.original)
+              console.log(row.original)
+            }}
             aria-label="Select row"
           />
         ),

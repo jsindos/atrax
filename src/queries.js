@@ -173,6 +173,34 @@ export const mutations = {
       }
     }
   `,
+  AssignProcedureToWorkInstruction: gql`
+    mutation AssignProcedureToWorkInstruction($procedureId: ID!, $workInstructionId: ID!, $isDuplicating: Boolean) {
+      assignProcedureToWorkInstruction(
+        procedureId: $procedureId
+        workInstructionId: $workInstructionId
+        isDuplicating: $isDuplicating
+      ) {
+        id
+        procedures {
+          id
+          index
+          procedure {
+            id
+            title
+            steps {
+              id
+              title
+              childSteps {
+                id
+                title
+              }
+            }
+          }
+        }
+      }
+    }
+  `,
+
   DeleteProcedure: gql`
     mutation DeleteProcedure($id: ID!) {
       deleteProcedure(id: $id) {

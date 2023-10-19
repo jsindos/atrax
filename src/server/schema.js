@@ -75,6 +75,7 @@ const Query = `
     id: Int
     index: Int
     procedure: Procedure
+    workInstruction: WorkInstruction
   }
 
   type Procedure {
@@ -157,6 +158,9 @@ const resolvers = {
   WorkInstructionProcedure: {
     procedure: async (workInstructionProcedure, args, context) => {
       return workInstructionProcedure
+    },
+    workInstruction: async (workInstructionProcedure, args, context) => {
+      return workInstructionProcedure.getWorkInstruction()
     }
   },
   Procedure: {
@@ -194,6 +198,7 @@ const Mutation = `
     updateProcedureIndices(procedures: [ProcedureInput!]!, workInstructionId: ID!): WorkInstruction
     deleteProcedure(id: ID!): WorkInstruction
     deleteStep(id: ID!): Procedure
+    assignProcedureToWorkInstruction(procedureId: ID!, workInstructionId: ID!, isDuplicating: Boolean): WorkInstruction
   }
 
   input WarningInput {
@@ -219,7 +224,7 @@ const Mutation = `
     SYSCOM: String
     MIPSeries: String
     activityNumber: String
-
+    procedures: [ProcedureInput]
     warningIds: [Int]
   }
 
@@ -372,6 +377,31 @@ const mutations = {
       const customer = await context.models.Customers.findByPk(customerId)
 
       return customer
+    },
+
+    async assignProcedureToWorkInstruction (root, args, context) {
+      const { procedureId, workInstructionId, isDuplicating } = args
+
+      // Find the procedure
+      const procedure = await context.models.Procedures.findByPk(procedureId)
+
+      // Find the work instruction
+      const workInstruction = await context.models.WorkInstructions.findByPk(workInstructionId)
+      const procedures = await workInstruction.getProcedures()
+
+      // Calculate the index for the new procedure
+      const index = procedures.length + 1
+
+      if (isDuplicating) {
+        const newProcedureData = Object.entries(procedure.dataValues).filter(([key]) => key !== 'id').reduce((obj, [key, value]) => ({ ...obj, [key]: value }), {})
+        const newProcedure = await context.models.Procedures.create(newProcedureData)
+        await newProcedure.addWorkInstruction(workInstruction, { through: { procedureIndex: index } })
+      } else {
+        await procedure.addWorkInstruction(workInstruction, { through: { procedureIndex: index } })
+      }
+
+      // Return the new WorkInstructionProcedure
+      return workInstruction
     },
 
     // All that needs to pass into this thing is workinstruction.id
