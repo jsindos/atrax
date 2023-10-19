@@ -480,7 +480,7 @@ const ProceduresPage = () => {
           )}
         </div>
         <div className="w-3/5 pl-2">
-          {selectedProcedure?.steps.length > 0 && (
+          {workInstruction?.procedures.length > 0 && (
             <Dialog open={createStepDialog} onOpenChange={setCreateStepDialog}>
               <DialogTrigger asChild>
                 <Button>Create Step</Button>
