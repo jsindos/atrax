@@ -17,7 +17,7 @@ import {
   TableHeader,
   TableRow
 } from '@/components/ui/table'
-import { gql, useMutation, useQuery } from '@apollo/client'
+import { gql, useLazyQuery, useMutation, useQuery } from '@apollo/client'
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
@@ -35,7 +35,7 @@ export default () => {
 
   const { data: { workInstruction } = {} } = useQuery(queries.WorkInstruction, { variables: { id: Number(id) } })
 
-  const [warningsAdded, setWarningsAdded] = useState()
+  const [warningsAdded, setWarningsAdded] = useState([])
 
   useEffect(() => {
     if (workInstruction) {
@@ -63,12 +63,12 @@ export default () => {
       null,
       setIsSaving
     )
-    setShowDialog(false)
   }
 
   const navigate = useNavigate()
 
-  const [showDialog, setShowDialog] = useState(false)
+  const [isByCustomer, setIsByCustomer] = useState(false)
+  const [isByDefaults, setIsByDefaults] = useState(false)
 
   return (
     <div className='container mx-auto px-4 pb-8'>
@@ -90,50 +90,6 @@ export default () => {
           }
         </Button>
       </div>
-      <WarningsBody {...{ setWarningsAdded, warningsAdded }} />
-    </div>
-  // <Dialog open={showDialog} onOpenChange={setShowDialog}>
-  //   <DialogTrigger className='pt-8'>
-  //     <Button>
-  //       Warnings, Cautions and Notes
-  //     </Button>
-  //   </DialogTrigger>
-  //   <DialogContent className='Dialog'>
-  //     <DialogHeader>
-  //       <DialogTitle>{workInstruction.title} Warnings, Cautions and Notes</DialogTitle>
-
-  //       <WarningsBody {...{ setWarningsAdded, warningsAdded }} />
-  //     </DialogHeader>
-  //     <DialogFooter>
-  //       <div className='flex-col flex pt-8'>
-  //         <Button disabled={isSaving} className='self-end flex' onClick={() => saveWarnings()}>
-  //           {
-  //             isSaving
-  //               ? (
-  //                 <>
-  //                   <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />
-  //                   Saving
-  //                 </>
-  //                 )
-  //               : 'Save Changes'
-  //           }
-  //         </Button>
-  //       </div>
-  //     </DialogFooter>
-  //   </DialogContent>
-  // </Dialog>
-  )
-}
-
-const WarningsBody = ({ setWarningsAdded, warningsAdded }) => {
-  // one of 'warning', 'caution', 'note'
-  const [tab, setTab] = useState('warning')
-
-  const [isByCustomer, setIsByCustomer] = useState(false)
-  const [isByDefaults, setIsByDefaults] = useState(false)
-
-  return (
-    <>
       <CreateNewWarning />
       <div className='flex items-center row space-x-4 pt-8 pb-8'>
         <div className='flex items-center space-x-2'>
@@ -145,6 +101,17 @@ const WarningsBody = ({ setWarningsAdded, warningsAdded }) => {
           <Label htmlFor='airplane-mode'>Limit to defaults</Label>
         </div>
       </div>
+      <WarningsBody {...{ setWarningsAdded, warningsAdded, isByCustomer, isByDefaults }} />
+    </div>
+  )
+}
+
+export const WarningsBody = ({ setWarningsAdded, warningsAdded, isByCustomer, isByDefaults, isByWorkInstruction }) => {
+  // one of 'warning', 'caution', 'note'
+  const [tab, setTab] = useState('warning')
+
+  return (
+    <>
       <Tabs value={tab} onValueChange={v => setTab(v)} className='w-full'>
         <TabsList>
           <TabsTrigger value='warning'>Warnings</TabsTrigger>
@@ -153,8 +120,8 @@ const WarningsBody = ({ setWarningsAdded, warningsAdded }) => {
         </TabsList>
       </Tabs>
       <div className='flex w-full space-x-10 pt-8'>
-        <WarningsToAdd {...{ setWarningsAdded, warningsAdded, isByCustomer, isByDefaults }} typeSelected={tab} />
-        <WarningsAdded warnings={warningsAdded} {...{ setWarningsAdded }} typeSelected={tab} />
+        <WarningsToAdd {...{ setWarningsAdded, warningsAdded, isByCustomer, isByDefaults, isByWorkInstruction }} typeSelected={tab} />
+        <WarningsAdded warnings={warningsAdded} {...{ setWarningsAdded, isByWorkInstruction }} typeSelected={tab} />
       </div>
     </>
   )
@@ -162,18 +129,27 @@ const WarningsBody = ({ setWarningsAdded, warningsAdded }) => {
 
 const PAGE_SIZE = 8
 
-const WarningsToAdd = ({ setWarningsAdded, warningsAdded, typeSelected, isByCustomer, isByDefaults }) => {
-  const { id } = useParams()
+export const WarningsToAdd = ({ setWarningsAdded, warningsAdded, typeSelected, isByCustomer, isByDefaults, isByWorkInstruction }) => {
+  const { id, workInstructionId } = useParams()
 
   const { data: { warnings: initialWarnings } = {} } = useQuery(queries.Warnings)
-  const { data: { workInstruction } = {} } = useQuery(queries.WorkInstruction, { variables: { id: Number(id) } })
+  const [getWorkInstruction, { data: { workInstruction } = {} }] = useLazyQuery(queries.WorkInstruction)
+
+  useEffect(() => {
+    if (id) {
+      getWorkInstruction({ variables: { id: Number(id) } })
+    }
+  }, [])
 
   const warnings = initialWarnings?.filter(w => (
+    (isByWorkInstruction
+      ? w.workInstructions.find(i => i.id === Number(workInstructionId))
+      : true) &&
     (isByDefaults
       ? w.isDefault
       : true) &&
     (isByCustomer
-      ? w.customer?.id === workInstruction.customer.id
+      ? w.customer?.id === workInstruction?.customer.id
       : true) &&
     w.warningType === typeSelected
   ))
@@ -202,10 +178,18 @@ const WarningsToAdd = ({ setWarningsAdded, warningsAdded, typeSelected, isByCust
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead />
+            {
+              !isByWorkInstruction && <TableHead />
+            }
             <TableHead>Text</TableHead>
-            <TableHead>Customer</TableHead>
-            <TableHead>Is default</TableHead>
+            {
+              !isByWorkInstruction && (
+                <>
+                  <TableHead>Customer</TableHead>
+                  <TableHead>Is default</TableHead>
+                </>
+              )
+            }
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -213,12 +197,22 @@ const WarningsToAdd = ({ setWarningsAdded, warningsAdded, typeSelected, isByCust
             warnings?.slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE).map((w, i) => {
               return (
                 <TableRow key={i}>
-                  <TableCell>
-                    <EditWarning id={w.id} />
-                  </TableCell>
+                  {
+                    !isByWorkInstruction && (
+                      <TableCell>
+                        <EditWarning id={w.id} />
+                      </TableCell>
+                    )
+                  }
                   <TableCell>{w.content}</TableCell>
-                  <TableCell>{w.customer?.name}</TableCell>
-                  <TableCell><Checkbox checked={w.isDefault} disabled /></TableCell>
+                  {
+                    !isByWorkInstruction && (
+                      <>
+                        <TableCell>{w.customer?.name}</TableCell>
+                        <TableCell><Checkbox checked={w.isDefault} disabled /></TableCell>
+                      </>
+                    )
+                  }
                   <TableCell>
                     <Button variant='ghost' size='icon' disabled={warningsAdded?.find(ww => ww.id === w.id)} onClick={() => setWarningsAdded(wa => [...wa, w])}>
                       <ArrowRightIcon className='h-4 w-4' />
@@ -235,7 +229,7 @@ const WarningsToAdd = ({ setWarningsAdded, warningsAdded, typeSelected, isByCust
   )
 }
 
-const WarningsAdded = ({ warnings, setWarningsAdded, typeSelected }) => {
+export const WarningsAdded = ({ warnings, setWarningsAdded, typeSelected, isByWorkInstruction }) => {
   warnings = warnings?.filter(w => w.warningType === typeSelected)
 
   const [pageIndex, setPageIndex] = useState(0)
@@ -262,10 +256,18 @@ const WarningsAdded = ({ warnings, setWarningsAdded, typeSelected }) => {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead />
+            {
+              !isByWorkInstruction && <TableHead />
+            }
             <TableHead>Text</TableHead>
-            <TableHead>Customer</TableHead>
-            <TableHead>Is default</TableHead>
+            {
+              !isByWorkInstruction && (
+                <>
+                  <TableHead>Customer</TableHead>
+                  <TableHead>Is default</TableHead>
+                </>
+              )
+            }
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -273,12 +275,22 @@ const WarningsAdded = ({ warnings, setWarningsAdded, typeSelected }) => {
             warnings?.slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE).map((w, i) => {
               return (
                 <TableRow key={i}>
-                  <TableCell>
-                    <EditWarning id={w.id} />
-                  </TableCell>
+                  {
+                    !isByWorkInstruction && (
+                      <TableCell>
+                        <EditWarning id={w.id} />
+                      </TableCell>
+                    )
+                  }
                   <TableCell>{w.content}</TableCell>
-                  <TableCell>{w.customer?.name}</TableCell>
-                  <TableCell><Checkbox checked={w.isDefault} disabled /></TableCell>
+                  {
+                    !isByWorkInstruction && (
+                      <>
+                        <TableCell>{w.customer?.name}</TableCell>
+                        <TableCell><Checkbox checked={w.isDefault} disabled /></TableCell>
+                      </>
+                    )
+                  }
                   <TableCell>
                     <Button variant='ghost' size='icon' onClick={() => setWarningsAdded(wa => wa.filter(ww => ww.id !== w.id))}>
                       <Cross2Icon className='h-4 w-4' />

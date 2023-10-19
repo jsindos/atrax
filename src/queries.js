@@ -14,6 +14,15 @@ const fields = {
       MIPSeries
       activityNumber
     }
+  `,
+  WarningFields: gql`
+    fragment WarningFields on Warning {
+      id
+      isDefault
+      type
+      content
+      warningType
+    }
   `
 }
 
@@ -78,6 +87,9 @@ export const mutations = {
         id
         title
         index
+        warnings {
+          id
+        }
       }
     }
   `,
@@ -242,11 +254,7 @@ export const queries = {
   Warnings: gql`
     query Warnings {
       warnings {
-        id
-        isDefault
-        type
-        content
-        warningType
+        ...WarningFields
         customer {
           id
           name
@@ -256,6 +264,7 @@ export const queries = {
         }
       }
     }
+    ${fields.WarningFields}
   `,
   WorkInstructions: gql`
     query WorkInstructions {
@@ -316,11 +325,7 @@ export const queries = {
       workInstruction(id: $id) {
         ...WorkInstructionFields
         warnings {
-          id
-          isDefault
-          type
-          content
-          warningType
+          ...WarningFields
           customer {
             id
             name
@@ -350,17 +355,22 @@ export const queries = {
       }
     }
     ${fields.WorkInstructionFields}
+    ${fields.WarningFields}
   `,
   Step: gql`
     query Step($id: Int!) {
       step(id: $id) {
         title
         id
+        warnings {
+          ...WarningFields
+        }
         childSteps {
           title
           id
         }
       }
     }
+    ${fields.WarningFields}
   `
 }

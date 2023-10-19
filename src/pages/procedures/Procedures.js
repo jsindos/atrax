@@ -240,7 +240,7 @@ const ProceduresPage = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => navigate(`/steps/${row.original.id}`)}>
+              <DropdownMenuItem onClick={() => navigate(`/work_instructions/${id}/steps/${row.original.id}`)}>
                 Child Steps
               </DropdownMenuItem>
 

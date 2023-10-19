@@ -181,8 +181,8 @@ const Mutation = `
   type Mutation {
     _empty: String
     saveWorkInstruction(workInstruction: WorkInstructionInput!): WorkInstruction
-    saveChildStep(childStep: ChildStepInput!): ChildStep
     saveStep(step: StepInput!): Step
+    saveChildStep(childStep: ChildStepInput!): ChildStep
     createWorkInstruction(workInstruction: WorkInstructionInput!): Customer
     saveWarning(warning: WarningInput!): Warning
     deleteWorkInstruction(id: ID!): Customer
@@ -237,6 +237,8 @@ const Mutation = `
     index: Int
     title: String
     childSteps: [ChildStepInput]
+
+    warningIds: [Int]
   }
   
   input ChildStepInput {
@@ -302,6 +304,26 @@ const mutations = {
       }
 
       return workInstruction
+    },
+    async saveStep (root, args, context) {
+      const { step: { warningIds, ...stepFields } } = args
+
+      // https://stackoverflow.com/a/40543424/3171685
+      // eslint-disable-next-line no-unused-vars
+      const [number, updatedRows] = await context.models.Steps.update(stepFields, {
+        where: { id: stepFields.id },
+        returning: true
+      })
+      const step = updatedRows[0]
+
+      if (warningIds) {
+        await context.models.StepsWarnings.destroy({
+          where: { stepId: step.id }
+        })
+        await step.addWarnings(warningIds)
+      }
+
+      return step
     },
     async deleteWorkInstruction (root, args, context) {
       const { id } = args
@@ -425,20 +447,6 @@ const mutations = {
 
       // Return the updated procedure.
       return updatedProcedure
-    },
-
-    async saveStep (root, args, context) {
-      const { step: stepFields } = args
-
-      // https://stackoverflow.com/a/40543424/3171685
-      // eslint-disable-next-line no-unused-vars
-      const [number, updatedRows] = await context.models.Steps.update(stepFields, {
-        where: { id: stepFields.id },
-        returning: true
-      })
-      const step = updatedRows[0]
-
-      return step
     },
     async saveChildStep (root, args, context) {
       const { childStep: childStepFields } = args

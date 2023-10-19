@@ -3,7 +3,7 @@ import { BackButton } from './WorkInstructionDetail'
 import { Pencil1Icon, ReloadIcon } from '@radix-ui/react-icons'
 import { mutations, queries } from '@/queries'
 import { useMutation, useQuery } from '@apollo/client'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/components/ui/use-toast'
 import { Textarea } from '@/components/ui/textarea'
@@ -27,9 +27,9 @@ import {
 import { saveWithToast } from '@/utils'
 
 export default () => {
-  const { id } = useParams()
+  const { workInstructionId, stepId } = useParams()
 
-  const { data: { step } = {}, loading } = useQuery(queries.Step, { variables: { id: Number(id) } })
+  const { data: { step } = {}, loading } = useQuery(queries.Step, { variables: { id: Number(stepId) } })
 
   const [content, setContent] = useState('')
 
@@ -59,11 +59,13 @@ export default () => {
     setIsSaving
   )
 
+  const navigate = useNavigate()
+
   return (
     <div className='container mx-auto px-4'>
       <div className='flex justify-between row pt-8'>
         <h3>Update Step</h3>
-        <BackButton onClick={() => navigate(`/customers/${workInstruction.customer.id}/work_instructions`)} />
+        <BackButton onClick={() => navigate(`/work_instructions/${workInstructionId}/procedures`)} />
       </div>
       {
         loading
@@ -85,6 +87,9 @@ export default () => {
                 </Button>
               </div>
               <Textarea className='mt-8' style={{ minHeight: 100 }} value={content} onChange={(e) => setContent(e.target.value)} />
+              <Button className='mt-8' onClick={() => navigate(`/work_instructions/${workInstructionId}/steps/${stepId}/warnings`)}>
+                Warnings, Cautions and Notes
+              </Button>
               <Tabs defaultValue='children' className='mt-8'>
                 <TabsList>
                   <TabsTrigger value='children'>Child Steps</TabsTrigger>

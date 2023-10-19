@@ -13,6 +13,7 @@ import StepDetail from './pages/StepDetail.js'
 
 import { loadErrorMessages, loadDevMessages } from '@apollo/client/dev'
 import WorkInstructionWarnings from './pages/WorkInstructionWarnings/WorkInstructionWarnings.js'
+import StepWarnings from './pages/StepWarnings.js'
 
 const BASE_URL = 'http://localhost:8080'
 
@@ -36,13 +37,11 @@ const App = () => {
         <Routes>
           <Route path='/work_instructions/:id' element={<WorkInstructionDetail />} />
           <Route path='/work_instructions/:id/warnings' element={<WorkInstructionWarnings />} />
-          <Route path='/steps/:id' element={<StepDetail />} />
           <Route path='/' element={<Navigate to='/customers/1/work_instructions' />} />
-          <Route
-            path='/customers/:customerId/work_instructions'
-            element={<WorkInstructionsPage />}
-          />
+          <Route path='/customers/:customerId/work_instructions' element={<WorkInstructionsPage />} />
           <Route path='/work_instructions/:id/procedures' element={<ProceduresPage />} />
+          <Route path='/work_instructions/:workInstructionId/steps/:stepId' element={<StepDetail />} />
+          <Route path='/work_instructions/:workInstructionId/steps/:stepId/warnings' element={<StepWarnings />} />
         </Routes>
       </Router>
     </ApolloProvider>
