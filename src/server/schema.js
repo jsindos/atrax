@@ -263,9 +263,13 @@ const mutations = {
     async createWorkInstruction(root, args, context) {
       const { workInstruction: workInstructionFields } = args
 
-      await context.models.WorkInstructions.create(workInstructionFields)
+      const workInstruction = await context.models.WorkInstructions.create(workInstructionFields)
 
       const customer = await context.models.Customers.findByPk(workInstructionFields.customerId)
+
+      const warnings = await customer.getWarnings({ where: { isDefault: true } })
+
+      await workInstruction.addWarnings(warnings)
 
       return customer
     },

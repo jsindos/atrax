@@ -89,7 +89,7 @@ fs.readdirSync(path.join(__dirname, '..'))
 async function initialize() {
   if (process.env.NODE_ENV === 'development') {
     await db.sequelize.sync({
-      // force: true,
+      // force: true
     })
     await seed(db)
   }

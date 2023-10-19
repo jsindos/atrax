@@ -47,28 +47,30 @@ module.exports = async (db) => {
    * `type` is one of 'warning', 'caution', 'note'
    * `warningType` is an enum, unsure what the values are yet
    */
-  const warning = await Warnings.create({
-    type: 'warning',
-    content: 'content',
-    warningType: 'warningType'
-  })
-  await Warnings.create({
-    type: 'warning',
-    content: 'content2',
-    warningType: 'warningType'
-  })
-  await Warnings.create({
-    type: 'caution',
-    content: 'content2',
-    warningType: 'warningType'
-  })
-  await Warnings.create({
-    type: 'note',
-    content: 'content2',
-    warningType: 'warningType'
-  })
-  await warning.addWorkInstruction(workInstruction)
-  await warning.setCustomer(customer)
+  const warningsData = [
+    { type: 'diving', warningType: 'warning', content: 'Divers are not to approach main inlets when in use.', customerId: 3 },
+    { type: 'diving', warningType: 'warning', content: 'An attended diver is never to cross the keel. If a job has to be done on the opposite side of the ship they are to be called up to the surface and sent down again on the other side.', customerId: 3, isDefault: true },
+    { type: 'diving', warningType: 'warning', content: 'The diver is not to pass between the shaft and the hull or the “A” bracket in the case the lifeline becomes fouled, unless a special underwater attendant is available on the job to attend the diver.', customerId: 3, isDefault: true },
+    { type: 'diving', warningType: 'warning', content: 'The Ship will pass the following message over the Ship\'s 1MC every 20 minutes: “Restrictions in force, diving operations in progress, do not operate any underwater equipment without giving prior notification to the Engineer Officer of the day and the Diving Supervisor”.', customerId: 3, isDefault: true },
+    { type: 'diving', warningType: 'warning', content: 'Rotation of propellers or operation of underwater electrical equipment while divers are in the vicinity can cause serious injury or death. Ensure that the local and remote Bow Thruster motor controls are de-energised and tagged out and shaft brakes engaged prior to beginning underwater operations.', customerId: 3, isDefault: true },
+    { type: 'diving', warningType: 'warning', content: 'Bow Thruster shall not be actuated (raised or lowered) while diver is working overside in the water.', customerId: 3, isDefault: true },
+    { type: 'general', warningType: 'warning', content: 'Ensure all Tag-Out procedures are in accordance with Class Standing Orders Volume 1 Chapter 7 W- Whole Ships Maintenance Management.', customerId: 3, isDefault: true },
+    { type: 'general', warningType: 'caution', content: 'Geometry of propeller blade leading edges, trailing edges and tips is critical. Extreme care must be taken when cleaning outer four inch periphery of each blade.', customerId: 3 },
+    { type: 'painting', warningType: 'caution', content: 'Special care should be exercised to avoid gouging protective coating (resin - impregnated fibrous glass cloth or rubber) under antifouling paint on shaft.', customerId: 3 },
+    { type: 'general', warningType: 'note', content: 'Accomplish this maintenance requirement when any of the following situations or periodicities occur: a. Six Monthly, b. When abnormal noises or vibrations are detected, or when the propeller has been operating in dock for prolonged periods of time in excess of those periods normally used for docking and casting off manoeuvers, whichever comes first.', customerId: 3 },
+    { type: 'diving', warningType: 'note', content: 'Clearance to dive form, found on NAVY MCDGRP website, must be completed before commencement of diving operations', customerId: 3, isDefault: true },
+    { type: 'diving', warningType: 'note', content: 'All diving operations are to be under the direct charge of a diving supervisor.', customerId: 3, isDefault: true },
+    { type: 'electrical', warningType: 'note', content: 'Electrical isolations shall be conducted IAW Class Standing Orders following the table below.', customerId: 3, isDefault: true },
+    { type: 'mechanical', warningType: 'note', content: 'Mechanical isolations shall be conducted IAW Class Standing Orders following the table below.', customerId: 3, isDefault: true }
+  ]
+
+  let warning
+
+  for (const warningData of warningsData) {
+    warning = await Warnings.create(warningData)
+    await warning.addWorkInstruction(workInstruction)
+    await warning.setCustomer(customer)
+  }
 
   const procedure = await Procedures.create({ title: 'title' })
   // add index to the through table

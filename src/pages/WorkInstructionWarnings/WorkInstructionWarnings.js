@@ -33,18 +33,15 @@ import WarningsTablePagination from './WarningsTablePagination'
 export default () => {
   const { id } = useParams()
 
-  const { data: { warnings } = {} } = useQuery(queries.Warnings)
   const { data: { workInstruction } = {} } = useQuery(queries.WorkInstruction, { variables: { id: Number(id) } })
 
   const [warningsAdded, setWarningsAdded] = useState()
 
   useEffect(() => {
-    if (warningsAdded?.length) {
-      setWarningsAdded(warningsAdded.map(w => warnings.find(ww => ww.id === w.id)))
-    } else {
+    if (workInstruction) {
       setWarningsAdded(workInstruction?.warnings || [])
     }
-  }, [warnings])
+  }, [workInstruction])
 
   const [saveWorkInstructionMutation] = useMutation(mutations.SaveWorkInstruction)
 
@@ -168,8 +165,18 @@ const PAGE_SIZE = 8
 const WarningsToAdd = ({ setWarningsAdded, warningsAdded, typeSelected, isByCustomer, isByDefaults }) => {
   const { id } = useParams()
 
-  const { data: { warnings } = {} } = useQuery(queries.Warnings)
+  const { data: { warnings: initialWarnings } = {} } = useQuery(queries.Warnings)
   const { data: { workInstruction } = {} } = useQuery(queries.WorkInstruction, { variables: { id: Number(id) } })
+
+  const warnings = initialWarnings?.filter(w => (
+    (isByDefaults
+      ? w.isDefault
+      : true) &&
+    (isByCustomer
+      ? w.customer?.id === workInstruction.customer.id
+      : true) &&
+    w.warningType === typeSelected
+  ))
 
   const [pageIndex, setPageIndex] = useState(0)
   const pageCount = Math.ceil(warnings?.length / PAGE_SIZE)
@@ -191,7 +198,7 @@ const WarningsToAdd = ({ setWarningsAdded, warningsAdded, typeSelected, isByCust
 
   return (
     <div className='w-full' style={{ display: 'flex', rowGap: '0.75rem', flexDirection: 'column' }}>
-      <Label>All</Label>
+      <Label>All {typeSelected}s</Label>
       <Table>
         <TableHeader>
           <TableRow>
@@ -203,34 +210,23 @@ const WarningsToAdd = ({ setWarningsAdded, warningsAdded, typeSelected, isByCust
         </TableHeader>
         <TableBody>
           {
-            warnings
-              ?.filter(w => (
-                (isByDefaults
-                  ? w.isDefault
-                  : true) &&
-                (isByCustomer
-                  ? w.customer?.id === workInstruction.customer.id
-                  : true) &&
-                w.type === typeSelected
-              ))
-              .slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE)
-              .map((w, i) => {
-                return (
-                  <TableRow key={i}>
-                    <TableCell>
-                      <EditWarning id={w.id} />
-                    </TableCell>
-                    <TableCell>{w.content}</TableCell>
-                    <TableCell>{w.customer?.name}</TableCell>
-                    <TableCell><Checkbox checked={w.isDefault} disabled /></TableCell>
-                    <TableCell>
-                      <Button variant='ghost' size='icon' disabled={warningsAdded?.find(ww => ww.id === w.id)} onClick={() => setWarningsAdded(wa => [...wa, w])}>
-                        <ArrowRightIcon className='h-4 w-4' />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                )
-              })
+            warnings?.slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE).map((w, i) => {
+              return (
+                <TableRow key={i}>
+                  <TableCell>
+                    <EditWarning id={w.id} />
+                  </TableCell>
+                  <TableCell>{w.content}</TableCell>
+                  <TableCell>{w.customer?.name}</TableCell>
+                  <TableCell><Checkbox checked={w.isDefault} disabled /></TableCell>
+                  <TableCell>
+                    <Button variant='ghost' size='icon' disabled={warningsAdded?.find(ww => ww.id === w.id)} onClick={() => setWarningsAdded(wa => [...wa, w])}>
+                      <ArrowRightIcon className='h-4 w-4' />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              )
+            })
           }
         </TableBody>
       </Table>
@@ -240,6 +236,8 @@ const WarningsToAdd = ({ setWarningsAdded, warningsAdded, typeSelected, isByCust
 }
 
 const WarningsAdded = ({ warnings, setWarningsAdded, typeSelected }) => {
+  warnings = warnings?.filter(w => w.warningType === typeSelected)
+
   const [pageIndex, setPageIndex] = useState(0)
   const pageCount = Math.ceil(warnings?.length / PAGE_SIZE)
 
@@ -260,7 +258,7 @@ const WarningsAdded = ({ warnings, setWarningsAdded, typeSelected }) => {
 
   return (
     <div className='w-full' style={{ display: 'flex', rowGap: '0.75rem', flexDirection: 'column' }}>
-      <Label>Selected</Label>
+      <Label>Assigned {typeSelected}s</Label>
       <Table>
         <TableHeader>
           <TableRow>
@@ -272,7 +270,7 @@ const WarningsAdded = ({ warnings, setWarningsAdded, typeSelected }) => {
         </TableHeader>
         <TableBody>
           {
-            warnings?.filter(w => w.type === typeSelected).slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE).map((w, i) => {
+            warnings?.slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE).map((w, i) => {
               return (
                 <TableRow key={i}>
                   <TableCell>
@@ -326,7 +324,7 @@ const CreateNewWarning = () => {
       () => createWarningMutation({
         variables: {
           warning: {
-            type: type.id,
+            warningType: type.id,
             isDefault,
             content,
             customerId: customer?.id
@@ -432,17 +430,19 @@ const EditWarning = ({ id }) => {
   const { data: { customers } = {} } = useQuery(queries.Customers)
   const { data: { warnings } = {} } = useQuery(queries.Warnings)
 
-  const warning = warnings.find(w => w.id === id)
+  const warning = warnings?.find(w => w.id === id)
 
   const [customer, setCustomer] = useState()
   const [content, setContent] = useState('')
   const [isDefault, setIsDefault] = useState()
 
   useEffect(() => {
-    setCustomer(warning.customer)
-    setContent(warning.content)
-    setIsDefault(warning.isDefault)
-  }, [])
+    if (warning) {
+      setCustomer(warning.customer)
+      setContent(warning.content)
+      setIsDefault(warning.isDefault)
+    }
+  }, [warning])
 
   const [saveWarningMutation] = useMutation(mutations.SaveWarning)
 

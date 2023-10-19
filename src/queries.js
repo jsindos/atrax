@@ -14,7 +14,7 @@ const fields = {
       MIPSeries
       activityNumber
     }
-  `,
+  `
 }
 
 export const mutations = {
@@ -234,7 +234,7 @@ export const mutations = {
         }
       }
     }
-  `,
+  `
 }
 
 export const queries = {
@@ -389,5 +389,5 @@ export const queries = {
         }
       }
     }
-  `,
+  `
 }
