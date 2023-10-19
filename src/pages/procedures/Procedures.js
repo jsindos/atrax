@@ -44,6 +44,8 @@ const ProceduresPage = () => {
   })
 
   const [selectedRow, setSelectedRow] = useState(null)
+  const [selectedDialogRow, setSelectedDialogRow] = useState(null)
+
   const { toast } = useToast()
 
   const procedures = workInstruction?.procedures.map((item) => {
@@ -279,7 +281,10 @@ const ProceduresPage = () => {
         return (
           <Checkbox
             checked={row.getIsSelected()}
-            onCheckedChange={(value) => row.toggleSelected(!!value)}
+            onCheckedChange={(value) => {
+              row.toggleSelected(!!value)
+              setSelectedRow(value ? row : null)
+            }}
             aria-label="Select row"
           />
         )
@@ -301,6 +306,29 @@ const ProceduresPage = () => {
   }))
 
   console.log('procedures', transformedAllProcedures)
+
+  const [isDuplicating, setIsDuplicating] = useState()
+  const [assignProcedureMutation] = useMutation(mutations.AssignProcedureToWorkInstruction)
+
+  const assignProcedureToWorkInstruction = async (procedureId, workInstructionId) => {
+    setIsDuplicating(true)
+
+    try {
+      await saveWithToast(() =>
+        assignProcedureMutation({
+          variables: {
+            procedureId: procedureId,
+            workInstructionId: workInstructionId,
+          },
+        })
+      )
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setIsDuplicating(false)
+      setUseExistingProcedureDialog(false)
+    }
+  }
 
   return (
     <div className="container mx-auto px-4">
@@ -368,16 +396,27 @@ const ProceduresPage = () => {
                 <DialogDescription>Info about duplicating/importing procedure</DialogDescription>
               </DialogHeader>
 
-              {/* Table goes here */}
               <div className="container mx-auto py-10">
                 <DataTableUseExisting
+                  setSelectedDialogRow={setSelectedDialogRow}
                   columns={columnsUseExisting}
                   data={transformedAllProcedures}
                 />
               </div>
 
               <DialogFooter>
-                <Button type="submit" onClick={() => createProcedure(title)}>
+                <Button
+                  type="submit"
+                  onClick={() => {
+                    console.log(selectedDialogRow)
+                    if (selectedDialogRow) {
+                      assignProcedureToWorkInstruction(
+                        selectedDialogRow.procedureId,
+                        workInstruction.id
+                      )
+                    }
+                  }}
+                >
                   {isCreating ? (
                     <>
                       <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
