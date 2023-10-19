@@ -432,17 +432,19 @@ const EditWarning = ({ id }) => {
   const { data: { customers } = {} } = useQuery(queries.Customers)
   const { data: { warnings } = {} } = useQuery(queries.Warnings)
 
-  const warning = warnings.find(w => w.id === id)
+  const warning = warnings?.find(w => w.id === id)
 
   const [customer, setCustomer] = useState()
   const [content, setContent] = useState('')
   const [isDefault, setIsDefault] = useState()
 
   useEffect(() => {
-    setCustomer(warning.customer)
-    setContent(warning.content)
-    setIsDefault(warning.isDefault)
-  }, [])
+    if (warning) {
+      setCustomer(warning.customer)
+      setContent(warning.content)
+      setIsDefault(warning.isDefault)
+    }
+  }, [warning])
 
   const [saveWarningMutation] = useMutation(mutations.SaveWarning)
 

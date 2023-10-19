@@ -96,8 +96,11 @@ module.exports = ({ sequelize, models, services }, DataTypes) => {
         through: models.WorkInstructionsWarnings,
         foreignKey: 'warningId'
       })
+      Warnings.belongsToMany(models.Steps, {
+        through: models.StepsWarnings,
+        foreignKey: 'warningId'
+      })
       Warnings.belongsTo(models.Customers)
-      Warnings.belongsTo(models.Steps)
     }
   };
 
@@ -191,11 +194,34 @@ module.exports = ({ sequelize, models, services }, DataTypes) => {
     modelName: 'procedures'
   })
 
+  // StepsWarnings (through table)
+  class StepsWarnings extends Model {
+    static associate (models) {
+    }
+  };
+
+  StepsWarnings.modelName = 'StepsWarnings'
+
+  StepsWarnings.init({
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true
+    }
+  }, {
+    timestamps: true,
+    sequelize,
+    modelName: 'stepsWarnings'
+  })
+
   // Steps
   class Steps extends Model {
     static associate (models) {
       Steps.belongsTo(models.Procedures)
-      Steps.hasMany(models.Warnings)
+      Steps.belongsToMany(models.Warnings, {
+        through: models.StepsWarnings,
+        foreignKey: 'stepId'
+      })
       Steps.hasMany(models.ChildSteps)
     }
   };
@@ -240,5 +266,5 @@ module.exports = ({ sequelize, models, services }, DataTypes) => {
     modelName: 'childSteps'
   })
 
-  return [Customers, WorkInstructions, WorkInstructionsWarnings, Warnings, WorkInstructionsProcedures, Procedures, Steps, ChildSteps]
+  return [Customers, WorkInstructions, WorkInstructionsWarnings, Warnings, WorkInstructionsProcedures, Procedures, Steps, ChildSteps, StepsWarnings]
 }

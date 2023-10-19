@@ -64,8 +64,10 @@ module.exports = async (db) => {
     { type: 'mechanical', warningType: 'note', content: 'Mechanical isolations shall be conducted IAW Class Standing Orders following the table below.', customerId: 3, isDefault: true }
   ]
 
+  let warning
+
   for (const warningData of warningsData) {
-    const warning = await Warnings.create(warningData)
+    warning = await Warnings.create(warningData)
     await warning.addWorkInstruction(workInstruction)
     await warning.setCustomer(customer)
   }
@@ -89,7 +91,7 @@ module.exports = async (db) => {
     index: 1
   })
   await step.setProcedure(procedure)
-  // await step.addWarning(warning)
+  await step.addWarning(warning)
 
   const step2 = await Steps.create({
     title:
@@ -98,7 +100,7 @@ module.exports = async (db) => {
     index: 1
   })
   await step2.setProcedure(procedure)
-  // await step2.addWarning(warning)
+  await step2.addWarning(warning)
 
   const step3 = await Steps.create({
     title:
@@ -107,7 +109,7 @@ module.exports = async (db) => {
     index: 1
   })
   await step3.setProcedure(procedure)
-  // await step3.addWarning(warning)
+  await step3.addWarning(warning)
 
   const childStep = await ChildSteps.create({
     title:
