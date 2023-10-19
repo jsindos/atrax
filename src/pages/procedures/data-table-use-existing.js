@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
 import {
-  ColumnDef,
   flexRender,
   getCoreRowModel,
   getPaginationRowModel,
+  getFilteredRowModel,
   useReactTable,
 } from '@tanstack/react-table'
 import { Button } from '@/components/ui/button'
@@ -17,9 +17,11 @@ import {
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Input } from '@/components/ui/input'
 
 export function DataTableUseExisting({ columns, data }) {
   const [selectedRowId, setSelectedRowId] = useState(null)
+  const [columnFilters, setColumnFilters] = useState([])
 
   const modifiedColumns = columns.map((column) => {
     if (column.id === 'select') {
@@ -42,9 +44,31 @@ export function DataTableUseExisting({ columns, data }) {
     columns: modifiedColumns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    onColumnFiltersChange: setColumnFilters,
+    getFilteredRowModel: getFilteredRowModel(),
+    state: {
+      columnFilters,
+    },
   })
+
   return (
     <div>
+      <div className="flex items-center py-4">
+        <Input
+          placeholder="Filter by customer..."
+          value={table.getColumn('customerName')?.getFilterValue() ?? ''}
+          onChange={(event) => table.getColumn('customerName')?.setFilterValue(event.target.value)}
+          className="max-w-sm"
+        />
+        <Input
+          placeholder="Filter by procedure title..."
+          value={table.getColumn('procedureTitle')?.getFilterValue() ?? ''}
+          onChange={(event) =>
+            table.getColumn('procedureTitle')?.setFilterValue(event.target.value)
+          }
+          className="max-w-sm ml-4"
+        />
+      </div>
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -82,24 +106,6 @@ export function DataTableUseExisting({ columns, data }) {
             )}
           </TableBody>
         </Table>
-      </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          Previous
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          Next
-        </Button>
       </div>
     </div>
   )

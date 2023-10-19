@@ -263,8 +263,12 @@ const ProceduresPage = () => {
 
   const columnsUseExisting = [
     {
-      accessorKey: 'title',
+      accessorKey: 'procedureTitle',
       header: 'Title',
+    },
+    {
+      accessorKey: 'customerName',
+      header: 'Customer',
     },
     {
       id: 'select',
@@ -288,7 +292,15 @@ const ProceduresPage = () => {
   const { data: { procedures: allProcedures } = {}, loadingProcedures } = useQuery(
     queries.Procedures
   )
-  console.log('procedures', allProcedures)
+
+  let transformedAllProcedures = allProcedures?.map((procedure) => ({
+    procedureId: procedure.id,
+    procedureTitle: procedure.title,
+    customerId: procedure.workInstructions[0].customer.id,
+    customerName: procedure.workInstructions[0].customer.name,
+  }))
+
+  console.log('procedures', transformedAllProcedures)
 
   return (
     <div className="container mx-auto px-4">
@@ -358,7 +370,10 @@ const ProceduresPage = () => {
 
               {/* Table goes here */}
               <div className="container mx-auto py-10">
-                <DataTableUseExisting columns={columnsUseExisting} data={allProcedures} />
+                <DataTableUseExisting
+                  columns={columnsUseExisting}
+                  data={transformedAllProcedures}
+                />
               </div>
 
               <DialogFooter>
