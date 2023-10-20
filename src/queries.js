@@ -23,7 +23,7 @@ const fields = {
       content
       warningType
     }
-  `
+  `,
 }
 
 export const mutations = {
@@ -196,11 +196,42 @@ export const mutations = {
     }
   `,
   AssignProcedureToWorkInstruction: gql`
-    mutation AssignProcedureToWorkInstruction($procedureId: ID!, $workInstructionId: ID!, $isDuplicating: Boolean) {
+    mutation AssignProcedureToWorkInstruction(
+      $procedureId: ID!
+      $workInstructionId: ID!
+      $isDuplicating: Boolean
+    ) {
       assignProcedureToWorkInstruction(
         procedureId: $procedureId
         workInstructionId: $workInstructionId
         isDuplicating: $isDuplicating
+      ) {
+        id
+        procedures {
+          id
+          index
+          procedure {
+            id
+            title
+            steps {
+              id
+              title
+              childSteps {
+                id
+                title
+              }
+            }
+          }
+        }
+      }
+    }
+  `,
+
+  UnassignProcedureFromWorkInstruction: gql`
+    mutation UnassignProcedureFromWorkInstruction($procedureId: ID!, $workInstructionId: ID!) {
+      unassignProcedureFromWorkInstruction(
+        procedureId: $procedureId
+        workInstructionId: $workInstructionId
       ) {
         id
         procedures {
@@ -269,7 +300,7 @@ export const mutations = {
         }
       }
     }
-  `
+  `,
 }
 
 export const queries = {
@@ -426,5 +457,5 @@ export const queries = {
       }
     }
     ${fields.WarningFields}
-  `
+  `,
 }

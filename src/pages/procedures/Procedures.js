@@ -167,6 +167,20 @@ const ProceduresPage = () => {
                   'Delete Procedure'
                 )}
               </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() =>
+                  unassignProcedureFromWorkInstruction(row.original.id, workInstruction.id)
+                }
+              >
+                {isCreating ? (
+                  <>
+                    <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+                    Unassigning
+                  </>
+                ) : (
+                  'Unassign Procedure'
+                )}
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         )
@@ -321,8 +335,8 @@ const ProceduresPage = () => {
   const transformedAllProcedures = filteredProcedures?.map((procedure) => ({
     procedureId: procedure.id,
     procedureTitle: procedure.title,
-    customerId: procedure.workInstructions[0].customer.id,
-    customerName: procedure.workInstructions[0].customer.name,
+    customerId: procedure.workInstructions[0]?.customer?.id || null,
+    customerName: procedure.workInstructions[0]?.customer?.name || null,
   }))
 
   const [assignProcedureMutation] = useMutation(mutations.AssignProcedureToWorkInstruction)
@@ -348,6 +362,32 @@ const ProceduresPage = () => {
       )
       // Add the importedProcedureId to the array
       setImportedProcedureIds((prevIds) => [...prevIds, procedureId])
+      refetch()
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setUseExistingProcedureDialog(false)
+    }
+  }
+
+  const [unassignProcedureMutation] = useMutation(mutations.UnassignProcedureFromWorkInstruction)
+
+  const unassignProcedureFromWorkInstruction = async (procedureId, workInstructionId) => {
+    try {
+      await saveWithToast(
+        () =>
+          unassignProcedureMutation({
+            variables: {
+              procedureId: procedureId,
+              workInstructionId: workInstructionId,
+            },
+          }),
+        toast,
+        'Procedure Unassigned',
+        setIsCreating
+      )
+      // Remove the unassignedProcedureId from the array
+      setImportedProcedureIds((prevIds) => prevIds.filter((id) => id !== procedureId))
       refetch()
     } catch (error) {
       console.error(error)
