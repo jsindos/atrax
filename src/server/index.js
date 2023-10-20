@@ -53,8 +53,17 @@ app.use(bodyParser.json({ limit: '80mb' }))
 app.use(express.json())
 app.use(express.static('assets'))
 
-// fetching pop-w
-app.use(express.static(path.join(__dirname, '/dist')))
+// fetching dist
+app.use(express.static(path.join(__dirname, '..', '..', '/dist')))
+
+app.get('*', (req, res, next) => {
+  if (req.url.includes('/graphql') || req.url.includes('/img')) {
+    next();
+  } else {
+    res.sendFile(path.resolve(__dirname, '..', '..', 'dist', 'index.html'));
+  }
+})
+
 // app.get('/download', (req, res) => {
 //   res.redirect('https://api.izoukhai.com/qr-codes/0e505664-ef6e-4e88-a5b6-c9145cf2fa4d')
 // })
