@@ -17,6 +17,7 @@ import { Button } from '@/components/ui/button'
 import { Cross2Icon, ReloadIcon } from '@radix-ui/react-icons'
 import { useToast } from '@/components/ui/use-toast'
 import { saveWithToast } from '@/utils'
+import { firstColumn } from '../../cmc'
 
 export default () => {
   const { id } = useParams()
@@ -102,6 +103,8 @@ export default () => {
 
   const [showLocationDialog, setShowLocationDialog] = useState()
 
+  const values = firstColumn.reduce((a, c) => [...a, { id: c.first, name: c.first }], [])
+
   return (
     <div className='container mx-auto px-4'>
       <div className='flex justify-between row pt-8'>
@@ -133,7 +136,7 @@ export default () => {
               <S
                 currentValue={customer}
                 handleSelectChange={id => setCustomer(customers.find(c => c.id === id))}
-                values={customers}
+                values={values}
                 nameKey='name'
                 valueKey='id'
                 placeholder='Select customer...'
@@ -188,6 +191,19 @@ export default () => {
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
+                <S
+                  // currentValue={type}
+                  // handleSelectChange={id => setType({ id, name: id })}
+                  values={[
+                    { id: 'warning', name: 'Warning' },
+                    { id: 'caution', name: 'Caution' },
+                    { id: 'note', name: 'Note' }
+                  ]}
+                  nameKey='name'
+                  valueKey='id'
+                  placeholder='Type...'
+                  label='Type'
+                />
                 <Button className='mt-8' onClick={() => navigate(`/work_instructions/${id}/warnings`)}>
                   Warnings, Cautions and Notes
                 </Button>
