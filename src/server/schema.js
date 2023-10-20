@@ -89,10 +89,15 @@ const Query = `
   type Step {
     id: Int
     title: String
-    images: String
+    images: [Image]
     index: Int
     childSteps: [ChildStep]
     warnings: [Warning]
+  }
+
+  type Image {
+    id: Int
+    uri: String
   }
 
   type ChildStep {
@@ -172,6 +177,9 @@ const resolvers = {
     },
   },
   Step: {
+    images: async (step, args, context) => {
+      return step.getImages()
+    },
     childSteps: async (step, args, context) => {
       return step.getChildSteps()
     },
@@ -259,8 +267,14 @@ const mutations = {
   Mutation: {
     async createStepImage(root, args, context) {
       const { stepId, image } = args
+
       // https://github.com/jaydenseric/apollo-upload-examples/blob/master/api/schema/MutationType.mjs
-      const { uri } = await ImageUploadService.storeImage(image, context.req.headers.host)
+      const { uri } = await context.services.ImageUploadService.storeImage(
+        image,
+        context.req.headers.host
+      )
+
+      const step = await context.models.Steps.findByPk(stepId)
 
       if (uri) {
         const currentImages = await ImagesModel.findAll({
@@ -274,7 +288,18 @@ const mutations = {
         })
 
         return uri
+        const currentImages = await context.models.Images.findAll({
+          where: { stepId },
+          order: [['index', 'DESC']],
+        })
+        const image = await context.models.Images.create({
+          uri,
+          index: currentImages.length ? currentImages[0].index + 1 : 1,
+        })
+        await step.addImage(image)
       }
+
+      return step
     },
     async createWarning(root, args, context) {
       const { warning: warningFields } = args

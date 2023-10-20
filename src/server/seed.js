@@ -1,11 +1,8 @@
-const env = process.env.NODE_ENV || 'development'
-const config = require('../../settings.json')[env]
-
 module.exports = async (db) => {
   console.log('seeding database')
 
   const { models } = db
-  const { Customers, WorkInstructions, Warnings, Procedures, Steps, ChildSteps } = models
+  const { Customers, WorkInstructions, Warnings, Procedures, Steps, ChildSteps, Images } = models
 
   let customers
   customers = await Customers.findAll()
@@ -84,19 +81,21 @@ module.exports = async (db) => {
   // add index to the through table
   await procedure3.addWorkInstruction(workInstruction, { through: { procedureIndex: 3 } })
 
+  // `[${config.MEDIA_URL} + '/bee.png']`
+  // const image = await Images.create()
+
   const step = await Steps.create({
     title:
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
-    images: `[${config.MEDIA_URL} + '/bee.png']`,
     index: 1
   })
   await step.setProcedure(procedure)
   await step.addWarning(warning)
+  // await step.addImage(image)
 
   const step2 = await Steps.create({
     title:
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
-    images: `[${config.MEDIA_URL} + '/bee.png']`,
     index: 1
   })
   await step2.setProcedure(procedure)
@@ -105,7 +104,6 @@ module.exports = async (db) => {
   const step3 = await Steps.create({
     title:
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
-    images: `[${config.MEDIA_URL} + '/bee.png']`,
     index: 1
   })
   await step3.setProcedure(procedure)

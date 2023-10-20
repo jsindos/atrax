@@ -17,7 +17,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { useMutation, useQuery } from '@apollo/client'
-import React, { useEffect, useState } from 'react'
+import React, { forwardRef, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Cross2Icon, ReloadIcon } from '@radix-ui/react-icons'
@@ -347,16 +347,16 @@ export const BackButton = ({ onClick }) => {
   )
 }
 
-export const I = ({ className, label, value, handleInputChange }) => {
+export const I = forwardRef(({ className, label, value, handleInputChange, placeholder, type, name }, ref) => {
   return (
     <div className={'pt-8 ' + className}>
       <div className="grid w-full max-w-sm items-center gap-3">
         <Label>{label}</Label>
-        <Input value={value} onChange={handleInputChange} />
+        <Input onChange={handleInputChange} {...{ value, placeholder, type, name, ref }} />
       </div>
     </div>
   )
-}
+})
 
 export const S = ({
   label,

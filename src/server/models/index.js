@@ -223,6 +223,7 @@ module.exports = ({ sequelize, models, services }, DataTypes) => {
         foreignKey: 'stepId'
       })
       Steps.hasMany(models.ChildSteps)
+      Steps.hasMany(models.Images)
     }
   };
 
@@ -235,7 +236,6 @@ module.exports = ({ sequelize, models, services }, DataTypes) => {
       autoIncrement: true
     },
     title: DataTypes.TEXT,
-    images: DataTypes.TEXT,
     index: DataTypes.INTEGER
   }, {
     timestamps: true,
@@ -266,5 +266,28 @@ module.exports = ({ sequelize, models, services }, DataTypes) => {
     modelName: 'childSteps'
   })
 
-  return [Customers, WorkInstructions, WorkInstructionsWarnings, Warnings, WorkInstructionsProcedures, Procedures, Steps, ChildSteps, StepsWarnings]
+  // Images
+  class Images extends Model {
+    static associate (models) {
+      Images.belongsTo(models.Steps)
+    }
+  }
+
+  Images.modelName = 'Images'
+
+  Images.init({
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true
+    },
+    index: DataTypes.INTEGER,
+    uri: DataTypes.STRING
+  }, {
+    timestamps: true,
+    sequelize,
+    modelName: 'images'
+  })
+
+  return [Customers, WorkInstructions, WorkInstructionsWarnings, Warnings, WorkInstructionsProcedures, Procedures, Steps, ChildSteps, StepsWarnings, Images]
 }
