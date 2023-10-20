@@ -44,8 +44,8 @@ module.exports = async (db) => {
   })
 
   /**
-   * `type` is one of 'warning', 'caution', 'note'
-   * `warningType` is an enum, unsure what the values are yet
+   * `warningType` is one of 'warning', 'caution', 'note'
+   * `type` is an enum, of values 'general', 'electrical', 'mechanical', 'tagout', 'diving' and 'hydraulic'
    */
   const warningsData = [
     { type: 'diving', warningType: 'warning', content: 'Divers are not to approach main inlets when in use.', customerId: 3 },

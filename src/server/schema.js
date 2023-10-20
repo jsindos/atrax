@@ -200,7 +200,7 @@ const Mutation = `
     deleteStep(id: ID!): Procedure
     assignProcedureToWorkInstruction(procedureId: ID!, workInstructionId: ID!, isDuplicating: Boolean): WorkInstruction
     unassignProcedureFromWorkInstruction(procedureId: ID!, workInstructionId: ID!): WorkInstruction
-
+    createStepImage(stepId: ID!, image: Upload): Step
   }
 
   input WarningInput {
@@ -231,11 +231,11 @@ const Mutation = `
   }
 
   input ProcedureInput {
-      id: Int
-      workInstructionId: Int
-      title: String
-      steps: [StepInput]
-      index: Int
+    id: Int
+    workInstructionId: Int
+    title: String
+    steps: [StepInput]
+    index: Int
   }
 
   input StepInput {
@@ -257,6 +257,25 @@ const Mutation = `
 
 const mutations = {
   Mutation: {
+    async createStepImage(root, args, context) {
+      const { stepId, image } = args
+      // https://github.com/jaydenseric/apollo-upload-examples/blob/master/api/schema/MutationType.mjs
+      const { uri } = await ImageUploadService.storeImage(image, context.req.headers.host)
+
+      if (uri) {
+        const currentImages = await ImagesModel.findAll({
+          where: { optionId },
+          order: [['index', 'DESC']],
+        })
+        await ImagesModel.create({
+          optionId,
+          uri,
+          index: currentImages.length ? currentImages[0].index + 1 : 1,
+        })
+
+        return uri
+      }
+    },
     async createWarning(root, args, context) {
       const { warning: warningFields } = args
 

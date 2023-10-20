@@ -182,6 +182,7 @@ export const WarningsToAdd = ({ setWarningsAdded, warningsAdded, typeSelected, i
               !isByWorkInstruction && <TableHead />
             }
             <TableHead>Text</TableHead>
+            <TableHead>Type</TableHead>
             {
               !isByWorkInstruction && (
                 <>
@@ -205,6 +206,7 @@ export const WarningsToAdd = ({ setWarningsAdded, warningsAdded, typeSelected, i
                     )
                   }
                   <TableCell>{w.content}</TableCell>
+                  <TableCell>{w.type.charAt(0).toUpperCase() + w.type.slice(1)}</TableCell>
                   {
                     !isByWorkInstruction && (
                       <>
@@ -260,6 +262,7 @@ export const WarningsAdded = ({ warnings, setWarningsAdded, typeSelected, isByWo
               !isByWorkInstruction && <TableHead />
             }
             <TableHead>Text</TableHead>
+            <TableHead>Type</TableHead>
             {
               !isByWorkInstruction && (
                 <>
@@ -283,6 +286,7 @@ export const WarningsAdded = ({ warnings, setWarningsAdded, typeSelected, isByWo
                     )
                   }
                   <TableCell>{w.content}</TableCell>
+                  <TableCell>{w.type.charAt(0).toUpperCase() + w.type.slice(1)}</TableCell>
                   {
                     !isByWorkInstruction && (
                       <>
@@ -318,6 +322,8 @@ const CreateNewWarning = () => {
   const [isDefault, setIsDefault] = useState()
   // one of 'warning', 'caution', 'note'
   const [type, setType] = useState({ name: 'Warning', id: 'warning' })
+  // `category` is an enum, of values 'general', 'electrical', 'mechanical', 'tagout', 'diving' and 'hydraulic'
+  const [category, setCategory] = useState({ name: 'General', id: 'general' })
 
   useEffect(() => {
     if (workInstruction) {
@@ -337,6 +343,7 @@ const CreateNewWarning = () => {
         variables: {
           warning: {
             warningType: type.id,
+            type: category.id,
             isDefault,
             content,
             customerId: customer?.id
@@ -372,6 +379,8 @@ const CreateNewWarning = () => {
 
   const [showDialog, setShowDialog] = useState(false)
 
+  const categories = ['general', 'electrical', 'mechanical', 'tagout', 'diving', 'hydraulic'].reduce((a, c) => [...a, { id: c, name: c.charAt(0).toUpperCase() + c.slice(1) }], [])
+
   return (
     <Dialog open={showDialog} onOpenChange={setShowDialog}>
       <DialogTrigger>
@@ -394,6 +403,15 @@ const CreateNewWarning = () => {
             valueKey='id'
             placeholder='Type...'
             label='Type'
+          />
+          <S
+            currentValue={category}
+            handleSelectChange={id => setCategory({ id, name: id })}
+            values={categories}
+            nameKey='name'
+            valueKey='id'
+            placeholder='Category...'
+            label='Category'
           />
           <S
             currentValue={customer}
