@@ -24,11 +24,14 @@ import { Cross2Icon, ReloadIcon } from '@radix-ui/react-icons'
 import { useToast } from '@/components/ui/use-toast'
 import { saveWithToast } from '@/utils'
 import { firstColumn, secondColumn, thirdColumn, fourthColumn } from '../../cmc'
+import { useRef } from 'react'
 
-export const MyComponent = () => {
+export const MyComponent = ({ setCMC }) => {
   const [firstValue, setFirstValue] = useState(null)
   const [secondValue, setSecondValue] = useState(null)
   const [thirdValue, setThirdValue] = useState(null)
+
+  const [showSelectDialog, setShowSelectDialog] = useState()
 
   const handleFirstChange = (value) => {
     setFirstValue(value)
@@ -45,6 +48,25 @@ export const MyComponent = () => {
     setThirdValue(value)
   }
 
+  const [fourthValue, setFourthValue] = useState(null)
+
+  const handleFourthChange = (value) => {
+    setFourthValue(value)
+  }
+
+  const handleButtonClick = (setCMC) => {
+    if (fourthValue) {
+      // Use fourthValue.description here
+      const parts = fourthValue.description.split(/\s+/)
+      const CMC = parts[parts.length - 1]
+      console.log(CMC)
+      console.log(setCMC)
+      setCMC(CMC)
+      setShowSelectDialog(false)
+    } else {
+      console.log('No value selected')
+    }
+  }
   const firstOptions = firstColumn
   const secondOptions = secondColumn.filter((item) => item.first === firstValue)
   const thirdOptions = thirdColumn.filter(
@@ -56,57 +78,71 @@ export const MyComponent = () => {
 
   return (
     <div>
-      <Select onValueChange={handleFirstChange}>
-        <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder="First Column" />
-        </SelectTrigger>
-        <SelectContent>
-          {firstOptions.map((item) => (
-            <SelectItem key={item.first} value={item.first}>
-              {item.description}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <Dialog open={showSelectDialog} onOpenChange={setShowSelectDialog}>
+        <DialogTrigger>
+          <Button>Lookup CMC</Button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Select Columns</DialogTitle>
+          </DialogHeader>
 
-      <Select onValueChange={handleSecondChange}>
-        <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder="Second Column" />
-        </SelectTrigger>
-        <SelectContent>
-          {secondOptions.map((item) => (
-            <SelectItem key={item.second} value={item.second}>
-              {item.description}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+          <Select onValueChange={handleFirstChange}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="First Column" />
+            </SelectTrigger>
+            <SelectContent>
+              {firstOptions.map((item) => (
+                <SelectItem key={item.first} value={item.first}>
+                  {item.description}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-      <Select onValueChange={handleThirdChange}>
-        <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder="Third Column" />
-        </SelectTrigger>
-        <SelectContent>
-          {thirdOptions.map((item) => (
-            <SelectItem key={item.third} value={item.third}>
-              {item.description}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+          <Select onValueChange={handleSecondChange}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Second Column" />
+            </SelectTrigger>
+            <SelectContent>
+              {secondOptions.map((item) => (
+                <SelectItem key={item.second} value={item.second}>
+                  {item.description}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-      <Select>
-        <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder="Fourth Column" />
-        </SelectTrigger>
-        <SelectContent>
-          {fourthOptions.map((item) => (
-            <SelectItem key={item.fourth} value={item.fourth}>
-              {item.description}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+          <Select onValueChange={handleThirdChange}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Third Column" />
+            </SelectTrigger>
+            <SelectContent>
+              {thirdOptions.map((item) => (
+                <SelectItem key={item.third} value={item.third}>
+                  {item.description}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select onValueChange={handleFourthChange}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Fourth Column" />
+            </SelectTrigger>
+            <SelectContent>
+              {fourthOptions.map((item) => (
+                <SelectItem key={item.fourth} value={item}>
+                  {item.description}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <DialogFooter>
+            <Button onClick={() => handleButtonClick(setCMC)}>Use Selected Value</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
@@ -138,6 +174,7 @@ export default () => {
               title,
               draftingOrganisation,
               hoursToComplete,
+              CMC,
               customerId: customer.id,
             },
           },
@@ -173,6 +210,7 @@ export default () => {
   const [title, setTitle] = useState('')
   const [draftingOrganisation, setDraftingOrganisation] = useState('')
   const [hoursToComplete, setHoursToComplete] = useState('')
+  const [CMC, setCMC] = useState('')
   const [system, setSystem] = useState('')
   const [shipSystem, setShipSystem] = useState('')
   const [subsystem, setSubsystem] = useState('')
@@ -193,6 +231,7 @@ export default () => {
       setMIPSeries(workInstruction.MIPSeries)
       setActivityNumber(workInstruction.activityNumber)
       setCustomer(workInstruction.customer)
+      setCMC(workInstruction.CMC)
     }
   }, [workInstruction])
 
@@ -242,7 +281,9 @@ export default () => {
             handleInputChange={(e) => setHoursToComplete(e.target.value)}
           />
 
-          <MyComponent> </MyComponent>
+          <I label="CMC" value={CMC} handleInputChange={(e) => setCMC(e.target.value)} readOnly />
+
+          <MyComponent setCMC={setCMC}> </MyComponent>
           <div
             style={{
               display: 'flex',
@@ -347,16 +388,21 @@ export const BackButton = ({ onClick }) => {
   )
 }
 
-export const I = forwardRef(({ className, label, value, handleInputChange, placeholder, type, name }, ref) => {
-  return (
-    <div className={'pt-8 ' + className}>
-      <div className="grid w-full max-w-sm items-center gap-3">
-        <Label>{label}</Label>
-        <Input onChange={handleInputChange} {...{ value, placeholder, type, name, ref }} />
+export const I = forwardRef(
+  ({ className, label, value, handleInputChange, placeholder, type, name, readOnly }, ref) => {
+    return (
+      <div className={'pt-8 ' + className}>
+        <div className="grid w-full max-w-sm items-center gap-3">
+          <Label>{label}</Label>
+          <Input
+            onChange={handleInputChange}
+            {...{ value, placeholder, type, name, ref, readOnly }}
+          />
+        </div>
       </div>
-    </div>
-  )
-})
+    )
+  }
+)
 
 export const S = ({
   label,
