@@ -3,7 +3,7 @@ const shortId = require('shortid')
 const fs = require('fs')
 // const sharp = require('sharp')
 
-const settings = require(path.join(__dirname, '/../../settings.json'))
+const settings = require(path.join(__dirname, '/../../../settings.json'))
 
 module.exports = class ImageUploadService {
   constructor (db) {
@@ -85,64 +85,23 @@ module.exports = class ImageUploadService {
     const { createReadStream, filename, mimetype } = await image
     const generatedFileName = `${isShortId ? shortId.generate() + '-' : ''}${filename}${mimetype ? '' : '.png'}`
 
-    const isVideo = this.isVideoFile(mimetype)
-
-    const tmpFiles = []
-
-    const tmpPath = path.join(this.tmpDir, generatedFileName)
-    await this.storeFileLocally(createReadStream(), tmpPath)
-
-    tmpFiles.push(tmpPath)
-
-    const streamA = isVideo ? this.createAndSaveThumbnail(tmpPath) : Promise.resolve()
-
     // eslint-disable-next-line
     const streamB = new Promise(async (resolve, reject) => {
-      let resizedImagePath, readStream
-
-      let outputPath = path.join(process.cwd(), 'assets/img', generatedFileName)
-
-      if (isVideo) {
-        const compressedVideoPath = await this.compressVideo(tmpPath)
-        if (fs.existsSync(compressedVideoPath)) {
-          readStream = fs.createReadStream(compressedVideoPath)
-          outputPath = path.join(process.cwd(), 'assets/img', path.basename(compressedVideoPath))
-          tmpFiles.push(compressedVideoPath)
-        }
-      } else {
-        resizedImagePath = await this.generateResizedImage(tmpPath, 1080, 'webp')
-
-        if (resizedImagePath) {
-          tmpFiles.push(resizedImagePath)
-          readStream = fs.createReadStream(resizedImagePath)
-          outputPath = path.join(process.cwd(), 'assets/img', path.basename(resizedImagePath))
-        }
-      }
-
-      // use default readStream if another one was not created
-      if (!readStream) readStream = createReadStream()
-
-      const basename = await this.saveStream(readStream, outputPath)
+      const outputPath = path.join(process.cwd(), 'assets/img', generatedFileName)
+      const basename = await this.saveStream(createReadStream(), outputPath)
 
       resolve(basename)
     })
 
-    const [thumbnailFilename, storedFileName] = await Promise.all([streamA, streamB])
-
-    for (let i = 0; i < tmpFiles.length; i++) {
-      const tmpFile = tmpFiles[i]
-      fs.rmSync(tmpFile, { force: true })
-    }
+    const storedFileName = await streamB
 
     if (this.isProduction) {
       return {
-        uri: settings.production.MEDIA_URL + `/${storedFileName}`,
-        thumbnail: settings.production.MEDIA_URL + `/${thumbnailFilename}`
+        uri: settings.production.MEDIA_URL + `/${storedFileName}`
       }
     } else {
       return {
-        uri: `http://${host}/img/${storedFileName}`,
-        thumbnail: `http://${host}/thumbnail/${thumbnailFilename}`
+        uri: `http://${host}/img/${storedFileName}`
       }
     }
   }

@@ -27,6 +27,17 @@ const fields = {
 }
 
 export const mutations = {
+  CreateStepImage: gql`
+    mutation createStepImage($stepId: ID!, $image: Upload!) {
+      createStepImage(stepId: $stepId, image: $image) {
+        id
+        images {
+          id
+          uri
+        }
+      }
+    }
+  `,
   CreateWarning: gql`
     mutation CreateWarning($warning: WarningInput!) {
       createWarning(warning: $warning) {
@@ -388,14 +399,18 @@ export const queries = {
   Step: gql`
     query Step($id: Int!) {
       step(id: $id) {
-        title
         id
+        title
+        images {
+          id
+          uri
+        }
         warnings {
           ...WarningFields
         }
         childSteps {
-          title
           id
+          title
         }
       }
     }

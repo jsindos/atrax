@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from 'react'
-import { BackButton } from './WorkInstructionDetail'
-import { Pencil1Icon, ReloadIcon } from '@radix-ui/react-icons'
+/* global FormData */
+
+import React, { useEffect, useRef, useState } from 'react'
+import { BackButton, I } from './WorkInstructionDetail'
+import { Pencil1Icon, ReloadIcon, TrashIcon } from '@radix-ui/react-icons'
 import { mutations, queries } from '@/queries'
 import { useMutation, useQuery } from '@apollo/client'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -61,6 +63,26 @@ export default () => {
 
   const navigate = useNavigate()
 
+  const fileInput1 = useRef(null)
+
+  const [createStepImageMutation, { loading: isUploadingImage }] = useMutation(mutations.CreateStepImage)
+
+  const handleSubmit = async (e) => {
+    const file = fileInput1.current.files[0]
+    if (!file) return
+
+    try {
+      await createStepImageMutation({
+        variables: {
+          stepId: Number(stepId),
+          image: file
+        }
+      })
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
   return (
     <div className='container mx-auto px-4'>
       <div className='flex justify-between row pt-8'>
@@ -119,7 +141,37 @@ export default () => {
                   </Table>
 
                 </TabsContent>
-                <TabsContent className='mt-8' value='password'>Upload your images here.</TabsContent>
+                <TabsContent className='mt-8' value='password'>
+                  <I label='Upload image' type='file' name='upload1' ref={fileInput1} />
+                  <Button disabled={isUploadingImage} onClick={handleSubmit}>
+                    {
+                      isUploadingImage
+                        ? (
+                          <>
+                            <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />
+                            Uploading...
+                          </>
+                          )
+                        : 'Upload'
+                    }
+                  </Button>
+                  <div className='flex flex-row space-x-4 mt-8'>
+                    {
+                      step.images.map((image, i) => {
+                        return (
+                          <div key={i} className='relative'>
+                            <img src={image.uri} alt={`Step image ${i}`} style={{ maxWidth: '325px' }} />
+                            <div className='absolute top-4 right-4'>
+                              <Button variant='outline' size='icon'>
+                                <TrashIcon className='h-4 w-4' />
+                              </Button>
+                            </div>
+                          </div>
+                        )
+                      })
+                    }
+                  </div>
+                </TabsContent>
               </Tabs>
 
             </>

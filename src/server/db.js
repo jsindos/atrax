@@ -19,7 +19,7 @@ let sequelize
 if (process.env.USE_CONNECTION_STRING) {
   sequelize = new Sequelize('ebdb', 'pop', 'E4Q7ufuAdhm!fhb', {
     host: 'aaeuktxcxfukq6.cpq4oq6xi1l9.ap-southeast-2.rds.amazonaws.com',
-    dialect: 'postgres',
+    dialect: 'postgres'
   })
 } else if (config.use_env_variable) {
   sequelize = new Sequelize(process.env[config.use_env_variable], config)
@@ -32,7 +32,7 @@ if (process.env.USE_CONNECTION_STRING) {
       console.log(msg.replace('Executing (default)', `\x1b[40m\x1b[37mExecuting ${count}\x1b[0m`))
       count++
     },
-    ...config,
+    ...config
   })
 }
 
@@ -41,7 +41,7 @@ const db = {
   services: {},
   sequelize,
   Sequelize,
-  initialize,
+  initialize
 }
 
 process.env.NODE_ENV === 'production' &&
@@ -71,22 +71,22 @@ Object.keys(db.models).forEach((modelName) => {
 })
 
 // services
-fs.readdirSync(path.join(__dirname, '..'))
+fs.readdirSync(__dirname)
   .filter((file) => {
     return file.indexOf('.') === -1 && file !== 'db' && file !== 'models'
   })
   .forEach((directory) => {
-    fs.readdirSync(path.join(__dirname, '..', directory))
+    fs.readdirSync(path.join(__dirname, directory))
       .filter((file) => {
         return file.slice(-10) === 'service.js'
       })
       .forEach((file) => {
-        const Class = require(path.join(__dirname, '..', directory, file))
+        const Class = require(path.join(__dirname, directory, file))
         db.services[Class.name] = new Class(db)
       })
   })
 
-async function initialize() {
+async function initialize () {
   if (process.env.NODE_ENV === 'development') {
     await db.sequelize.sync({
       // force: true
