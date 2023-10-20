@@ -46,6 +46,9 @@ const ProceduresPage = () => {
   const [selectedRow, setSelectedRow] = useState(null)
   const [selectedDialogRow, setSelectedDialogRow] = useState(null)
 
+  // State variable to hold the procedureIds of the imported procedures
+  const [importedProcedureIds, setImportedProcedureIds] = useState([])
+
   const { toast } = useToast()
 
   const procedures = workInstruction?.procedures.map((item) => {
@@ -59,8 +62,6 @@ const ProceduresPage = () => {
     selectedProcedure = procedures.find((procedure) => procedure.id === selectedRow.id)
   }
 
-  console.log('selectedProcedure', selectedProcedure)
-
   const [createProcedureDialog, setCreateProcedureDialog] = useState()
   const [useExistingProcedureDialog, setUseExistingProcedureDialog] = useState()
   const [createStepDialog, setCreateStepDialog] = useState()
@@ -69,10 +70,13 @@ const ProceduresPage = () => {
 
   const [title, setTitle] = useState('')
 
-  const [createProcedureMutation] = useMutation(mutations.CreateProcedure)
+  const [createProcedureMutation, { error }] = useMutation(mutations.CreateProcedure, {
+    refetchQueries: [{ query: queries.Procedures }],
+  })
 
   const [isCreating, setIsCreating] = useState()
 
+  // Then you can use createProcedure as a function
   const createProcedure = async (procedureTitle) => {
     const procedureInput = {
       title: procedureTitle,
@@ -298,13 +302,9 @@ const ProceduresPage = () => {
     },
   ]
 
-  const {
-    data: { procedures: allProcedures } = {},
-    loadingProcedures,
-    refetchAllProcedures,
-  } = useQuery(queries.Procedures)
-  console.log(workInstruction?.id)
-  console.log(allProcedures)
+  const { data: { procedures: allProcedures } = {}, loadingProcedures } = useQuery(
+    queries.Procedures
+  )
 
   let workInstructionId = workInstruction?.id // assuming this is your workInstruction id
   let filteredProcedures = allProcedures?.filter(
@@ -313,6 +313,10 @@ const ProceduresPage = () => {
         (workInstruction) => workInstruction?.id === workInstructionId
       )
   )
+
+  console.log('all', allProcedures)
+  console.log('filtered', filteredProcedures)
+  console.log('workInc', workInstruction)
 
   const transformedAllProcedures = filteredProcedures?.map((procedure) => ({
     procedureId: procedure.id,
@@ -342,6 +346,8 @@ const ProceduresPage = () => {
         'Procedure Created',
         setIsCreating
       )
+      // Add the importedProcedureId to the array
+      setImportedProcedureIds((prevIds) => [...prevIds, procedureId])
       refetch()
     } catch (error) {
       console.error(error)
@@ -420,7 +426,10 @@ const ProceduresPage = () => {
                 <DataTableUseExisting
                   setSelectedDialogRow={setSelectedDialogRow}
                   columns={columnsUseExisting}
-                  data={transformedAllProcedures}
+                  // Filter out all imported procedures from the data array
+                  data={transformedAllProcedures?.filter(
+                    (procedure) => !importedProcedureIds.includes(procedure.procedureId)
+                  )}
                 />
               </div>
 
