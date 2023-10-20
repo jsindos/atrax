@@ -208,6 +208,7 @@ const Mutation = `
     deleteStep(id: ID!): Procedure
     assignProcedureToWorkInstruction(procedureId: ID!, workInstructionId: ID!, isDuplicating: Boolean): WorkInstruction
     createStepImage(stepId: ID!, image: Upload): Step
+    deleteStepImage(imageId: ID!): Step
   }
 
   input WarningInput {
@@ -277,6 +278,17 @@ const mutations = {
         const image = await context.models.Images.create({ uri, index: currentImages.length ? currentImages[0].index + 1 : 1 })
         await step.addImage(image)
       }
+
+      return step
+    },
+    async deleteStepImage (root, { imageId }, context) {
+      const image = await context.models.Images.findByPk(imageId)
+
+      if (!image) return
+
+      const step = await image.getStep()
+
+      await image.destroy()
 
       return step
     },

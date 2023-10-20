@@ -83,6 +83,24 @@ export default () => {
     }
   }
 
+  const [deleteStepImageMutation, { loading: isDeletingImage }] = useMutation(mutations.DeleteStepImage)
+  const [deletingImageId, setDeletingImageId] = useState()
+
+  const handleDelete = async (imageId) => {
+    setDeletingImageId(imageId)
+    try {
+      await deleteStepImageMutation({
+        variables: {
+          imageId
+        }
+      })
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setDeletingImageId()
+    }
+  }
+
   return (
     <div className='container mx-auto px-4'>
       <div className='flex justify-between row pt-8'>
@@ -143,7 +161,7 @@ export default () => {
                 </TabsContent>
                 <TabsContent className='mt-8' value='password'>
                   <I label='Upload image' type='file' name='upload1' ref={fileInput1} />
-                  <Button disabled={isUploadingImage} onClick={handleSubmit}>
+                  <Button disabled={isUploadingImage} className='mt-8' onClick={handleSubmit}>
                     {
                       isUploadingImage
                         ? (
@@ -161,10 +179,20 @@ export default () => {
                         return (
                           <div key={i} className='relative'>
                             <img src={image.uri} alt={`Step image ${i}`} style={{ maxWidth: '325px' }} />
-                            <div className='absolute top-4 right-4'>
-                              <Button variant='outline' size='icon'>
-                                <TrashIcon className='h-4 w-4' />
-                              </Button>
+                            <div className='absolute top-2 right-2'>
+                              {
+                                isDeletingImage && deletingImageId === image.id
+                                  ? (
+                                    <Button variant='outline' size='icon' disabled>
+                                      <ReloadIcon className='h-4 w-4 animate-spin' />
+                                    </Button>
+                                    )
+                                  : (
+                                    <Button variant='outline' size='icon' onClick={() => handleDelete(image.id)}>
+                                      <TrashIcon className='h-4 w-4' />
+                                    </Button>
+                                    )
+                              }
                             </div>
                           </div>
                         )

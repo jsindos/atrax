@@ -27,6 +27,17 @@ const fields = {
 }
 
 export const mutations = {
+  DeleteStepImage: gql`
+    mutation deleteStepImage($imageId: ID!) {
+      deleteStepImage(imageId: $imageId) {
+        id
+        images {
+          id
+          uri
+        }
+      }
+    }
+  `,
   CreateStepImage: gql`
     mutation createStepImage($stepId: ID!, $image: Upload!) {
       createStepImage(stepId: $stepId, image: $image) {
