@@ -13,11 +13,7 @@
     "dev": "NODE_ENV=development nodemon --trace-warnings --preserve-symlinks ./src/server/index.js",
     "test": "NODE_ENV=test BABEL_DISABLE_CACHE=1 node --trace-warnings ./test/RunTests.js --runInBand"
   },
-  "keywords": [
-    "webpack",
-    "webpack 5",
-    "webpack boilerplate"
-  ],
+  "keywords": ["webpack", "webpack 5", "webpack boilerplate"],
   "devDependencies": {
     "@babel/core": "^7.15.8",
     "@babel/plugin-proposal-class-properties": "^7.14.5",
@@ -35,6 +31,7 @@
     "css-minimizer-webpack-plugin": "^3.1.1",
     "eslint": "^7.28.0",
     "eslint-config-prettier": "^8.3.0",
+    "express": "^4.18.2",
     "eslint-import-resolver-webpack": "^0.13.1",
     "eslint-plugin-prettier": "^4.0.0",
     "html-webpack-plugin": "^5.3.2",
