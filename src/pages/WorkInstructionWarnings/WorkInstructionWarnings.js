@@ -162,10 +162,9 @@ export const WarningsToAdd = ({ setWarningsAdded, warningsAdded, typeSelected, i
     (isByWorkInstruction
       ? w.workInstructions.find(i => i.id === Number(workInstructionId))
       : true) &&
-    (
-      filterByCategory && filterByCategory !== 'all'
-        ? w.type === filterByCategory
-        : true) &&
+    (filterByCategory && filterByCategory !== 'all'
+      ? w.type === filterByCategory
+      : true) &&
     (isByDefaults
       ? w.isDefault
       : true) &&
@@ -253,7 +252,7 @@ export const WarningsToAdd = ({ setWarningsAdded, warningsAdded, typeSelected, i
 }
 
 export const WarningsAdded = ({ warnings, setWarningsAdded, typeSelected, isByCustomer, isByDefaults, filterByCategory, isByWorkInstruction }) => {
-  const { id, workInstructionId } = useParams()
+  const { id } = useParams()
 
   const [getWorkInstruction, { data: { workInstruction } = {} }] = useLazyQuery(queries.WorkInstruction)
 
@@ -264,13 +263,9 @@ export const WarningsAdded = ({ warnings, setWarningsAdded, typeSelected, isByCu
   }, [])
 
   warnings = warnings?.filter(w => (
-    (isByWorkInstruction
-      ? w.workInstructions.find(i => i.id === Number(workInstructionId))
+    (filterByCategory && filterByCategory !== 'all'
+      ? w.type === filterByCategory
       : true) &&
-    (
-      filterByCategory && filterByCategory !== 'all'
-        ? w.type === filterByCategory
-        : true) &&
     (isByDefaults
       ? w.isDefault
       : true) &&

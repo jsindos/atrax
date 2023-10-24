@@ -8,7 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
 import {
@@ -18,7 +18,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogFooter,
+  DialogFooter
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
@@ -28,7 +28,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from '@/components/ui/select'
 import { ReloadIcon } from '@radix-ui/react-icons'
 import { useToast } from '@/components/ui/use-toast'
@@ -37,6 +37,7 @@ import { queries, mutations } from '@/queries'
 import { useQuery, useMutation } from '@apollo/client'
 import { useNavigate, useParams } from 'react-router-dom'
 import { saveWithToast } from '@/utils'
+import TreeExample from '../TreeExample'
 
 const DialogComponent = ({ customers, selectedCustomer, workInstruction }) => {
   const [localCustomer, setLocalCustomer] = useState(
@@ -57,9 +58,6 @@ const DialogComponent = ({ customers, selectedCustomer, workInstruction }) => {
   }
 
   const handleSaveChangesClick = () => {
-    console.log(localCustomer)
-    console.log(activityNumber)
-    console.log(workInstruction)
     duplicateWorkInstruction(workInstruction.id, localCustomer.id, activityNumber)
     setShowNewCustomerDialog(false)
     navigate(`/customers/${localCustomer.id}/work_instructions`)
@@ -77,8 +75,8 @@ const DialogComponent = ({ customers, selectedCustomer, workInstruction }) => {
         () =>
           deleteWorkInstructionMutation({
             variables: {
-              id,
-            },
+              id
+            }
           }),
         toast,
         'Work Instruction Deleted',
@@ -109,8 +107,8 @@ const DialogComponent = ({ customers, selectedCustomer, workInstruction }) => {
             variables: {
               existingWorkInstructionId,
               customerId,
-              newActivityNumber,
-            },
+              newActivityNumber
+            }
           }),
         toast,
         'Work Instruction Duplicated',
@@ -127,25 +125,27 @@ const DialogComponent = ({ customers, selectedCustomer, workInstruction }) => {
     <Dialog open={showNewCustomerDialog} onOpenChange={setShowNewCustomerDialog}>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="h-8 w-8 p-0">
-            <span className="sr-only">Open menu</span>
-            <MoreHorizontal className="h-4 w-4" />
+          <Button variant='ghost' className='h-8 w-8 p-0'>
+            <span className='sr-only'>Open menu</span>
+            <MoreHorizontal className='h-4 w-4' />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
+        <DropdownMenuContent align='end'>
           <DropdownMenuLabel>Work Instruction</DropdownMenuLabel>
           <DropdownMenuItem onClick={() => navigate(`/work_instructions/${workInstruction.id}`)}>
             Edit Work Instruction
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => deleteWorkInstruction(workInstruction.id)}>
-            {isDeleting ? (
-              <>
-                <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
-                Deleting
-              </>
-            ) : (
-              'Delete Work Instruction'
-            )}
+            {isDeleting
+              ? (
+                <>
+                  <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />
+                  Deleting
+                </>
+                )
+              : (
+                  'Delete Work Instruction'
+                )}
           </DropdownMenuItem>
           <DialogTrigger asChild>
             <DropdownMenuItem>Duplicate Work Instruction</DropdownMenuItem>
@@ -159,18 +159,18 @@ const DialogComponent = ({ customers, selectedCustomer, workInstruction }) => {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className='sm:max-w-[425px]'>
         <DialogHeader>
           <DialogTitle>Duplicate Existing Work Instruction</DialogTitle>
           <DialogDescription>Some details about creating a Work Instruction ...</DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name" className="text-right">
+        <div className='grid gap-4 py-4'>
+          <div className='grid grid-cols-4 items-center gap-4'>
+            <Label htmlFor='name' className='text-right'>
               Customer
             </Label>
             <Select value={localCustomer?.id} onValueChange={handleSelectChangeDialog}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className='w-[180px]'>
                 <SelectValue placeholder={localCustomer?.name || 'Customer'} />
               </SelectTrigger>
               <SelectContent>
@@ -182,28 +182,32 @@ const DialogComponent = ({ customers, selectedCustomer, workInstruction }) => {
               </SelectContent>
             </Select>
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="activityNumber" className="text-right">
+          <div className='grid grid-cols-4 items-center gap-4'>
+            <Label htmlFor='activityNumber' className='text-right'>
               Activity Number
             </Label>
             <Input
-              id="ActivityNumber"
-              defaultValue=""
-              className="col-span-3"
+              id='ActivityNumber'
+              defaultValue=''
+              className='col-span-3'
               onChange={handleInputChangeDialog}
             />
           </div>
         </div>
         <DialogFooter>
-          <Button type="submit" onClick={handleSaveChangesClick}>
-            {isDuplicating ? (
-              <>
-                <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
-                Duplicating
-              </>
-            ) : (
-              'Save changes'
-            )}
+          <Button type='submit' onClick={handleSaveChangesClick}>
+            {
+              isDuplicating
+                ? (
+                  <>
+                    <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />
+                    Duplicating
+                  </>
+                  )
+                : (
+                    'Save changes'
+                  )
+            }
             Save changes
           </Button>
         </DialogFooter>
@@ -215,7 +219,6 @@ const DialogComponent = ({ customers, selectedCustomer, workInstruction }) => {
 const WorkInstructionsPage = () => {
   const { customerId } = useParams()
   const { data: { customers } = {}, loading } = useQuery(queries.Customers)
-  console.log(customers)
 
   const customer = customers?.find((customer) => customer.id === Number(customerId))
 
@@ -237,15 +240,17 @@ const WorkInstructionsPage = () => {
         createWorkInstructionMutation({
           variables: {
             workInstruction: {
-              customerId: customer.id,
-            },
-          },
+              customerId: customer.id
+            }
+          }
         }),
       toast,
       'Work Instruction Created',
       setIsCreating
     )
     const workInstructions = result.data.createWorkInstruction.workInstructions
+
+    // eslint-disable-next-line camelcase
     const latest_id_work_instruction = workInstructions.reduce((max, obj) =>
       max.id > obj.id ? max : obj
     )
@@ -256,19 +261,19 @@ const WorkInstructionsPage = () => {
   const columns = [
     {
       accessorKey: 'CMC',
-      header: 'CMC',
+      header: 'CMC'
     },
     {
       accessorKey: 'title',
-      header: 'Title',
+      header: 'Title'
     },
     {
       accessorKey: 'equipment',
-      header: 'Equipment',
+      header: 'Equipment'
     },
     {
       accessorKey: 'system',
-      header: 'System',
+      header: 'System'
     },
     {
       id: 'actions',
@@ -284,49 +289,59 @@ const WorkInstructionsPage = () => {
             {' '}
           </DialogComponent>
         )
-      },
-    },
+      }
+    }
   ]
 
   return (
     <div>
-      {loading ? (
-        <div className="loader" />
-      ) : (
-        <>
-          <Button
-            disabled={isCreating}
-            className="self-end flex"
-            onClick={() => {
-              createWorkInstruction()
-            }}
-          >
-            {isCreating ? (
-              <>
-                <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
-                Creating
-              </>
-            ) : (
-              'Create Work Instruction'
-            )}
-          </Button>
-          <Select value={customer?.id} onValueChange={handleSelectChange}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder={customer?.name || 'Customer'} />
-            </SelectTrigger>
-            <SelectContent>
-              {customers.map((customer) => (
-                <SelectItem key={customer.id} value={customer.id}>
-                  {customer.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <div className="container mx-auto py-10">
-            <DataTable columns={columns} data={customer.workInstructions} />
-          </div>
-        </>
-      )}
+      {
+        loading
+          ? (
+            <div className='loader' />
+            )
+          : (
+            <>
+              <Button
+                disabled={isCreating}
+                className='self-end flex'
+                onClick={() => {
+                  createWorkInstruction()
+                }}
+              >
+                {
+                  isCreating
+                    ? (
+                      <>
+                        <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />
+                        Creating
+                      </>
+                      )
+                    : (
+                        'Create Work Instruction'
+                      )
+                }
+              </Button>
+              <Select value={customer?.id} onValueChange={handleSelectChange}>
+                <SelectTrigger className='w-[180px]'>
+                  <SelectValue placeholder={customer?.name || 'Customer'} />
+                </SelectTrigger>
+                <SelectContent>
+                  {customers.map((customer) => (
+                    <SelectItem key={customer.id} value={customer.id}>
+                      {customer.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <TreeExample />
+              <div className='container mx-auto py-10'>
+                <DataTable columns={columns} data={customer.workInstructions} />
+              </div>
+            </>
+
+            )
+      }
     </div>
   )
 }
