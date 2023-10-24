@@ -24,6 +24,13 @@ const fields = {
       content
       warningType
     }
+  `,
+  StepFields: gql`
+    fragment StepFields on Step {
+      id
+      title
+      parentId
+    }
   `
 }
 
@@ -94,34 +101,20 @@ export const mutations = {
         id
         title
         steps {
-          title
-          id
-          childSteps {
-            title
-            id
-          }
+          ...StepFields
         }
       }
     }
+    ${fields.StepFields}
   `,
   SaveStep: gql`
     mutation SaveStep($step: StepInput!) {
       saveStep(step: $step) {
         id
         title
-        index
         warnings {
           id
         }
-      }
-    }
-  `,
-  SaveChildStep: gql`
-    mutation SaveChildStep($childStep: ChildStepInput!) {
-      saveChildStep(childStep: $childStep) {
-        id
-        title
-        index
       }
     }
   `,
@@ -142,18 +135,14 @@ export const mutations = {
               id
               title
               steps {
-                title
-                id
-                childSteps {
-                  title
-                  id
-                }
+                ...StepFields
               }
             }
           }
         }
       }
     }
+    ${fields.StepFields}
     ${fields.WorkInstructionFields}
   `,
   DeleteWorkInstruction: gql`
@@ -215,17 +204,13 @@ export const mutations = {
             id
             title
             steps {
-              id
-              title
-              childSteps {
-                id
-                title
-              }
+              ...StepFields
             }
           }
         }
       }
     }
+    ${fields.StepFields}
   `,
 
   UnassignProcedureFromWorkInstruction: gql`
@@ -242,17 +227,13 @@ export const mutations = {
             id
             title
             steps {
-              id
-              title
-              childSteps {
-                id
-                title
-              }
+              ...StepFields
             }
           }
         }
       }
     }
+    ${fields.StepFields}
   `,
 
   DeleteProcedure: gql`
@@ -292,15 +273,11 @@ export const mutations = {
       deleteStep(id: $id) {
         id
         steps {
-          id
-          title
-          childSteps {
-            id
-            title
-          }
+          ...StepFields
         }
       }
     }
+    ${fields.StepFields}
   `
 }
 
@@ -319,18 +296,14 @@ export const queries = {
               id
               title
               steps {
-                title
-                id
-                childSteps {
-                  title
-                  id
-                }
+                ...StepFields
               }
             }
           }
         }
       }
     }
+    ${fields.StepFields}
     ${fields.WorkInstructionFields}
   `,
   Warnings: gql`
@@ -374,17 +347,13 @@ export const queries = {
             id
             title
             steps {
-              title
-              id
-              childSteps {
-                title
-                id
-              }
+              ...StepFields
             }
           }
         }
       }
     }
+    ${fields.StepFields}
     ${fields.WorkInstructionFields}
   `,
   Procedures: gql`
@@ -424,26 +393,20 @@ export const queries = {
             id
             title
             steps {
-              title
-              id
-              index
-              childSteps {
-                title
-                id
-              }
+              ...StepFields
             }
           }
         }
       }
     }
+    ${fields.StepFields}
     ${fields.WorkInstructionFields}
     ${fields.WarningFields}
   `,
   Step: gql`
     query Step($id: Int!) {
       step(id: $id) {
-        id
-        title
+        ...StepFields
         images {
           id
           uri
@@ -451,12 +414,9 @@ export const queries = {
         warnings {
           ...WarningFields
         }
-        childSteps {
-          id
-          title
-        }
       }
     }
+    ${fields.StepFields}
     ${fields.WarningFields}
   `
 }

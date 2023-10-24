@@ -35,10 +35,10 @@ module.exports = merge(common, {
               postcssOptions: {
                 plugins: [
                   require('tailwindcss'),
-                  require('autoprefixer'),
-                ],
-              },
-            },
+                  require('autoprefixer')
+                ]
+              }
+            }
           },
           { loader: 'sass-loader', options: { sourceMap: true } }
         ]

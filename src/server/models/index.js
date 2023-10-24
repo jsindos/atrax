@@ -221,7 +221,10 @@ module.exports = ({ sequelize, models, services }, DataTypes) => {
         through: models.StepsWarnings,
         foreignKey: 'stepId'
       })
-      Steps.hasMany(models.ChildSteps)
+      // Self referencing relationships
+      Steps.hasMany(models.Steps, { as: 'childSteps', foreignKey: 'parentId' }) // defines the children of a step
+      Steps.belongsTo(models.Steps, { as: 'parent', foreignKey: 'parentId' }) // defines the parent of a step
+
       Steps.hasMany(models.Images)
     }
   }
@@ -235,39 +238,12 @@ module.exports = ({ sequelize, models, services }, DataTypes) => {
         primaryKey: true,
         autoIncrement: true
       },
-      title: DataTypes.TEXT,
-      index: DataTypes.INTEGER
+      title: DataTypes.TEXT
     },
     {
       timestamps: true,
       sequelize,
       modelName: 'steps'
-    }
-  )
-
-  // ChildSteps
-  class ChildSteps extends Model {
-    static associate (models) {
-      ChildSteps.belongsTo(models.Steps)
-    }
-  }
-
-  ChildSteps.modelName = 'ChildSteps'
-
-  ChildSteps.init(
-    {
-      id: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
-      },
-      title: DataTypes.TEXT,
-      index: DataTypes.INTEGER
-    },
-    {
-      timestamps: true,
-      sequelize,
-      modelName: 'childSteps'
     }
   )
 
@@ -305,7 +281,6 @@ module.exports = ({ sequelize, models, services }, DataTypes) => {
     WorkInstructionsProcedures,
     Procedures,
     Steps,
-    ChildSteps,
     StepsWarnings,
     Images
   ]

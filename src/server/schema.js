@@ -90,21 +90,14 @@ const Query = `
   type Step {
     id: Int
     title: String
+    parentId: Int
     images: [Image]
-    index: Int
-    childSteps: [ChildStep]
     warnings: [Warning]
   }
 
   type Image {
     id: Int
     uri: String
-  }
-
-  type ChildStep {
-    id: Int
-    title: String
-    index: Int
   }
 `
 
@@ -181,9 +174,6 @@ const resolvers = {
     images: async (step, args, context) => {
       return step.getImages()
     },
-    childSteps: async (step, args, context) => {
-      return step.getChildSteps()
-    },
     warnings: async (step, args, context) => {
       return step.getWarnings()
     }
@@ -195,7 +185,6 @@ const Mutation = `
     _empty: String
     saveWorkInstruction(workInstruction: WorkInstructionInput!): WorkInstruction
     saveStep(step: StepInput!): Step
-    saveChildStep(childStep: ChildStepInput!): ChildStep
     createWorkInstruction(workInstruction: WorkInstructionInput!): Customer
     saveWarning(warning: WarningInput!): Warning
     deleteWorkInstruction(id: ID!): Customer
@@ -248,19 +237,11 @@ const Mutation = `
   }
 
   input StepInput {
-    procedureId: Int
     id: Int
-    index: Int
+    procedureId: Int
     title: String
-    childSteps: [ChildStepInput]
 
     warningIds: [Int]
-  }
-  
-  input ChildStepInput {
-    id: Int
-    title: String
-    index: Int
   }
 `
 
@@ -531,20 +512,6 @@ const mutations = {
       // Return the updated procedure.
       return updatedProcedure
     },
-    async saveChildStep (root, args, context) {
-      const { childStep: childStepFields } = args
-
-      // https://stackoverflow.com/a/40543424/3171685
-      // eslint-disable-next-line no-unused-vars
-      const [number, updatedRows] = await context.models.ChildSteps.update(childStepFields, {
-        where: { id: childStepFields.id },
-        returning: true
-      })
-      const childStep = updatedRows[0]
-
-      return childStep
-    },
-
     async deleteStep (root, args, context) {
       const { id } = args
 
