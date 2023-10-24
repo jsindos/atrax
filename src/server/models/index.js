@@ -238,7 +238,8 @@ module.exports = ({ sequelize, models, services }, DataTypes) => {
         primaryKey: true,
         autoIncrement: true
       },
-      title: DataTypes.TEXT
+      title: DataTypes.TEXT,
+      index: DataTypes.INTEGER
     },
     {
       timestamps: true,

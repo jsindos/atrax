@@ -91,6 +91,7 @@ const Query = `
     id: Int
     title: String
     parentId: Int
+    index: Int
     images: [Image]
     warnings: [Warning]
   }
@@ -192,7 +193,7 @@ const Mutation = `
     duplicateWorkInstruction(existingWorkInstructionId: ID!, customerId: ID!, newActivityNumber: String!): Customer
     createProcedure(procedure: ProcedureInput!): WorkInstruction
     createStep(step: StepInput!): Procedure 
-    updateStepIndices(steps: [StepInput!]!): [Step]
+    updateStepIndices(steps: [StepInput!]): [Step]
     updateProcedureIndices(procedures: [ProcedureInput!]!, workInstructionId: ID!): WorkInstruction
     deleteProcedure(id: ID!): WorkInstruction
     deleteStep(id: ID!): Procedure
@@ -241,7 +242,7 @@ const Mutation = `
     procedureId: Int
     title: String
     parentId: Int
-
+    index: Int
     warningIds: [Int]
   }
 `
@@ -543,16 +544,14 @@ const mutations = {
 
       // Update the index property of each step to match its position in the array
       for (let i = 0; i < steps.length; i++) {
-        const stepFields = steps[i]
-        const step = await context.models.Steps.findByPk(stepFields.id)
-        if (!step) {
-          throw new Error(`Step with id ${stepFields.id} not found`)
-        }
-        step.index = i + 1 // assuming index starts from 1
-        await step.save()
+        const step = steps[i]
 
-        // Add the updated step to the array of updated steps
-        updatedSteps.push(step)
+        // https://stackoverflow.com/a/40543424/3171685
+        // eslint-disable-next-line no-unused-vars
+        const [number, updatedRows] = await context.models.Steps.update(step, { where: { id: step.id }, returning: true })
+        const updatedStep = updatedRows[0]
+
+        updatedSteps.push(updatedStep)
       }
 
       // Return the array of updated steps

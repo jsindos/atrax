@@ -30,6 +30,7 @@ const fields = {
       id
       title
       parentId
+      index
     }
   `
 }
@@ -260,7 +261,7 @@ export const mutations = {
   `,
 
   UpdateStepIndices: gql`
-    mutation UpdateStepIndices($steps: [StepInput!]!) {
+    mutation UpdateStepIndices($steps: [StepInput!]) {
       updateStepIndices(steps: $steps) {
         id
         title
