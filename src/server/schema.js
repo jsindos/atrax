@@ -240,6 +240,7 @@ const Mutation = `
     id: Int
     procedureId: Int
     title: String
+    parentId: Int
 
     warningIds: [Int]
   }
