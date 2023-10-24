@@ -87,7 +87,6 @@ fs.readdirSync(__dirname)
   })
 
 async function initialize () {
-  console.log('got to ehre')
   await db.sequelize.sync({
     // force: true
   })

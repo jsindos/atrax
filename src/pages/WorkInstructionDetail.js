@@ -17,7 +17,7 @@ import {
   DialogTrigger
 } from '@/components/ui/dialog'
 import { useMutation, useQuery } from '@apollo/client'
-import React, { forwardRef, useEffect, useState, useRef } from 'react'
+import React, { forwardRef, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Cross2Icon, ReloadIcon } from '@radix-ui/react-icons'
@@ -58,12 +58,8 @@ export const MyComponent = ({ setCMC }) => {
       // Use fourthValue.description here
       const parts = fourthValue.description.split(/\s+/)
       const CMC = parts[parts.length - 1]
-      console.log(CMC)
-      console.log(setCMC)
       setCMC(CMC)
       setShowSelectDialog(false)
-    } else {
-      console.log('No value selected')
     }
   }
   const firstOptions = firstColumn
@@ -76,14 +72,14 @@ export const MyComponent = ({ setCMC }) => {
   )
 
   return (
-    <div>
+    <div className='pl-8'>
       <Dialog open={showSelectDialog} onOpenChange={setShowSelectDialog}>
         <DialogTrigger>
           <Button>Lookup CMC</Button>
         </DialogTrigger>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Select Columns</DialogTitle>
+            <DialogTitle>Select CMC Columns</DialogTitle>
           </DialogHeader>
 
           <Select onValueChange={handleFirstChange}>
@@ -149,12 +145,9 @@ export const MyComponent = ({ setCMC }) => {
 export default () => {
   const { id } = useParams()
 
-  const { data: { customers } = {}, loading: loadingA } = useQuery(queries.Customers)
-  const { data: { workInstruction } = {}, loading: loadingB } = useQuery(queries.WorkInstruction, {
+  const { data: { workInstruction } = {}, loading } = useQuery(queries.WorkInstruction, {
     variables: { id: Number(id) }
   })
-
-  const loading = loadingA || loadingB
 
   const [saveWorkInstructionMutation] = useMutation(mutations.SaveWorkInstruction)
 
@@ -238,8 +231,6 @@ export default () => {
 
   const [showLocationDialog, setShowLocationDialog] = useState()
 
-  const values = firstColumn.reduce((a, c) => [...a, { id: c.first, name: c.first }], [])
-
   return (
     <div className='container mx-auto px-4'>
       <div className='flex justify-between row pt-8'>
@@ -248,137 +239,131 @@ export default () => {
           onClick={() => navigate(`/customers/${workInstruction.customer.id}/work_instructions`)}
         />
       </div>
-      {loading ? (
-        <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />
-      ) : (
-        <>
-          <div className='flex-col flex pt-8'>
-            <Button
-              disabled={isSaving}
-              className='self-end flex'
-              onClick={() => saveWorkInstructionMainFields()}
-            >
-              {isSaving
-                ? (
-                  <>
-                    <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />
-                    Saving
-                  </>
-                  )
-                : (
-                    'Save Changes'
-                  )}
-            </Button>
-          </div>
-          <I label='Title' value={title} handleInputChange={(e) => setTitle(e.target.value)} />
-          <I
-            label='Drafting Organisation'
-            value={draftingOrganisation}
-            handleInputChange={(e) => setDraftingOrganisation(e.target.value)}
-          />
-          <I
-            label='Hours to Complete'
-            value={hoursToComplete}
-            handleInputChange={(e) => setHoursToComplete(e.target.value)}
-          />
+      {
+        loading
+          ? (
+            <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />
+            )
+          : (
+            <>
+              <div className='flex-col flex pt-8'>
+                <Button
+                  disabled={isSaving}
+                  className='self-end flex'
+                  onClick={() => saveWorkInstructionMainFields()}
+                >
+                  {isSaving
+                    ? (
+                      <>
+                        <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />
+                        Saving
+                      </>
+                      )
+                    : (
+                        'Save Changes'
+                      )}
+                </Button>
+              </div>
+              <I label='Title' value={title} handleInputChange={(e) => setTitle(e.target.value)} />
+              <I
+                label='Drafting Organisation'
+                value={draftingOrganisation}
+                handleInputChange={(e) => setDraftingOrganisation(e.target.value)}
+              />
+              <I
+                label='Hours to Complete'
+                value={hoursToComplete}
+                handleInputChange={(e) => setHoursToComplete(e.target.value)}
+              />
 
-          <I label='CMC' value={CMC} handleInputChange={(e) => setCMC(e.target.value)} readOnly />
+              <div className='flex row items-end'>
+                <I label='CMC' value={CMC} handleInputChange={(e) => setCMC(e.target.value)} readOnly />
 
-          <MyComponent setCMC={setCMC}> </MyComponent>
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'flex-start'
-            }}
-          >
-            <Dialog open={showLocationDialog} onOpenChange={setShowLocationDialog}>
-              <DialogTrigger className='pt-8'>
-                <Button>Location Data</Button>
-              </DialogTrigger>
-              <DialogContent className='Dialog'>
-                <DialogHeader>
-                  <DialogTitle>Location Data</DialogTitle>
-                  <div className='flex flex-wrap'>
-                    <div className='w-full md:w-1/2'>
-                      <h6 className='pt-8'>ESWBS Codes</h6>
-                      <I
-                        label='System'
-                        value={system}
-                        handleInputChange={(e) => setSystem(e.target.value)}
-                      />
-                      <I
-                        label='Ship System'
-                        value={shipSystem}
-                        handleInputChange={(e) => setShipSystem(e.target.value)}
-                      />
-                      <I
-                        label='Subsystem'
-                        value={subsystem}
-                        handleInputChange={(e) => setSubsystem(e.target.value)}
-                      />
-                    </div>
-                    <div className='w-full md:w-1/2'>
-                      <h6 className='pt-8'>Ran Codes</h6>
-                      <I
-                        label='SYSCOM'
-                        value={SYSCOM}
-                        handleInputChange={(e) => setSYSCOM(e.target.value)}
-                      />
-                      <I
-                        label='MIP Series'
-                        value={MIPSeries}
-                        handleInputChange={(e) => setMIPSeries(e.target.value)}
-                      />
-                      <I
-                        label='Activity Number'
-                        value={activityNumber}
-                        handleInputChange={(e) => setActivityNumber(e.target.value)}
-                      />
-                    </div>
-                  </div>
-                </DialogHeader>
-                <DialogFooter>
-                  <div className='flex-col flex pt-8'>
-                    <Button
-                      disabled={isSavingLocationFields}
-                      className='self-end flex'
-                      onClick={() => saveWorkInstructionLocationFields()}
-                    >
-                      {isSavingLocationFields
-                        ? (
-                          <>
-                            <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />
-                            Saving
-                          </>
-                          )
-                        : (
-                            'Save Changes'
-                          )}
-                    </Button>
-                  </div>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-            <S
-              // currentValue={type}
-              // handleSelectChange={id => setType({ id, name: id })}
-              values={[
-                { id: 'warning', name: 'Warning' },
-                { id: 'caution', name: 'Caution' },
-                { id: 'note', name: 'Note' }
-              ]}
-              nameKey='name'
-              valueKey='id'
-              placeholder='Type...'
-              label='Type'
-            />
-            <Button className='mt-8' onClick={() => navigate(`/work_instructions/${id}/warnings`)}>
-              Warnings, Cautions and Notes
-            </Button>
-          </div>
-        </>
-      )}
+                <MyComponent setCMC={setCMC}> </MyComponent>
+              </div>
+
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'flex-start'
+                }}
+              >
+                <Dialog open={showLocationDialog} onOpenChange={setShowLocationDialog}>
+                  <DialogTrigger className='pt-8'>
+                    <Button>Location Data</Button>
+                  </DialogTrigger>
+                  <DialogContent className='Dialog'>
+                    <DialogHeader>
+                      <DialogTitle>Location Data</DialogTitle>
+                      <div className='flex flex-wrap'>
+                        <div className='w-full md:w-1/2'>
+                          <h6 className='pt-8'>ESWBS Codes</h6>
+                          <I
+                            label='System'
+                            value={system}
+                            handleInputChange={(e) => setSystem(e.target.value)}
+                          />
+                          <I
+                            label='Ship System'
+                            value={shipSystem}
+                            handleInputChange={(e) => setShipSystem(e.target.value)}
+                          />
+                          <I
+                            label='Subsystem'
+                            value={subsystem}
+                            handleInputChange={(e) => setSubsystem(e.target.value)}
+                          />
+                        </div>
+                        <div className='w-full md:w-1/2'>
+                          <h6 className='pt-8'>Ran Codes</h6>
+                          <I
+                            label='SYSCOM'
+                            value={SYSCOM}
+                            handleInputChange={(e) => setSYSCOM(e.target.value)}
+                          />
+                          <I
+                            label='MIP Series'
+                            value={MIPSeries}
+                            handleInputChange={(e) => setMIPSeries(e.target.value)}
+                          />
+                          <I
+                            label='Activity Number'
+                            value={activityNumber}
+                            handleInputChange={(e) => setActivityNumber(e.target.value)}
+                          />
+                        </div>
+                      </div>
+                    </DialogHeader>
+                    <DialogFooter>
+                      <div className='flex-col flex pt-8'>
+                        <Button
+                          disabled={isSavingLocationFields}
+                          className='self-end flex'
+                          onClick={() => saveWorkInstructionLocationFields()}
+                        >
+                          {isSavingLocationFields
+                            ? (
+                              <>
+                                <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />
+                                Saving
+                              </>
+                              )
+                            : (
+                                'Save Changes'
+                              )}
+                        </Button>
+                      </div>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+                <Button className='mt-8' onClick={() => navigate(`/work_instructions/${id}/warnings`)}>
+                  Warnings, Cautions and Notes
+                </Button>
+              </div>
+            </>
+            )
+      }
     </div>
   )
 }

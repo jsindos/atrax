@@ -13,6 +13,7 @@ const fields = {
       SYSCOM
       MIPSeries
       activityNumber
+      CMC
     }
   `,
   WarningFields: gql`
@@ -23,7 +24,7 @@ const fields = {
       content
       warningType
     }
-  `,
+  `
 }
 
 export const mutations = {
@@ -300,7 +301,7 @@ export const mutations = {
         }
       }
     }
-  `,
+  `
 }
 
 export const queries = {
@@ -457,5 +458,5 @@ export const queries = {
       }
     }
     ${fields.WarningFields}
-  `,
+  `
 }

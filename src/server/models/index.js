@@ -65,7 +65,9 @@ module.exports = ({ sequelize, models, services }, DataTypes) => {
       // Ran Codes
       SYSCOM: DataTypes.TEXT,
       MIPSeries: DataTypes.TEXT,
-      activityNumber: DataTypes.TEXT
+      activityNumber: DataTypes.TEXT,
+
+      CMC: DataTypes.STRING
     },
     {
       timestamps: true,
