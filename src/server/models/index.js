@@ -5,7 +5,7 @@ const { Model } = Sequelize
 module.exports = ({ sequelize, models, services }, DataTypes) => {
   // Customers
   class Customers extends Model {
-    static associate(models) {
+    static associate (models) {
       Customers.hasMany(models.WorkInstructions)
       Customers.hasMany(models.Warnings)
     }
@@ -18,28 +18,28 @@ module.exports = ({ sequelize, models, services }, DataTypes) => {
       id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
-        autoIncrement: true,
+        autoIncrement: true
       },
-      name: DataTypes.TEXT,
+      name: DataTypes.TEXT
     },
     {
       timestamps: true,
       sequelize,
-      modelName: 'customers',
+      modelName: 'customers'
     }
   )
 
   // WorkInstructions
   class WorkInstructions extends Model {
-    static associate(models) {
+    static associate (models) {
       WorkInstructions.belongsTo(Customers)
       WorkInstructions.belongsToMany(models.Warnings, {
         through: models.WorkInstructionsWarnings,
-        foreignKey: 'workInstructionId',
+        foreignKey: 'workInstructionId'
       })
       WorkInstructions.belongsToMany(models.Procedures, {
         through: models.WorkInstructionsProcedures,
-        foreignKey: 'workInstructionId',
+        foreignKey: 'workInstructionId'
       })
     }
   }
@@ -51,7 +51,7 @@ module.exports = ({ sequelize, models, services }, DataTypes) => {
       id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
-        autoIncrement: true,
+        autoIncrement: true
       },
       title: DataTypes.TEXT,
       draftingOrganisation: DataTypes.TEXT,
@@ -65,25 +65,25 @@ module.exports = ({ sequelize, models, services }, DataTypes) => {
       // Ran Codes
       SYSCOM: DataTypes.TEXT,
       MIPSeries: DataTypes.TEXT,
-      activityNumber: DataTypes.TEXT,
+      activityNumber: DataTypes.TEXT
     },
     {
       timestamps: true,
       sequelize,
-      modelName: 'workInstructions',
+      modelName: 'workInstructions'
     }
   )
 
   // Warnings (Warnings, Cautions and Notes)
   class Warnings extends Model {
-    static associate(models) {
+    static associate (models) {
       Warnings.belongsToMany(models.WorkInstructions, {
         through: models.WorkInstructionsWarnings,
-        foreignKey: 'warningId',
+        foreignKey: 'warningId'
       })
       Warnings.belongsToMany(models.Steps, {
         through: models.StepsWarnings,
-        foreignKey: 'warningId',
+        foreignKey: 'warningId'
       })
       Warnings.belongsTo(models.Customers)
     }
@@ -96,7 +96,7 @@ module.exports = ({ sequelize, models, services }, DataTypes) => {
       id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
-        autoIncrement: true,
+        autoIncrement: true
       },
       content: DataTypes.TEXT,
       // additional enum, may or may not only apply to 'type: warning'
@@ -105,18 +105,18 @@ module.exports = ({ sequelize, models, services }, DataTypes) => {
       warningType: DataTypes.STRING,
 
       // `isDefault` for a customer, at the moment warnings-customers is many-to-one, if it becomes many-to-many this will have to live on the through table
-      isDefault: DataTypes.BOOLEAN,
+      isDefault: DataTypes.BOOLEAN
     },
     {
       timestamps: true,
       sequelize,
-      modelName: 'warnings',
+      modelName: 'warnings'
     }
   )
 
   // WorkInstructionsWarnings (through table)
   class WorkInstructionsWarnings extends Model {
-    static associate(models) {}
+    static associate (models) {}
   }
 
   WorkInstructionsWarnings.modelName = 'WorkInstructionsWarnings'
@@ -126,19 +126,19 @@ module.exports = ({ sequelize, models, services }, DataTypes) => {
       id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
-        autoIncrement: true,
-      },
+        autoIncrement: true
+      }
     },
     {
       timestamps: true,
       sequelize,
-      modelName: 'workInstructionsWarnings',
+      modelName: 'workInstructionsWarnings'
     }
   )
 
   // WorkInstructionsProcedures (through table)
   class WorkInstructionsProcedures extends Model {
-    static associate(models) {}
+    static associate (models) {}
   }
 
   WorkInstructionsProcedures.modelName = 'WorkInstructionsProcedures'
@@ -148,23 +148,23 @@ module.exports = ({ sequelize, models, services }, DataTypes) => {
       id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
-        autoIncrement: true,
+        autoIncrement: true
       },
-      procedureIndex: DataTypes.INTEGER,
+      procedureIndex: DataTypes.INTEGER
     },
     {
       timestamps: true,
       sequelize,
-      modelName: 'workInstructionsProcedures',
+      modelName: 'workInstructionsProcedures'
     }
   )
 
   // Procedures
   class Procedures extends Model {
-    static associate(models) {
+    static associate (models) {
       Procedures.belongsToMany(models.WorkInstructions, {
         through: models.WorkInstructionsProcedures,
-        foreignKey: 'procedureId',
+        foreignKey: 'procedureId'
       })
       Procedures.hasMany(models.Steps)
     }
@@ -177,21 +177,21 @@ module.exports = ({ sequelize, models, services }, DataTypes) => {
       id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
-        autoIncrement: true,
+        autoIncrement: true
       },
       title: DataTypes.TEXT,
-      index: DataTypes.VIRTUAL,
+      index: DataTypes.VIRTUAL
     },
     {
       timestamps: true,
       sequelize,
-      modelName: 'procedures',
+      modelName: 'procedures'
     }
   )
 
   // StepsWarnings (through table)
   class StepsWarnings extends Model {
-    static associate(models) {}
+    static associate (models) {}
   }
 
   StepsWarnings.modelName = 'StepsWarnings'
@@ -201,23 +201,23 @@ module.exports = ({ sequelize, models, services }, DataTypes) => {
       id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
-        autoIncrement: true,
-      },
+        autoIncrement: true
+      }
     },
     {
       timestamps: true,
       sequelize,
-      modelName: 'stepsWarnings',
+      modelName: 'stepsWarnings'
     }
   )
 
   // Steps
   class Steps extends Model {
-    static associate(models) {
+    static associate (models) {
       Steps.belongsTo(models.Procedures)
       Steps.belongsToMany(models.Warnings, {
         through: models.StepsWarnings,
-        foreignKey: 'stepId',
+        foreignKey: 'stepId'
       })
       Steps.hasMany(models.ChildSteps)
       Steps.hasMany(models.Images)
@@ -231,21 +231,21 @@ module.exports = ({ sequelize, models, services }, DataTypes) => {
       id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
-        autoIncrement: true,
+        autoIncrement: true
       },
       title: DataTypes.TEXT,
-      index: DataTypes.INTEGER,
+      index: DataTypes.INTEGER
     },
     {
       timestamps: true,
       sequelize,
-      modelName: 'steps',
+      modelName: 'steps'
     }
   )
 
   // ChildSteps
   class ChildSteps extends Model {
-    static associate(models) {
+    static associate (models) {
       ChildSteps.belongsTo(models.Steps)
     }
   }
@@ -257,21 +257,21 @@ module.exports = ({ sequelize, models, services }, DataTypes) => {
       id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
-        autoIncrement: true,
+        autoIncrement: true
       },
       title: DataTypes.TEXT,
-      index: DataTypes.INTEGER,
+      index: DataTypes.INTEGER
     },
     {
       timestamps: true,
       sequelize,
-      modelName: 'childSteps',
+      modelName: 'childSteps'
     }
   )
 
   // Images
   class Images extends Model {
-    static associate(models) {
+    static associate (models) {
       Images.belongsTo(models.Steps)
     }
   }
@@ -283,15 +283,15 @@ module.exports = ({ sequelize, models, services }, DataTypes) => {
       id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
-        autoIncrement: true,
+        autoIncrement: true
       },
       index: DataTypes.INTEGER,
-      uri: DataTypes.STRING,
+      uri: DataTypes.STRING
     },
     {
       timestamps: true,
       sequelize,
-      modelName: 'images',
+      modelName: 'images'
     }
   )
 
@@ -305,6 +305,6 @@ module.exports = ({ sequelize, models, services }, DataTypes) => {
     Steps,
     ChildSteps,
     StepsWarnings,
-    Images,
+    Images
   ]
 }

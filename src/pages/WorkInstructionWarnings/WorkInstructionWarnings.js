@@ -30,6 +30,11 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { BackButton, S } from '../WorkInstructionDetail'
 import WarningsTablePagination from './WarningsTablePagination'
 
+const capitalise = c => c.charAt(0).toUpperCase() + c.slice(1)
+
+// in the form [ { id: 'general', name: 'General' }, ... ]
+const CATEGORIES = ['general', 'electrical', 'mechanical', 'tagout', 'diving', 'hydraulic'].reduce((a, c) => [...a, { id: c, name: c.charAt(0).toUpperCase() + c.slice(1) }], [])
+
 export default () => {
   const { id } = useParams()
 
@@ -69,6 +74,7 @@ export default () => {
 
   const [isByCustomer, setIsByCustomer] = useState(false)
   const [isByDefaults, setIsByDefaults] = useState(false)
+  const [category, setCategory] = useState({ name: 'All', id: 'all' })
 
   return (
     <div className='container mx-auto px-4 pb-8'>
@@ -90,7 +96,7 @@ export default () => {
           }
         </Button>
       </div>
-      <CreateNewWarning />
+      <CreateOrEditWarning />
       <div className='flex items-center row space-x-4 pt-8 pb-8'>
         <div className='flex items-center space-x-2'>
           <Switch checked={isByCustomer} onCheckedChange={setIsByCustomer} />
@@ -101,6 +107,17 @@ export default () => {
           <Label htmlFor='airplane-mode'>Limit to defaults</Label>
         </div>
       </div>
+      <S
+        style={{ paddingTop: 0 }}
+        className='pb-8'
+        currentValue={category}
+        handleSelectChange={id => setCategory({ id, name: id })}
+        values={[{ id: 'all', name: 'All' }, ...CATEGORIES]}
+        nameKey='name'
+        valueKey='id'
+        placeholder='Category...'
+        label='Warning Type'
+      />
       <WarningsBody {...{ setWarningsAdded, warningsAdded, isByCustomer, isByDefaults }} />
     </div>
   )
@@ -201,7 +218,7 @@ export const WarningsToAdd = ({ setWarningsAdded, warningsAdded, typeSelected, i
                   {
                     !isByWorkInstruction && (
                       <TableCell>
-                        <EditWarning id={w.id} />
+                        <CreateOrEditWarning id={w.id} />
                       </TableCell>
                     )
                   }
@@ -281,7 +298,7 @@ export const WarningsAdded = ({ warnings, setWarningsAdded, typeSelected, isByWo
                   {
                     !isByWorkInstruction && (
                       <TableCell>
-                        <EditWarning id={w.id} />
+                        <CreateOrEditWarning id={w.id} />
                       </TableCell>
                     )
                   }
@@ -311,11 +328,14 @@ export const WarningsAdded = ({ warnings, setWarningsAdded, typeSelected, isByWo
   )
 }
 
-const CreateNewWarning = () => {
-  const { id } = useParams()
+const CreateOrEditWarning = ({ id }) => {
+  const { id: workInstructionId } = useParams()
 
-  const { data: { workInstruction } = {} } = useQuery(queries.WorkInstruction, { variables: { id: Number(id) } })
+  const { data: { workInstruction } = {} } = useQuery(queries.WorkInstruction, { variables: { id: Number(workInstructionId) } })
   const { data: { customers } = {} } = useQuery(queries.Customers)
+  const { data: { warnings } = {} } = useQuery(queries.Warnings)
+
+  const warning = warnings?.find(w => w.id === id)
 
   const [customer, setCustomer] = useState()
   const [content, setContent] = useState('')
@@ -331,13 +351,23 @@ const CreateNewWarning = () => {
     }
   }, [workInstruction])
 
+  useEffect(() => {
+    if (warning) {
+      setCustomer(warning.customer)
+      setContent(warning.content)
+      setIsDefault(warning.isDefault)
+      setType({ id: warning.warningType, name: capitalise(warning.warningType) })
+      setCategory({ id: warning.type, name: capitalise(warning.type) })
+    }
+  }, [warning])
+
   const [createWarningMutation] = useMutation(mutations.CreateWarning)
 
   const [isSaving, setIsSaving] = useState()
 
   const { toast } = useToast()
 
-  const saveWarning = async () => {
+  const createWarning = async () => {
     await saveWithToast(
       () => createWarningMutation({
         variables: {
@@ -377,20 +407,54 @@ const CreateNewWarning = () => {
     setShowDialog(false)
   }
 
-  const [showDialog, setShowDialog] = useState(false)
+  const [saveWarningMutation] = useMutation(mutations.SaveWarning)
 
-  const categories = ['general', 'electrical', 'mechanical', 'tagout', 'diving', 'hydraulic'].reduce((a, c) => [...a, { id: c, name: c.charAt(0).toUpperCase() + c.slice(1) }], [])
+  const saveWarning = async () => {
+    await saveWithToast(
+      () => saveWarningMutation({
+        variables: {
+          warning: {
+            id,
+            isDefault,
+            warningType: type.id,
+            type: category.id,
+            content,
+            customerId: customer?.id
+          }
+        }
+      }),
+      toast,
+      'Warning saved',
+      setIsSaving
+    )
+    setCustomer()
+    setContent('')
+    setIsDefault()
+    setShowDialog(false)
+  }
+
+  const [showDialog, setShowDialog] = useState(false)
 
   return (
     <Dialog open={showDialog} onOpenChange={setShowDialog}>
       <DialogTrigger>
-        <Button className='self-end flex max-w-sm mt-4 mb-4'>
-          Create new
-        </Button>
+        {
+          id
+            ? (
+              <Button variant='ghost' size='icon'>
+                <Pencil1Icon className='h-4 w-4' />
+              </Button>
+              )
+            : (
+              <Button className='self-end flex max-w-sm mt-4 mb-4'>
+                Create new
+              </Button>
+              )
+        }
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create Warning, Caution or Note</DialogTitle>
+          <DialogTitle>{id ? 'Edit warning' : 'Create Warning, Caution or Note'}</DialogTitle>
           <S
             currentValue={type}
             handleSelectChange={id => setType({ id, name: id })}
@@ -407,7 +471,7 @@ const CreateNewWarning = () => {
           <S
             currentValue={category}
             handleSelectChange={id => setCategory({ id, name: id })}
-            values={categories}
+            values={CATEGORIES}
             nameKey='name'
             valueKey='id'
             placeholder='Category...'
@@ -437,114 +501,18 @@ const CreateNewWarning = () => {
         </DialogHeader>
         <DialogFooter>
           <div className='flex-col flex pt-8'>
-            <Button disabled={isSaving} className='self-end flex' onClick={() => saveWarning()}>
+            <Button disabled={isSaving} className='self-end flex' onClick={() => id ? saveWarning() : createWarning()}>
               {
                 isSaving
                   ? (
                     <>
                       <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />
-                      Creating
+                      {id ? 'Saving' : 'Creating'}
                     </>
                     )
-                  : 'Create'
-              }
-            </Button>
-          </div>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  )
-}
-
-const EditWarning = ({ id }) => {
-  const { data: { customers } = {} } = useQuery(queries.Customers)
-  const { data: { warnings } = {} } = useQuery(queries.Warnings)
-
-  const warning = warnings?.find(w => w.id === id)
-
-  const [customer, setCustomer] = useState()
-  const [content, setContent] = useState('')
-  const [isDefault, setIsDefault] = useState()
-
-  useEffect(() => {
-    if (warning) {
-      setCustomer(warning.customer)
-      setContent(warning.content)
-      setIsDefault(warning.isDefault)
-    }
-  }, [warning])
-
-  const [saveWarningMutation] = useMutation(mutations.SaveWarning)
-
-  const [isSaving, setIsSaving] = useState()
-
-  const { toast } = useToast()
-
-  const saveWarning = async () => {
-    await saveWithToast(
-      () => saveWarningMutation({
-        variables: {
-          warning: {
-            id: warning.id,
-            isDefault,
-            content,
-            customerId: customer?.id
-          }
-        }
-      }),
-      toast,
-      'Warning saved',
-      setIsSaving
-    )
-    setShowDialog(false)
-  }
-
-  const [showDialog, setShowDialog] = useState(false)
-
-  return (
-    <Dialog open={showDialog} onOpenChange={setShowDialog}>
-      <DialogTrigger>
-        <Button variant='ghost' size='icon'>
-          <Pencil1Icon className='h-4 w-4' />
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Edit warning</DialogTitle>
-          <S
-            currentValue={customer}
-            handleSelectChange={id => setCustomer(customers.find(c => c.id === id))}
-            values={customers}
-            nameKey='name'
-            valueKey='id'
-            placeholder='Select customer...'
-            label='Customer'
-          />
-          <div className='pt-8'>
-            <div className='grid w-full items-center gap-3'>
-              <Label>Text</Label>
-              <Textarea style={{ minHeight: 100 }} value={content} onChange={(e) => setContent(e.target.value)} />
-            </div>
-          </div>
-          <div className='pt-8'>
-            <div className='grid w-full items-center gap-3'>
-              <Label>Is default</Label>
-              <Checkbox onCheckedChange={v => setIsDefault(v)} checked={isDefault} />
-            </div>
-          </div>
-        </DialogHeader>
-        <DialogFooter>
-          <div className='flex-col flex pt-8'>
-            <Button disabled={isSaving} className='self-end flex' onClick={() => saveWarning()}>
-              {
-                isSaving
-                  ? (
-                    <>
-                      <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />
-                      Saving
-                    </>
+                  : (
+                      id ? 'Save changes' : 'Create'
                     )
-                  : 'Save Changes'
               }
             </Button>
           </div>

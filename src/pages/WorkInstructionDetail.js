@@ -5,7 +5,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from '@/components/ui/select'
 import { mutations, queries } from '@/queries'
 import {
@@ -14,17 +14,16 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  DialogTrigger
 } from '@/components/ui/dialog'
 import { useMutation, useQuery } from '@apollo/client'
-import React, { forwardRef, useEffect, useState } from 'react'
+import React, { forwardRef, useEffect, useState, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Cross2Icon, ReloadIcon } from '@radix-ui/react-icons'
 import { useToast } from '@/components/ui/use-toast'
 import { saveWithToast } from '@/utils'
 import { firstColumn, secondColumn, thirdColumn, fourthColumn } from '../../cmc'
-import { useRef } from 'react'
 
 export const MyComponent = ({ setCMC }) => {
   const [firstValue, setFirstValue] = useState(null)
@@ -88,8 +87,8 @@ export const MyComponent = ({ setCMC }) => {
           </DialogHeader>
 
           <Select onValueChange={handleFirstChange}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="First Column" />
+            <SelectTrigger className='w-[180px]'>
+              <SelectValue placeholder='First Column' />
             </SelectTrigger>
             <SelectContent>
               {firstOptions.map((item) => (
@@ -101,8 +100,8 @@ export const MyComponent = ({ setCMC }) => {
           </Select>
 
           <Select onValueChange={handleSecondChange}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Second Column" />
+            <SelectTrigger className='w-[180px]'>
+              <SelectValue placeholder='Second Column' />
             </SelectTrigger>
             <SelectContent>
               {secondOptions.map((item) => (
@@ -114,8 +113,8 @@ export const MyComponent = ({ setCMC }) => {
           </Select>
 
           <Select onValueChange={handleThirdChange}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Third Column" />
+            <SelectTrigger className='w-[180px]'>
+              <SelectValue placeholder='Third Column' />
             </SelectTrigger>
             <SelectContent>
               {thirdOptions.map((item) => (
@@ -127,8 +126,8 @@ export const MyComponent = ({ setCMC }) => {
           </Select>
 
           <Select onValueChange={handleFourthChange}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Fourth Column" />
+            <SelectTrigger className='w-[180px]'>
+              <SelectValue placeholder='Fourth Column' />
             </SelectTrigger>
             <SelectContent>
               {fourthOptions.map((item) => (
@@ -152,7 +151,7 @@ export default () => {
 
   const { data: { customers } = {}, loading: loadingA } = useQuery(queries.Customers)
   const { data: { workInstruction } = {}, loading: loadingB } = useQuery(queries.WorkInstruction, {
-    variables: { id: Number(id) },
+    variables: { id: Number(id) }
   })
 
   const loading = loadingA || loadingB
@@ -175,9 +174,9 @@ export default () => {
               draftingOrganisation,
               hoursToComplete,
               CMC,
-              customerId: customer.id,
-            },
-          },
+              customerId: customer.id
+            }
+          }
         }),
       toast,
       null,
@@ -196,9 +195,9 @@ export default () => {
               subsystem,
               SYSCOM,
               MIPSeries,
-              activityNumber,
-            },
-          },
+              activityNumber
+            }
+          }
         }),
       toast,
       'Location Data saved',
@@ -242,95 +241,97 @@ export default () => {
   const values = firstColumn.reduce((a, c) => [...a, { id: c.first, name: c.first }], [])
 
   return (
-    <div className="container mx-auto px-4">
-      <div className="flex justify-between row pt-8">
+    <div className='container mx-auto px-4'>
+      <div className='flex justify-between row pt-8'>
         <h3>Update Work Instruction Details</h3>
         <BackButton
           onClick={() => navigate(`/customers/${workInstruction.customer.id}/work_instructions`)}
         />
       </div>
       {loading ? (
-        <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+        <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />
       ) : (
         <>
-          <div className="flex-col flex pt-8">
+          <div className='flex-col flex pt-8'>
             <Button
               disabled={isSaving}
-              className="self-end flex"
+              className='self-end flex'
               onClick={() => saveWorkInstructionMainFields()}
             >
-              {isSaving ? (
-                <>
-                  <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
-                  Saving
-                </>
-              ) : (
-                'Save Changes'
-              )}
+              {isSaving
+                ? (
+                  <>
+                    <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />
+                    Saving
+                  </>
+                  )
+                : (
+                    'Save Changes'
+                  )}
             </Button>
           </div>
-          <I label="Title" value={title} handleInputChange={(e) => setTitle(e.target.value)} />
+          <I label='Title' value={title} handleInputChange={(e) => setTitle(e.target.value)} />
           <I
-            label="Drafting Organisation"
+            label='Drafting Organisation'
             value={draftingOrganisation}
             handleInputChange={(e) => setDraftingOrganisation(e.target.value)}
           />
           <I
-            label="Hours to Complete"
+            label='Hours to Complete'
             value={hoursToComplete}
             handleInputChange={(e) => setHoursToComplete(e.target.value)}
           />
 
-          <I label="CMC" value={CMC} handleInputChange={(e) => setCMC(e.target.value)} readOnly />
+          <I label='CMC' value={CMC} handleInputChange={(e) => setCMC(e.target.value)} readOnly />
 
           <MyComponent setCMC={setCMC}> </MyComponent>
           <div
             style={{
               display: 'flex',
               flexDirection: 'column',
-              alignItems: 'flex-start',
+              alignItems: 'flex-start'
             }}
           >
             <Dialog open={showLocationDialog} onOpenChange={setShowLocationDialog}>
-              <DialogTrigger className="pt-8">
+              <DialogTrigger className='pt-8'>
                 <Button>Location Data</Button>
               </DialogTrigger>
-              <DialogContent className="Dialog">
+              <DialogContent className='Dialog'>
                 <DialogHeader>
                   <DialogTitle>Location Data</DialogTitle>
-                  <div className="flex flex-wrap">
-                    <div className="w-full md:w-1/2">
-                      <h6 className="pt-8">ESWBS Codes</h6>
+                  <div className='flex flex-wrap'>
+                    <div className='w-full md:w-1/2'>
+                      <h6 className='pt-8'>ESWBS Codes</h6>
                       <I
-                        label="System"
+                        label='System'
                         value={system}
                         handleInputChange={(e) => setSystem(e.target.value)}
                       />
                       <I
-                        label="Ship System"
+                        label='Ship System'
                         value={shipSystem}
                         handleInputChange={(e) => setShipSystem(e.target.value)}
                       />
                       <I
-                        label="Subsystem"
+                        label='Subsystem'
                         value={subsystem}
                         handleInputChange={(e) => setSubsystem(e.target.value)}
                       />
                     </div>
-                    <div className="w-full md:w-1/2">
-                      <h6 className="pt-8">Ran Codes</h6>
+                    <div className='w-full md:w-1/2'>
+                      <h6 className='pt-8'>Ran Codes</h6>
                       <I
-                        label="SYSCOM"
+                        label='SYSCOM'
                         value={SYSCOM}
                         handleInputChange={(e) => setSYSCOM(e.target.value)}
                       />
                       <I
-                        label="MIP Series"
+                        label='MIP Series'
                         value={MIPSeries}
                         handleInputChange={(e) => setMIPSeries(e.target.value)}
                       />
                       <I
-                        label="Activity Number"
+                        label='Activity Number'
                         value={activityNumber}
                         handleInputChange={(e) => setActivityNumber(e.target.value)}
                       />
@@ -338,20 +339,22 @@ export default () => {
                   </div>
                 </DialogHeader>
                 <DialogFooter>
-                  <div className="flex-col flex pt-8">
+                  <div className='flex-col flex pt-8'>
                     <Button
                       disabled={isSavingLocationFields}
-                      className="self-end flex"
+                      className='self-end flex'
                       onClick={() => saveWorkInstructionLocationFields()}
                     >
-                      {isSavingLocationFields ? (
-                        <>
-                          <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
-                          Saving
-                        </>
-                      ) : (
-                        'Save Changes'
-                      )}
+                      {isSavingLocationFields
+                        ? (
+                          <>
+                            <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />
+                            Saving
+                          </>
+                          )
+                        : (
+                            'Save Changes'
+                          )}
                     </Button>
                   </div>
                 </DialogFooter>
@@ -363,14 +366,14 @@ export default () => {
               values={[
                 { id: 'warning', name: 'Warning' },
                 { id: 'caution', name: 'Caution' },
-                { id: 'note', name: 'Note' },
+                { id: 'note', name: 'Note' }
               ]}
-              nameKey="name"
-              valueKey="id"
-              placeholder="Type..."
-              label="Type"
+              nameKey='name'
+              valueKey='id'
+              placeholder='Type...'
+              label='Type'
             />
-            <Button className="mt-8" onClick={() => navigate(`/work_instructions/${id}/warnings`)}>
+            <Button className='mt-8' onClick={() => navigate(`/work_instructions/${id}/warnings`)}>
               Warnings, Cautions and Notes
             </Button>
           </div>
@@ -382,8 +385,8 @@ export default () => {
 
 export const BackButton = ({ onClick }) => {
   return (
-    <Button variant="outline" size="icon" onClick={onClick}>
-      <Cross2Icon className="h-4 w-4" />
+    <Button variant='outline' size='icon' onClick={onClick}>
+      <Cross2Icon className='h-4 w-4' />
     </Button>
   )
 }
@@ -392,7 +395,7 @@ export const I = forwardRef(
   ({ className, label, value, handleInputChange, placeholder, type, name, readOnly }, ref) => {
     return (
       <div className={'pt-8 ' + className}>
-        <div className="grid w-full max-w-sm items-center gap-3">
+        <div className='grid w-full max-w-sm items-center gap-3'>
           <Label>{label}</Label>
           <Input
             onChange={handleInputChange}
@@ -413,16 +416,17 @@ export const S = ({
   valueKey,
   placeholder,
   handleSelectChange,
+  style
 }) => {
   return (
-    <div className={'pt-8 ' + className}>
-      <div className="grid w-full max-w-sm items-center gap-3">
+    <div className={'pt-8 ' + className} style={style}>
+      <div className='grid w-full max-w-sm items-center gap-3'>
         <Label>{label}</Label>
         <Select value={currentValue && currentValue[valueKey]} onValueChange={handleSelectChange}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className='w-[180px]'>
             <SelectValue placeholder={placeholder} />
           </SelectTrigger>
-          <SelectContent className="SelectContent">
+          <SelectContent className='SelectContent'>
             {values.map((v, i) => (
               <SelectItem key={i} value={v && v[valueKey]}>
                 {v && v[nameKey]}

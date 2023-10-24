@@ -6,12 +6,11 @@
   "author": "Tania Rascia",
   "license": "MIT",
   "scripts": {
-    "start": "NODE_ENV=production node ./src/server/index.js",
-    "dev": "cross-env NODE_ENV=development webpack serve --config config/webpack.dev.js",
+    "start": "cross-env NODE_ENV=development webpack serve --config config/webpack.dev.js",
     "build": "cross-env NODE_ENV=production webpack --config config/webpack.prod.js",
     "lint": "eslint 'src/**/*.js' || true",
     "prettify": "prettier --write 'src/**/*.js'",
-    "serve": "NODE_ENV=development nodemon --trace-warnings --preserve-symlinks ./src/server/index.js",
+    "dev": "NODE_ENV=development nodemon --trace-warnings --preserve-symlinks ./src/server/index.js",
     "test": "NODE_ENV=test BABEL_DISABLE_CACHE=1 node --trace-warnings ./test/RunTests.js --runInBand"
   },
   "keywords": ["webpack", "webpack 5", "webpack boilerplate"],
