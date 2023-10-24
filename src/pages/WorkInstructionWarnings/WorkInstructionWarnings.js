@@ -74,7 +74,7 @@ export default () => {
 
   const [isByCustomer, setIsByCustomer] = useState(false)
   const [isByDefaults, setIsByDefaults] = useState(false)
-  const [category, setCategory] = useState({ name: 'All', id: 'all' })
+  const [filterByCategory, setFilterByCategory] = useState({ name: 'All', id: 'all' })
 
   return (
     <div className='container mx-auto px-4 pb-8'>
@@ -110,20 +110,20 @@ export default () => {
       <S
         style={{ paddingTop: 0 }}
         className='pb-8'
-        currentValue={category}
-        handleSelectChange={id => setCategory({ id, name: id })}
+        currentValue={filterByCategory}
+        handleSelectChange={id => setFilterByCategory({ id, name: id })}
         values={[{ id: 'all', name: 'All' }, ...CATEGORIES]}
         nameKey='name'
         valueKey='id'
         placeholder='Category...'
         label='Warning Type'
       />
-      <WarningsBody {...{ setWarningsAdded, warningsAdded, isByCustomer, isByDefaults }} />
+      <WarningsBody {...{ setWarningsAdded, warningsAdded, isByCustomer, isByDefaults }} filterByCategory={filterByCategory.id} />
     </div>
   )
 }
 
-export const WarningsBody = ({ setWarningsAdded, warningsAdded, isByCustomer, isByDefaults, isByWorkInstruction }) => {
+export const WarningsBody = ({ setWarningsAdded, warningsAdded, isByCustomer, isByDefaults, isByWorkInstruction, filterByCategory }) => {
   // one of 'warning', 'caution', 'note'
   const [tab, setTab] = useState('warning')
 
@@ -137,8 +137,8 @@ export const WarningsBody = ({ setWarningsAdded, warningsAdded, isByCustomer, is
         </TabsList>
       </Tabs>
       <div className='flex w-full space-x-10 pt-8'>
-        <WarningsToAdd {...{ setWarningsAdded, warningsAdded, isByCustomer, isByDefaults, isByWorkInstruction }} typeSelected={tab} />
-        <WarningsAdded warnings={warningsAdded} {...{ setWarningsAdded, isByWorkInstruction }} typeSelected={tab} />
+        <WarningsToAdd {...{ setWarningsAdded, warningsAdded, isByCustomer, isByDefaults, filterByCategory, isByWorkInstruction }} typeSelected={tab} />
+        <WarningsAdded warnings={warningsAdded} {...{ setWarningsAdded, isByCustomer, isByDefaults, filterByCategory, isByWorkInstruction }} typeSelected={tab} />
       </div>
     </>
   )
@@ -146,7 +146,7 @@ export const WarningsBody = ({ setWarningsAdded, warningsAdded, isByCustomer, is
 
 const PAGE_SIZE = 8
 
-export const WarningsToAdd = ({ setWarningsAdded, warningsAdded, typeSelected, isByCustomer, isByDefaults, isByWorkInstruction }) => {
+export const WarningsToAdd = ({ setWarningsAdded, warningsAdded, typeSelected, isByCustomer, isByDefaults, filterByCategory, isByWorkInstruction }) => {
   const { id, workInstructionId } = useParams()
 
   const { data: { warnings: initialWarnings } = {} } = useQuery(queries.Warnings)
@@ -162,6 +162,10 @@ export const WarningsToAdd = ({ setWarningsAdded, warningsAdded, typeSelected, i
     (isByWorkInstruction
       ? w.workInstructions.find(i => i.id === Number(workInstructionId))
       : true) &&
+    (
+      filterByCategory && filterByCategory !== 'all'
+        ? w.type === filterByCategory
+        : true) &&
     (isByDefaults
       ? w.isDefault
       : true) &&
@@ -248,8 +252,33 @@ export const WarningsToAdd = ({ setWarningsAdded, warningsAdded, typeSelected, i
   )
 }
 
-export const WarningsAdded = ({ warnings, setWarningsAdded, typeSelected, isByWorkInstruction }) => {
-  warnings = warnings?.filter(w => w.warningType === typeSelected)
+export const WarningsAdded = ({ warnings, setWarningsAdded, typeSelected, isByCustomer, isByDefaults, filterByCategory, isByWorkInstruction }) => {
+  const { id, workInstructionId } = useParams()
+
+  const [getWorkInstruction, { data: { workInstruction } = {} }] = useLazyQuery(queries.WorkInstruction)
+
+  useEffect(() => {
+    if (id) {
+      getWorkInstruction({ variables: { id: Number(id) } })
+    }
+  }, [])
+
+  warnings = warnings?.filter(w => (
+    (isByWorkInstruction
+      ? w.workInstructions.find(i => i.id === Number(workInstructionId))
+      : true) &&
+    (
+      filterByCategory && filterByCategory !== 'all'
+        ? w.type === filterByCategory
+        : true) &&
+    (isByDefaults
+      ? w.isDefault
+      : true) &&
+    (isByCustomer
+      ? w.customer?.id === workInstruction?.customer.id
+      : true) &&
+    w.warningType === typeSelected
+  ))
 
   const [pageIndex, setPageIndex] = useState(0)
   const pageCount = Math.ceil(warnings?.length / PAGE_SIZE)
@@ -351,15 +380,17 @@ const CreateOrEditWarning = ({ id }) => {
     }
   }, [workInstruction])
 
+  const [showDialog, setShowDialog] = useState(false)
+
   useEffect(() => {
-    if (warning) {
+    if (warning && showDialog) {
       setCustomer(warning.customer)
       setContent(warning.content)
       setIsDefault(warning.isDefault)
       setType({ id: warning.warningType, name: capitalise(warning.warningType) })
       setCategory({ id: warning.type, name: capitalise(warning.type) })
     }
-  }, [warning])
+  }, [warning, showDialog])
 
   const [createWarningMutation] = useMutation(mutations.CreateWarning)
 
@@ -432,8 +463,6 @@ const CreateOrEditWarning = ({ id }) => {
     setIsDefault()
     setShowDialog(false)
   }
-
-  const [showDialog, setShowDialog] = useState(false)
 
   return (
     <Dialog open={showDialog} onOpenChange={setShowDialog}>
