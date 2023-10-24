@@ -19,29 +19,29 @@ let sequelize
 if (process.env.USE_CONNECTION_STRING) {
   sequelize = new Sequelize('ebdb', 'pop', 'E4Q7ufuAdhm!fhb', {
     host: 'aaeuktxcxfukq6.cpq4oq6xi1l9.ap-southeast-2.rds.amazonaws.com',
-    dialect: 'postgres'
+    dialect: 'postgres',
   })
 } else if (config.use_env_variable) {
   sequelize = new Sequelize(process.env[config.use_env_variable], config)
 } else {
   let count = 0
-  sequelize = new Sequelize(config.database, config.username, config.password, {
-    logging: (msg) => {
-      // https://sequelize.org/docs/v6/getting-started/#logging
-      // https://stackoverflow.com/questions/9781218/how-to-change-node-jss-console-font-color
-      console.log(msg.replace('Executing (default)', `\x1b[40m\x1b[37mExecuting ${count}\x1b[0m`))
-      count++
-    },
-    ...config
+
+  console.log('before')
+  sequelize = new Sequelize('postgres://root:example@db:5432/atrax', {
+    dialect: 'postgres',
+    logging: false,
   })
+  console.log('after')
 }
+
+console.log('hello')
 
 const db = {
   models: {},
   services: {},
   sequelize,
   Sequelize,
-  initialize
+  initialize,
 }
 
 process.env.NODE_ENV === 'production' &&
@@ -86,13 +86,12 @@ fs.readdirSync(__dirname)
       })
   })
 
-async function initialize () {
-  if (process.env.NODE_ENV === 'development') {
-    await db.sequelize.sync({
-      // force: true
-    })
-    await seed(db)
-  }
+async function initialize() {
+  console.log('got to ehre')
+  await db.sequelize.sync({
+    // force: true
+  })
+  await seed(db)
 }
 
 initialize()
