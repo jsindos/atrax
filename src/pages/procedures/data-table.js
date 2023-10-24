@@ -20,7 +20,6 @@ import { ReloadIcon } from '@radix-ui/react-icons'
 // Define the DataTable function
 export function DataTable ({ columns, data, setSelectedRow }) {
   const sortedData = [...data].sort((a, b) => a.index - b.index)
-  console.log('sortedData', sortedData)
   const table = useReactTable({
     data: sortedData,
     columns,
@@ -35,7 +34,7 @@ export function DataTable ({ columns, data, setSelectedRow }) {
     }
   }, [table])
 
-  const [updateProcedureIndices, { returned_data, loading, error }] = useMutation(
+  const [updateProcedureIndices, { loading }] = useMutation(
     mutations.UpdateProcedureIndices
   )
 
@@ -43,8 +42,6 @@ export function DataTable ({ columns, data, setSelectedRow }) {
 
   const onDragEnd = (result) => {
     if (!result.destination) return
-
-    console.log(sortedData)
 
     const items = Array.from(sortedData)
     const [reorderedItem] = items.splice(result.source.index, 1)
@@ -58,8 +55,6 @@ export function DataTable ({ columns, data, setSelectedRow }) {
         index: index + 1 // assuming index starts from 1
       }
     })
-
-    console.log(updatedItems)
 
     updateProcedureIndices({ variables: { procedures: updatedItems.map(i => ({ id: i.id })), workInstructionId: Number(id) } })
   }

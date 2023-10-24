@@ -37,7 +37,7 @@ import { queries, mutations } from '@/queries'
 import { useQuery, useMutation } from '@apollo/client'
 import { useNavigate, useParams } from 'react-router-dom'
 import { saveWithToast } from '@/utils'
-import TreeExample from '../TreeExample'
+import Tree from '../Tree'
 
 const DialogComponent = ({ customers, selectedCustomer, workInstruction }) => {
   const [localCustomer, setLocalCustomer] = useState(
@@ -334,7 +334,7 @@ const WorkInstructionsPage = () => {
                   ))}
                 </SelectContent>
               </Select>
-              <TreeExample />
+              <Tree isDemo />
               <div className='container mx-auto py-10'>
                 <DataTable columns={columns} data={customer.workInstructions} />
               </div>

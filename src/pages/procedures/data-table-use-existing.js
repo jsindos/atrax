@@ -4,22 +4,20 @@ import {
   getCoreRowModel,
   getPaginationRowModel,
   getFilteredRowModel,
-  useReactTable,
+  useReactTable
 } from '@tanstack/react-table'
-import { Button } from '@/components/ui/button'
 import {
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
+  TableRow
 } from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 
-export function DataTableUseExisting({ columns, data, setSelectedDialogRow }) {
+export function DataTableUseExisting ({ columns, data, setSelectedDialogRow }) {
   const [selectedRowId, setSelectedRowId] = useState(null)
   const [columnFilters, setColumnFilters] = useState([])
 
@@ -33,11 +31,10 @@ export function DataTableUseExisting({ columns, data, setSelectedDialogRow }) {
             onCheckedChange={(value) => {
               setSelectedRowId(value ? row.id : null)
               setSelectedDialogRow(row.original)
-              console.log(row.original)
             }}
-            aria-label="Select row"
+            aria-label='Select row'
           />
-        ),
+        )
       }
     }
     return column
@@ -51,29 +48,28 @@ export function DataTableUseExisting({ columns, data, setSelectedDialogRow }) {
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
     state: {
-      columnFilters,
-    },
+      columnFilters
+    }
   })
 
   return (
     <div>
-      <div className="flex items-center py-4">
+      <div className='flex items-center py-4'>
         <Input
-          placeholder="Filter by customer..."
+          placeholder='Filter by customer...'
           value={table.getColumn('customerName')?.getFilterValue() ?? ''}
           onChange={(event) => table.getColumn('customerName')?.setFilterValue(event.target.value)}
-          className="max-w-sm"
+          className='max-w-sm'
         />
         <Input
-          placeholder="Filter by procedure title..."
+          placeholder='Filter by procedure title...'
           value={table.getColumn('procedureTitle')?.getFilterValue() ?? ''}
           onChange={(event) =>
-            table.getColumn('procedureTitle')?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm ml-4"
+            table.getColumn('procedureTitle')?.setFilterValue(event.target.value)}
+          className='max-w-sm ml-4'
         />
       </div>
-      <div className="rounded-md border">
+      <div className='rounded-md border'>
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -91,23 +87,25 @@ export function DataTableUseExisting({ columns, data, setSelectedDialogRow }) {
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
-                  ))}
+            {table.getRowModel().rows?.length
+              ? (
+                  table.getRowModel().rows.map((row) => (
+                    <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id}>
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                )
+              : (
+                <TableRow>
+                  <TableCell colSpan={columns.length} className='h-24 text-center'>
+                    No results.
+                  </TableCell>
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
+                )}
           </TableBody>
         </Table>
       </div>

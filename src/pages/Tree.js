@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
-import { SortableTree, SimpleTreeItemWrapper, TreeItems } from 'dnd-kit-sortable-tree' // Ensure you have this library installed
+import { SortableTree, SimpleTreeItemWrapper } from 'dnd-kit-sortable-tree' // Ensure you have this library installed
 
-export default () => {
-  const [items, setItems] = useState(initialTreeData)
+export default ({ data, isDemo }) => {
+  const [items, setItems] = useState(isDemo ? demoData : data)
 
   return (
     <SortableTree
@@ -19,7 +19,7 @@ const TreeItem = React.forwardRef((props, ref) => (
   </SimpleTreeItemWrapper>
 ))
 
-const initialTreeData = [
+const demoData = [
   {
     id: '1',
     value: 'First parent',

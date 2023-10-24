@@ -12,27 +12,25 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
+  TableRow
 } from '@/components/ui/table'
 import { ReloadIcon } from '@radix-ui/react-icons'
 
-export function DataTableSteps({ columns, data }) {
+export function DataTableSteps ({ columns, data }) {
   const sortedData = [...data].sort((a, b) => a.index - b.index)
 
   const table = useReactTable({
     data: sortedData,
     columns,
-    getCoreRowModel: getCoreRowModel(),
+    getCoreRowModel: getCoreRowModel()
   })
 
-  const [updateStepIndices, { returned_data, loading, error }] = useMutation(
+  const [updateStepIndices, { loading }] = useMutation(
     mutations.UpdateStepIndices
   )
 
   const onDragEnd = (result) => {
     if (!result.destination) return
-
-    console.log(sortedData)
 
     const items = Array.from(sortedData)
     const [reorderedItem] = items.splice(result.source.index, 1)
@@ -43,22 +41,20 @@ export function DataTableSteps({ columns, data }) {
       const { __typename, ...rest } = item
       return {
         ...rest,
-        index: index + 1, // assuming index starts from 1
+        index: index + 1 // assuming index starts from 1
       }
     })
-
-    console.log(updatedItems)
 
     updateStepIndices({ variables: { steps: updatedItems } })
   }
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <div className="rounded-md border">
-        <Droppable droppableId="table">
+      <div className='rounded-md border'>
+        <Droppable droppableId='table'>
           {(provided) => (
             <div {...provided.droppableProps} ref={provided.innerRef}>
-              {loading && <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />}
+              {loading && <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />}
               <Table>
                 <TableHeader>
                   {table.getHeaderGroups().map((headerGroup) => (
@@ -76,31 +72,33 @@ export function DataTableSteps({ columns, data }) {
                   ))}
                 </TableHeader>
                 <TableBody>
-                  {table.getRowModel().rows?.length ? (
-                    table.getRowModel().rows.map((row, index) => (
-                      <Draggable key={row.id} draggableId={row.id} index={index}>
-                        {(provided) => (
-                          <TableRow
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                          >
-                            {row.getVisibleCells().map((cell) => (
-                              <TableCell key={cell.id}>
-                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                              </TableCell>
-                            ))}
-                          </TableRow>
-                        )}
-                      </Draggable>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={columns.length} className="h-24 text-center">
-                        No results.
-                      </TableCell>
-                    </TableRow>
-                  )}
+                  {table.getRowModel().rows?.length
+                    ? (
+                        table.getRowModel().rows.map((row, index) => (
+                          <Draggable key={row.id} draggableId={row.id} index={index}>
+                            {(provided) => (
+                              <TableRow
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                {...provided.dragHandleProps}
+                              >
+                                {row.getVisibleCells().map((cell) => (
+                                  <TableCell key={cell.id}>
+                                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                  </TableCell>
+                                ))}
+                              </TableRow>
+                            )}
+                          </Draggable>
+                        ))
+                      )
+                    : (
+                      <TableRow>
+                        <TableCell colSpan={columns.length} className='h-24 text-center'>
+                          No results.
+                        </TableCell>
+                      </TableRow>
+                      )}
                 </TableBody>
               </Table>
             </div>
