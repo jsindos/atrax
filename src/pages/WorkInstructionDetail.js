@@ -358,7 +358,7 @@ export default () => {
                   </DialogContent>
                 </Dialog>
                 <Button className='mt-8' onClick={() => navigate(`/work_instructions/${id}/warnings`)}>
-                  Warnings, Cautions and Notes
+                  Warnings, Cautions and Notes ({workInstruction?.warnings.length || 0})
                 </Button>
               </div>
             </>

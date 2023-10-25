@@ -117,7 +117,7 @@ export default () => {
               </div>
               <Textarea className='mt-8' style={{ minHeight: 150 }} value={content} onChange={(e) => setContent(e.target.value)} />
               <Button className='mt-8' onClick={() => navigate(`/work_instructions/${workInstructionId}/procedures/${procedureId}/steps/${stepId}/warnings`)}>
-                Warnings, Cautions and Notes
+                Warnings, Cautions and Notes ({step?.warnings.length || 0})
               </Button>
               <Tabs defaultValue='steps' className='mt-8'>
                 <TabsList>

@@ -131,9 +131,9 @@ export const WarningsBody = ({ setWarningsAdded, warningsAdded, isByCustomer, is
     <>
       <Tabs value={tab} onValueChange={v => setTab(v)} className='w-full'>
         <TabsList>
-          <TabsTrigger value='warning'>Warnings</TabsTrigger>
-          <TabsTrigger value='caution'>Cautions</TabsTrigger>
-          <TabsTrigger value='note'>Notes</TabsTrigger>
+          <TabsTrigger value='warning'>Warnings ({warningsAdded.filter(w => w.warningType === 'warning').length || 0})</TabsTrigger>
+          <TabsTrigger value='caution'>Cautions ({warningsAdded.filter(w => w.warningType === 'caution').length || 0})</TabsTrigger>
+          <TabsTrigger value='note'>Notes ({warningsAdded.filter(w => w.warningType === 'note').length || 0})</TabsTrigger>
         </TabsList>
       </Tabs>
       <div className='flex w-full space-x-10 pt-8'>
