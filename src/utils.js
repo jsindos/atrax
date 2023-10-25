@@ -56,7 +56,7 @@ export function buildTree (steps, parentId = null) {
     .map(step => ({
       ...step,
       id: step.id,
-      value: step.id,
+      value: step.title,
       children: buildTree(steps, step.id)
     }))
 }

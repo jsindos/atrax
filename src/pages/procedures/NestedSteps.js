@@ -44,8 +44,6 @@ export default ({ steps, parentId = null }) => {
     // console.log('new', JSON.stringify(flattenTree(tree).map(i => ({ id: i.id, parentId: i.parentId, index: i.index })), null, 2))
   }
 
-  console.log('nestedSteps', nestedSteps)
-
   return (
     <div className='pt-8 flex row'>
       <div className='w-full'>
