@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { ReloadIcon } from '@radix-ui/react-icons'
 
-export default ({ procedureId, parentId, dialogTriggerClassName }) => {
+export default ({ isChild, procedureId, parentId, dialogTriggerClassName }) => {
   const { toast } = useToast()
 
   const [createStepMutation] = useMutation(mutations.CreateStep)
@@ -48,11 +48,11 @@ export default ({ procedureId, parentId, dialogTriggerClassName }) => {
   return (
     <Dialog open={createStepDialog} onOpenChange={setCreateStepDialog}>
       <DialogTrigger asChild>
-        <Button className={dialogTriggerClassName}>Create Step</Button>
+        <Button className={dialogTriggerClassName}>Create {isChild ? 'Child ' : ''}Step</Button>
       </DialogTrigger>
       <DialogContent className='Dialog'>
         <DialogHeader>
-          <DialogTitle>Create Step</DialogTitle>
+          <DialogTitle>Create {isChild ? 'Child ' : ''}Step</DialogTitle>
         </DialogHeader>
         <Textarea
           className='mt-8'

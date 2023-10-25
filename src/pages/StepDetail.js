@@ -125,11 +125,11 @@ export default () => {
                   <TabsTrigger value='images'>Images</TabsTrigger>
                 </TabsList>
                 <TabsContent value='steps'>
-                  <CreateStepDialog parentId={Number(stepId)} procedureId={Number(procedureId)} dialogTriggerClassName='mt-6' />
+                  <CreateStepDialog isChild parentId={Number(stepId)} procedureId={Number(procedureId)} dialogTriggerClassName='mt-6' />
                   {
                     childSteps?.length > 0
                       ? <NestedSteps steps={procedure.steps} parentId={step?.id} />
-                      : <p className='mt-8' style={{ color: '#999' }}>No steps yet</p>
+                      : <p className='mt-8' style={{ color: '#999' }}>No child steps yet</p>
                   }
                 </TabsContent>
                 <TabsContent value='images'>
