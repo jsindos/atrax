@@ -20,8 +20,6 @@ import {
   DialogTitle,
   DialogTrigger
 } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 
 import { MoreHorizontal } from 'lucide-react'
 import {
@@ -30,18 +28,19 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
-import Steps from './Steps'
 import { Textarea } from '@/components/ui/textarea'
+import NestedSteps from './NestedSteps'
+import CreateStepDialog from './CreateStepDialog'
 
 const ProceduresPage = () => {
-  const { id } = useParams()
+  const { workInstructionId } = useParams()
 
   const {
     data: { workInstruction } = {},
     loading,
     refetch
   } = useQuery(queries.WorkInstruction, {
-    variables: { id: Number(id) }
+    variables: { id: Number(workInstructionId) }
   })
 
   const [selectedRow, setSelectedRow] = useState(null)
@@ -65,7 +64,6 @@ const ProceduresPage = () => {
 
   const [createProcedureDialog, setCreateProcedureDialog] = useState()
   const [useExistingProcedureDialog, setUseExistingProcedureDialog] = useState()
-  const [createStepDialog, setCreateStepDialog] = useState()
 
   const navigate = useNavigate()
 
@@ -81,7 +79,7 @@ const ProceduresPage = () => {
   const createProcedure = async (procedureTitle) => {
     const procedureInput = {
       title: procedureTitle,
-      workInstructionId: Number(id)
+      workInstructionId: Number(workInstructionId)
     }
 
     setIsCreating(true)
@@ -103,34 +101,6 @@ const ProceduresPage = () => {
       setIsCreating(false)
       setCreateProcedureDialog(false)
     }
-  }
-
-  const [stepTitle, setStepTitle] = useState('')
-
-  const [createStepMutation] = useMutation(mutations.CreateStep)
-
-  const [isCreatingStep, setIsCreatingStep] = useState()
-
-  const createStep = async (stepTitle) => {
-    const stepInput = {
-      title: stepTitle,
-      procedureId: selectedProcedure.id,
-      index: selectedProcedure.steps.length + 1
-    }
-
-    setIsCreatingStep(true)
-    await saveWithToast(
-      () =>
-        createStepMutation({
-          variables: {
-            step: stepInput
-          }
-        }),
-      toast,
-      'Step Created',
-      setIsCreatingStep
-    )
-    setCreateStepDialog(false)
   }
 
   const columns = [
@@ -247,7 +217,6 @@ const ProceduresPage = () => {
     queries.Procedures
   )
 
-  const workInstructionId = workInstruction?.id // assuming this is your workInstruction id
   const filteredProcedures = allProcedures?.filter(
     (procedure) =>
       !procedure.workInstructions.some(
@@ -452,50 +421,13 @@ const ProceduresPage = () => {
           )}
         </div>
         <div className='w-3/5 pl-2'>
-          {workInstruction?.procedures.length > 0 && (
-            <Dialog open={createStepDialog} onOpenChange={setCreateStepDialog}>
-              <DialogTrigger asChild>
-                <Button>Create Step</Button>
-              </DialogTrigger>
-              <DialogContent className='Dialog'>
-                <DialogHeader>
-                  <DialogTitle>Create Step</DialogTitle>
-                </DialogHeader>
-                <Textarea
-                  className='mt-8'
-                  style={{ minHeight: 150 }}
-                  value={stepTitle}
-                  onChange={(e) => setStepTitle(e.target.value)}
-                />
-                <DialogFooter>
-                  <Button type='submit' onClick={() => createStep(stepTitle)}>
-                    {
-                      isCreatingStep
-                        ? (
-                          <>
-                            <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />
-                            Creating
-                          </>
-                          )
-                        : (
-                            'Create Step'
-                          )
-                    }
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          )}
           {
-            selectedProcedure && selectedProcedure.steps.length > 0 && (
-              <Steps procedure={selectedProcedure} />
-              // <DataTableSteps
-              //   setSelectedRow={setSelectedRow}
-              //   columns={columnsSteps}
-              //   data={selectedProcedure.steps}
-              //   isDeletingStep={isDeletingStep}
-              // />
-            )
+            selectedProcedure && <CreateStepDialog procedureId={selectedProcedure.id} />
+          }
+          {
+            selectedProcedure && selectedProcedure.steps.length > 0
+              ? <NestedSteps steps={selectedProcedure.steps.map(s => ({ ...s, procedureId: selectedProcedure.id }))} />
+              : <p className='mt-8' style={{ color: '#999' }}>No steps yet</p>
           }
         </div>
       </div>

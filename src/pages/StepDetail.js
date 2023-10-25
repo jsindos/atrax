@@ -8,12 +8,19 @@ import { Button } from '@/components/ui/button'
 import { useToast } from '@/components/ui/use-toast'
 import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { saveWithToast } from '@/utils'
+import { buildTree, saveWithToast } from '@/utils'
+import NestedSteps from './procedures/NestedSteps'
+import CreateStepDialog from './procedures/CreateStepDialog'
 
 export default () => {
-  const { workInstructionId, stepId } = useParams()
+  const { workInstructionId, procedureId, stepId } = useParams()
 
+  const { data: { procedures } = {} } = useQuery(queries.Procedures)
   const { data: { step } = {}, loading } = useQuery(queries.Step, { variables: { id: Number(stepId) } })
+
+  const procedure = procedures?.find(p => p.id === Number(procedureId))
+
+  const childSteps = buildTree(procedure?.steps, step?.id)
 
   const [content, setContent] = useState('')
 
@@ -109,13 +116,22 @@ export default () => {
                 </Button>
               </div>
               <Textarea className='mt-8' style={{ minHeight: 150 }} value={content} onChange={(e) => setContent(e.target.value)} />
-              <Button className='mt-8' onClick={() => navigate(`/work_instructions/${workInstructionId}/steps/${stepId}/warnings`)}>
+              <Button className='mt-8' onClick={() => navigate(`/work_instructions/${workInstructionId}/procedures/${procedureId}/steps/${stepId}/warnings`)}>
                 Warnings, Cautions and Notes
               </Button>
-              <Tabs defaultValue='images' className='mt-8'>
+              <Tabs defaultValue='steps' className='mt-8'>
                 <TabsList>
+                  <TabsTrigger value='steps'>Child Steps</TabsTrigger>
                   <TabsTrigger value='images'>Images</TabsTrigger>
                 </TabsList>
+                <TabsContent value='steps'>
+                  <CreateStepDialog parentId={Number(stepId)} procedureId={Number(procedureId)} dialogTriggerClassName='mt-6' />
+                  {
+                    childSteps?.length > 0
+                      ? <NestedSteps steps={procedure.steps} parentId={step?.id} />
+                      : <p className='mt-8' style={{ color: '#999' }}>No steps yet</p>
+                  }
+                </TabsContent>
                 <TabsContent value='images'>
                   <I label='Upload image' type='file' name='upload1' ref={fileInput1} />
                   <Button disabled={isUploadingImage} className='mt-8' onClick={handleSubmit}>

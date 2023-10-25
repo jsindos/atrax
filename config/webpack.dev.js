@@ -15,7 +15,10 @@ module.exports = merge(common, {
     open: true,
     compress: true,
     hot: true,
-    port: 8082
+    port: 8082,
+    client: {
+      overlay: false // Set overlay to false here
+    }
   },
 
   module: {

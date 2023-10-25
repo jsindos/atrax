@@ -39,9 +39,9 @@ const App = () => {
           <Route path='/work_instructions/:id/warnings' element={<WorkInstructionWarnings />} />
           <Route path='/' element={<Navigate to='/customers/1/work_instructions' />} />
           <Route path='/customers/:customerId/work_instructions' element={<WorkInstructionsPage />} />
-          <Route path='/work_instructions/:id/procedures' element={<ProceduresPage />} />
-          <Route path='/work_instructions/:workInstructionId/steps/:stepId' element={<StepDetail />} />
-          <Route path='/work_instructions/:workInstructionId/steps/:stepId/warnings' element={<StepWarnings />} />
+          <Route path='/work_instructions/:workInstructionId/procedures' element={<ProceduresPage />} />
+          <Route path='/work_instructions/:workInstructionId/procedures/:procedureId/steps/:stepId' element={<StepDetail />} />
+          <Route path='/work_instructions/:workInstructionId/procedures/:procedureId/steps/:stepId/warnings' element={<StepWarnings />} />
         </Routes>
       </Router>
     </ApolloProvider>

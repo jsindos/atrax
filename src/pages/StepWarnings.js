@@ -10,7 +10,7 @@ import { ReloadIcon } from '@radix-ui/react-icons'
 import { WarningsBody } from './WorkInstructionWarnings/WorkInstructionWarnings'
 
 export default () => {
-  const { workInstructionId, stepId } = useParams()
+  const { workInstructionId, procedureId, stepId } = useParams()
 
   const { data: { step } = {} } = useQuery(queries.Step, { variables: { id: Number(stepId) } })
 
@@ -50,7 +50,7 @@ export default () => {
     <div className='container mx-auto px-4 pb-8'>
       <div className='flex justify-between row pt-8'>
         <h3>Assign Warnings, Cautions and Notes to Step</h3>
-        <BackButton onClick={() => navigate(`/work_instructions/${workInstructionId}/steps/${stepId}`)} />
+        <BackButton onClick={() => navigate(`/work_instructions/${workInstructionId}/procedures/${procedureId}/steps/${stepId}`)} />
       </div>
       <div className='flex-col flex pt-8'>
         <Button disabled={isSaving} className='self-end flex' onClick={() => saveWarnings()}>

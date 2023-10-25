@@ -34,7 +34,7 @@ export default ({ items, onItemsChanged }) => {
 }
 
 const TreeItem = React.forwardRef((props, ref) => {
-  const { id } = useParams()
+  const { workInstructionId, procedureId } = useParams()
   const navigate = useNavigate()
 
   const [isDeletingStep, setIsDeletingStep] = useState()
@@ -84,7 +84,7 @@ const TreeItem = React.forwardRef((props, ref) => {
         </DropdownMenuTrigger>
         <DropdownMenuContent align='end'>
           <DropdownMenuItem
-            onClick={() => navigate(`/work_instructions/${id}/steps/${props.item.id}`)}
+            onClick={() => navigate(`/work_instructions/${workInstructionId}/procedures/${procedureId || props.item.procedureId}/steps/${props.item.id}`)}
           >
             Edit Step
           </DropdownMenuItem>

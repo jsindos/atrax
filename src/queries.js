@@ -263,11 +263,10 @@ export const mutations = {
   UpdateStepIndices: gql`
     mutation UpdateStepIndices($steps: [StepInput!]) {
       updateStepIndices(steps: $steps) {
-        id
-        title
-        index
+        ...StepFields
       }
     }
+    ${fields.StepFields}
   `,
   DeleteStep: gql`
     mutation DeleteStep($id: ID!) {
@@ -362,6 +361,9 @@ export const queries = {
       procedures {
         id
         title
+        steps {
+          ...StepFields
+        }
         workInstructions {
           id
           customer {
@@ -371,6 +373,7 @@ export const queries = {
         }
       }
     }
+    ${fields.StepFields}
   `,
   WorkInstruction: gql`
     query WorkInstruction($id: Int!) {
@@ -419,5 +422,13 @@ export const queries = {
     }
     ${fields.StepFields}
     ${fields.WarningFields}
+  `,
+  Steps: gql`
+    query Steps {
+      steps {
+        ...StepFields
+      }
+    }
+    ${fields.StepFields}
   `
 }

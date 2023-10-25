@@ -33,6 +33,7 @@ const Query = `
     workInstructions: [WorkInstruction]
     workInstruction(id: Int!): WorkInstruction
     step(id: Int!): Step
+    steps: [Step]
     warnings: [Warning]
     procedures: [Procedure]
   }
@@ -122,6 +123,9 @@ const resolvers = {
     },
     async procedures (root, args, context) {
       return context.models.Procedures.findAll()
+    },
+    async steps (root, args, context) {
+      return context.models.Steps.findAll()
     }
   },
   Customer: {
@@ -495,11 +499,11 @@ const mutations = {
     async createStep (root, args, context) {
       const { step: stepFields } = args
 
-      // Create the new step
-      const newStep = await context.models.Steps.create(stepFields)
-
       // Find the procedure
-      const procedure = await context.models.Procedures.findByPk(stepFields.procedureId)
+      const procedure = await context.models.Procedures.findByPk(stepFields.procedureId, { include: context.models.Steps })
+
+      // Create the new step
+      const newStep = await context.models.Steps.create({ ...stepFields, index: procedure.steps.length })
 
       // Associate the step with the procedure
       if (procedure) {
