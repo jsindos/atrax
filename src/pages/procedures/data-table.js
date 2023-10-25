@@ -59,7 +59,7 @@ export function DataTable ({ columns, data, setSelectedRow }) {
     updateProcedureIndices({ variables: { procedures: updatedItems.map(i => ({ id: i.id })), workInstructionId: Number(id) } })
   }
   return (
-    <div className='rounded-md border'>
+    <div className='rounded-md border mt-8'>
       {loading && <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />}
       <Table>
         <TableHeader>

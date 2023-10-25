@@ -222,7 +222,7 @@ module.exports = ({ sequelize, models, services }, DataTypes) => {
         foreignKey: 'stepId'
       })
       // Self referencing relationships
-      Steps.hasMany(models.Steps, { as: 'childSteps', foreignKey: 'parentId' }) // defines the children of a step
+      Steps.hasMany(models.Steps, { as: 'childSteps', foreignKey: 'parentId', onDelete: 'CASCADE' }) // defines the children of a step
       Steps.belongsTo(models.Steps, { as: 'parent', foreignKey: 'parentId' }) // defines the parent of a step
 
       Steps.hasMany(models.Images)
@@ -245,6 +245,15 @@ module.exports = ({ sequelize, models, services }, DataTypes) => {
       timestamps: true,
       sequelize,
       modelName: 'steps'
+      // hooks: {
+      //   async beforeDestroy (step, options) {
+      //     // Recursively delete all child steps
+      //     const childSteps = await step.getChildSteps()
+      //     for (const child of childSteps) {
+      //       await child.destroy()
+      //     }
+      //   }
+      // }
     }
   )
 

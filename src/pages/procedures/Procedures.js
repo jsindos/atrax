@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import { saveWithToast } from '@/utils'
 import { DataTable } from './data-table'
-import { DataTableSteps } from './data-table-steps'
 import { DataTableUseExisting } from './data-table-use-existing'
 import { useQuery, useMutation } from '@apollo/client'
 import { queries, mutations } from '@/queries'
@@ -32,6 +31,7 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import Steps from './Steps'
+import { Textarea } from '@/components/ui/textarea'
 
 const ProceduresPage = () => {
   const { id } = useParams()
@@ -119,24 +119,18 @@ const ProceduresPage = () => {
     }
 
     setIsCreatingStep(true)
-    try {
-      await saveWithToast(
-        () =>
-          createStepMutation({
-            variables: {
-              step: stepInput
-            }
-          }),
-        toast,
-        'Step Created',
-        setIsCreatingStep
-      )
-    } catch (error) {
-      console.error(error)
-    } finally {
-      setIsCreatingStep(false)
-      setCreateStepDialog(false)
-    }
+    await saveWithToast(
+      () =>
+        createStepMutation({
+          variables: {
+            step: stepInput
+          }
+        }),
+      toast,
+      'Step Created',
+      setIsCreatingStep
+    )
+    setCreateStepDialog(false)
   }
 
   const columns = [
@@ -217,77 +211,6 @@ const ProceduresPage = () => {
       setIsDeletingProcedure(false)
     }
   }
-
-  const [isDeletingStep, setIsDeletingStep] = useState()
-
-  const [deleteStepMutation] = useMutation(mutations.DeleteStep)
-
-  const deleteStep = async (id) => {
-    setIsDeletingStep(true)
-    try {
-      await saveWithToast(
-        () =>
-          deleteStepMutation({
-            variables: {
-              id
-            }
-          }),
-        toast,
-        'Step Deleted',
-        setIsDeletingStep
-      )
-      // After successful deletion, refetch the data
-      refetch()
-    } catch (error) {
-      console.error(error)
-    } finally {
-      setIsDeletingStep(false)
-    }
-  }
-
-  const columnsSteps = [
-    {
-      accessorKey: 'title',
-      header: 'Steps'
-    },
-    {
-      id: 'actions',
-      cell: ({ row }) => {
-        const navigate = useNavigate()
-
-        return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant='ghost' className='h-8 w-8 p-0'>
-                <span className='sr-only'>Open menu</span>
-                <MoreHorizontal className='h-4 w-4' />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align='end'>
-              <DropdownMenuItem
-                onClick={() => navigate(`/work_instructions/${id}/steps/${row.original.id}`)}
-              >
-                Child Steps
-              </DropdownMenuItem>
-
-              <DropdownMenuItem onClick={() => deleteStep(row.original.id)}>
-                {isDeletingStep
-                  ? (
-                    <>
-                      <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />
-                      Deleting
-                    </>
-                    )
-                  : (
-                      'Delete Step'
-                    )}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )
-      }
-    }
-  ]
 
   const columnsUseExisting = [
     {
@@ -414,30 +337,22 @@ const ProceduresPage = () => {
           </>
           )}
 
-      <div className='container mx-auto py-10 flex'>
+      <div className='mx-auto flex pt-8'>
         <div className='w-2/5 pr-2'>
           <Dialog open={createProcedureDialog} onOpenChange={setCreateProcedureDialog}>
             <DialogTrigger asChild>
               <Button>Create Procedure</Button>
             </DialogTrigger>
-            <DialogContent className='sm:max-w-[425px]'>
+            <DialogContent className='Dialog'>
               <DialogHeader>
                 <DialogTitle>Create Procedure</DialogTitle>
-                <DialogDescription>Info about creating procedure</DialogDescription>
               </DialogHeader>
-              <div className='grid gap-4 py-4'>
-                <div className='grid grid-cols-4 items-center gap-4'>
-                  <Label htmlFor='title' className='text-right'>
-                    Title
-                  </Label>
-                  <Input
-                    id='title'
-                    defaultValue=''
-                    className='col-span-3'
-                    onChange={(e) => setTitle(e.target.value)}
-                  />
-                </div>
-              </div>
+              <Textarea
+                className='mt-8'
+                style={{ minHeight: 150 }}
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+              />
               <DialogFooter>
                 <Button type='submit' onClick={() => createProcedure(title)}>
                   {isCreating
@@ -457,7 +372,7 @@ const ProceduresPage = () => {
 
           <Dialog open={useExistingProcedureDialog} onOpenChange={setUseExistingProcedureDialog}>
             <DialogTrigger asChild>
-              <Button>Use Existing Procedure</Button>
+              <Button className='ml-2'>Use Existing Procedure</Button>
             </DialogTrigger>
 
             <DialogContent className='sm:max-w-[425px]'>
@@ -542,36 +457,30 @@ const ProceduresPage = () => {
               <DialogTrigger asChild>
                 <Button>Create Step</Button>
               </DialogTrigger>
-              <DialogContent className='sm:max-w-[425px]'>
+              <DialogContent className='Dialog'>
                 <DialogHeader>
                   <DialogTitle>Create Step</DialogTitle>
-                  <DialogDescription>Info about creating step</DialogDescription>
                 </DialogHeader>
-                <div className='grid gap-4 py-4'>
-                  <div className='grid grid-cols-4 items-center gap-4'>
-                    <Label htmlFor='stepTitle' className='text-right'>
-                      Title
-                    </Label>
-                    <Input
-                      id='stepTitle'
-                      defaultValue=''
-                      className='col-span-3'
-                      onChange={(e) => setStepTitle(e.target.value)}
-                    />
-                  </div>
-                </div>
+                <Textarea
+                  className='mt-8'
+                  style={{ minHeight: 150 }}
+                  value={stepTitle}
+                  onChange={(e) => setStepTitle(e.target.value)}
+                />
                 <DialogFooter>
                   <Button type='submit' onClick={() => createStep(stepTitle)}>
-                    {isCreatingStep
-                      ? (
-                        <>
-                          <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />
-                          Creating
-                        </>
-                        )
-                      : (
-                          'Create Step'
-                        )}
+                    {
+                      isCreatingStep
+                        ? (
+                          <>
+                            <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />
+                            Creating
+                          </>
+                          )
+                        : (
+                            'Create Step'
+                          )
+                    }
                   </Button>
                 </DialogFooter>
               </DialogContent>

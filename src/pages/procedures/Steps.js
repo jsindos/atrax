@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Tree from '../Tree'
 import { useMutation } from '@apollo/client'
 import { mutations } from '@/queries'
@@ -12,7 +12,7 @@ function buildTree (steps, parentId = null) {
     .map(step => ({
       ...step,
       id: step.id,
-      value: step.id,
+      value: step.title,
       children: buildTree(steps, step.id)
     }))
 }
@@ -37,6 +37,13 @@ function flattenTree (tree, parentId = null) {
 
 export default ({ procedure }) => {
   const tree = buildTree(procedure.steps)
+
+  useEffect(() => {
+    if (procedure?.steps.length !== flattenTree(nestedSteps).length) {
+      const tree = buildTree(procedure.steps)
+      setNestedSteps(tree)
+    }
+  }, [procedure.steps])
 
   const [nestedSteps, setNestedSteps] = useState(tree)
 
