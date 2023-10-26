@@ -195,6 +195,7 @@ const EquipmentAdded = ({ equipmentAdded, setEquipmentAdded }) => {
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead />
             <TableHead>MEL Code</TableHead>
             <TableHead>Name</TableHead>
           </TableRow>
@@ -204,6 +205,9 @@ const EquipmentAdded = ({ equipmentAdded, setEquipmentAdded }) => {
             equipmentAdded?.slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE).map((e, i) => {
               return (
                 <TableRow key={i}>
+                  <TableCell>
+                    <CreateOrEditEquipment id={e.id} />
+                  </TableCell>
                   <TableCell>{e.MELCode}</TableCell>
                   <TableCell>{e.name}</TableCell>
                   <TableCell>
