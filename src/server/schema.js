@@ -33,6 +33,7 @@ const Query = `
     workInstructions: [WorkInstruction]
     workInstruction(id: Int!): WorkInstruction
     step(id: Int!): Step
+    equipment: [Equipment]
     steps: [Step]
     warnings: [Warning]
     procedures: [Procedure]
@@ -55,6 +56,18 @@ const Query = `
     workInstructions: [WorkInstruction]
   }
 
+  type Equipment {
+    id: Int
+    name: String
+    MELCode: String
+    CMC: CMC
+  }
+
+  type CMC {
+    id: Int
+    code: String
+  }
+
   type WorkInstruction {
     id: Int
     title: String
@@ -66,8 +79,9 @@ const Query = `
     SYSCOM: String
     MIPSeries: String
     activityNumber: String
-    CMC: String
+
     customer: Customer
+    CMC: CMC
     procedures: [WorkInstructionProcedure]
     warnings: [Warning]
   }
@@ -126,6 +140,14 @@ const resolvers = {
     },
     async steps (root, args, context) {
       return context.models.Steps.findAll()
+    },
+    async equipment (root, args, context) {
+      return context.models.Equipment.findAll()
+    }
+  },
+  Equipment: {
+    CMC: async (equipment, args, context) => {
+      return equipment.getCMC()
     }
   },
   Customer: {
@@ -157,6 +179,9 @@ const resolvers = {
     },
     customer: async (workInstruction, args, context) => {
       return workInstruction.getCustomer()
+    },
+    CMC: async (workInstruction, args, context) => {
+      return workInstruction.getCMC()
     }
   },
   WorkInstructionProcedure: {
@@ -222,13 +247,15 @@ const Mutation = `
     draftingOrganisation: String
     hoursToComplete: String
     customerId: Int
-    CMC: String
     system: String
     shipSystem: String
     subsystem: String
     SYSCOM: String
     MIPSeries: String
     activityNumber: String
+
+    CMC: String
+
     procedures: [ProcedureInput]
     warningIds: [Int]
   }
@@ -324,7 +351,7 @@ const mutations = {
     },
     async saveWorkInstruction (root, args, context) {
       const {
-        workInstruction: { warningIds, ...workInstructionFields }
+        workInstruction: { warningIds, CMC, ...workInstructionFields }
       } = args
 
       // https://stackoverflow.com/a/40543424/3171685
@@ -334,6 +361,13 @@ const mutations = {
         { where: { id: workInstructionFields.id }, returning: true }
       )
       const workInstruction = updatedRows[0]
+
+      if (CMC) {
+        const cmc = await context.models.CMCs.findOne({ where: { code: CMC } })
+        if (cmc) {
+          await workInstruction.setCMC(cmc)
+        }
+      }
 
       if (warningIds) {
         await context.models.WorkInstructionsWarnings.destroy({

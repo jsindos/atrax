@@ -87,6 +87,8 @@ fs.readdirSync(__dirname)
   })
 
 async function initialize () {
+  if (process.env.NODE_ENV === 'test') return
+
   await db.sequelize.sync({
     // force: true
   })

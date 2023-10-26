@@ -38,7 +38,7 @@ describe('', () => {
     // const images = await step.getImages()
 
     const childSteps = await step.getChildSteps()
-    expect(childSteps.length).toEqual(1)
+    expect(childSteps.length).toEqual(2)
 
     // warnings
     const customerWarnings = await customer.getWarnings()
@@ -47,6 +47,10 @@ describe('', () => {
     expect(workInstructionWarnings.length).toEqual(14)
     const stepWarnings = await step.getWarnings()
     expect(stepWarnings.length).toEqual(1)
+
+    // equipment
+    const equipment = await db.models.Equipment.findOne()
+    console.log(equipment)
 
     // expect(customerWarnings[0].id).toEqual(workInstructionWarnings[0].id)
     // expect(workInstructionWarnings[0].id).toEqual(stepWarnings[0].id)

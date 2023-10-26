@@ -28,7 +28,7 @@ import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
 import { BackButton, S } from '../WorkInstructionDetail'
-import WarningsTablePagination from './WarningsTablePagination'
+import TablePagination, { PAGE_SIZE } from './TablePagination'
 
 const capitalise = c => c.charAt(0).toUpperCase() + c.slice(1)
 
@@ -144,8 +144,6 @@ export const WarningsBody = ({ setWarningsAdded, warningsAdded, isByCustomer, is
   )
 }
 
-const PAGE_SIZE = 8
-
 export const WarningsToAdd = ({ setWarningsAdded, warningsAdded, typeSelected, isByCustomer, isByDefaults, filterByCategory, isByWorkInstruction }) => {
   const { id, workInstructionId } = useParams()
 
@@ -246,7 +244,7 @@ export const WarningsToAdd = ({ setWarningsAdded, warningsAdded, typeSelected, i
           }
         </TableBody>
       </Table>
-      <WarningsTablePagination pageIndex={pageIndex} setPageIndex={setPageIndex} pageCount={pageCount} nextPage={nextPage} previousPage={previousPage} canGetNextPage={canGetNextPage} canGetPreviousPage={canGetPreviousPage} />
+      <TablePagination pageIndex={pageIndex} setPageIndex={setPageIndex} pageCount={pageCount} nextPage={nextPage} previousPage={previousPage} canGetNextPage={canGetNextPage} canGetPreviousPage={canGetPreviousPage} />
     </div>
   )
 }
@@ -347,7 +345,7 @@ export const WarningsAdded = ({ warnings, setWarningsAdded, typeSelected, isByCu
           }
         </TableBody>
       </Table>
-      <WarningsTablePagination pageIndex={pageIndex} setPageIndex={setPageIndex} pageCount={pageCount} nextPage={nextPage} previousPage={previousPage} canGetNextPage={canGetNextPage} canGetPreviousPage={canGetPreviousPage} />
+      <TablePagination pageIndex={pageIndex} setPageIndex={setPageIndex} pageCount={pageCount} nextPage={nextPage} previousPage={previousPage} canGetNextPage={canGetNextPage} canGetPreviousPage={canGetPreviousPage} />
     </div>
   )
 }

@@ -41,6 +41,14 @@ module.exports = ({ sequelize, models, services }, DataTypes) => {
         through: models.WorkInstructionsProcedures,
         foreignKey: 'workInstructionId'
       })
+      WorkInstructions.belongsTo(models.CMCs, {
+        foreignKey: 'cmcId',
+        as: 'CMC'
+      })
+      WorkInstructions.belongsToMany(models.Equipment, {
+        through: models.WorkInstructionsEquipments,
+        foreignKey: 'workInstructionId'
+      })
     }
   }
 
@@ -65,14 +73,97 @@ module.exports = ({ sequelize, models, services }, DataTypes) => {
       // Ran Codes
       SYSCOM: DataTypes.TEXT,
       MIPSeries: DataTypes.TEXT,
-      activityNumber: DataTypes.TEXT,
-
-      CMC: DataTypes.STRING
+      activityNumber: DataTypes.TEXT
     },
     {
       timestamps: true,
       sequelize,
       modelName: 'workInstructions'
+    }
+  )
+
+  // CMCs
+  class CMCs extends Model {
+    static associate (models) {
+      CMCs.hasMany(models.WorkInstructions, {
+        foreignKey: 'cmcId'
+      })
+      CMCs.hasMany(models.Equipment, {
+        foreignKey: 'cmcId'
+      })
+    }
+  }
+
+  CMCs.modelName = 'CMCs'
+
+  CMCs.init(
+    {
+      id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+      },
+      code: DataTypes.STRING
+    },
+    {
+      timestamps: true,
+      sequelize,
+      modelName: 'cmcs'
+    }
+  )
+
+  // Equipment
+  class Equipment extends Model {
+    static associate (models) {
+      Equipment.belongsTo(models.CMCs, {
+        foreignKey: 'cmcId',
+        as: 'CMC'
+      })
+      Equipment.belongsToMany(models.WorkInstructions, {
+        through: models.WorkInstructionsEquipments,
+        foreignKey: 'equipmentId'
+      })
+    }
+  }
+
+  Equipment.modelName = 'Equipment'
+
+  Equipment.init(
+    {
+      id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+      },
+      MELCode: DataTypes.STRING,
+      name: DataTypes.TEXT
+    },
+    {
+      timestamps: true,
+      sequelize,
+      modelName: 'equipments'
+    }
+  )
+
+  // WorkInstructionsEquipments (through table)
+  class WorkInstructionsEquipments extends Model {
+    static associate (models) {}
+  }
+
+  WorkInstructionsEquipments.modelName = 'WorkInstructionsEquipments'
+
+  WorkInstructionsEquipments.init(
+    {
+      id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+      }
+    },
+    {
+      timestamps: true,
+      sequelize,
+      modelName: 'workInstructionsEquipment'
     }
   )
 
@@ -292,6 +383,9 @@ module.exports = ({ sequelize, models, services }, DataTypes) => {
     Procedures,
     Steps,
     StepsWarnings,
-    Images
+    Images,
+    CMCs,
+    Equipment,
+    WorkInstructionsEquipments
   ]
 }

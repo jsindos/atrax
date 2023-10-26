@@ -1,8 +1,10 @@
+const cmcData = require('../../cmc-node.js')
+
 module.exports = async (db) => {
   console.log('seeding database')
 
   const { models } = db
-  const { Customers, WorkInstructions, Warnings, Procedures, Steps } = models
+  const { Customers, WorkInstructions, Warnings, Procedures, Steps, CMCs, Equipment } = models
 
   let customers
   customers = await Customers.findAll()
@@ -114,6 +116,38 @@ module.exports = async (db) => {
     title:
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
   })
+
+  let cmc1, cmc2
+  if (process.env.NODE_ENV === 'test') {
+    cmc1 = await CMCs.create({ code: 1 })
+    cmc2 = await CMCs.create({ code: 2 })
+  } else {
+    // seed CMCs from cmc-node.js
+    for (const entry of cmcData) {
+      const code = entry.description.split('\t').pop()
+      if (code.length === 4) {
+        const cmc = await CMCs.create({ code })
+        if (!cmc1) {
+          cmc1 = cmc
+        } else if (!cmc2) {
+          cmc2 = cmc
+        }
+      } else {
+        console.log(`Skipped entry with code: ${code}`)
+      }
+    }
+  }
+
+  // create Equipment
+  const equipment1 = await Equipment.create({ cmcId: cmc1.id, MELCode: 'TNK-001', name: 'DFM Tank' })
+  await Equipment.create({ cmcId: cmc1.id, MELCode: 'MEL-ABC-001', name: 'Major Equipment Item 1' })
+  await Equipment.create({ cmcId: cmc2.id, MELCode: 'PMP-DFM-001', name: 'DFM Transfer Pump' })
+
+  // attach the CMC with two equipment to the work instruction
+  await workInstruction.setCMC(cmc1)
+
+  // attach one of the equipment under this CMC to the work instruction
+  await workInstruction.addEquipment(equipment1)
 
   console.log('successfully seeded')
 }

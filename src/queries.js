@@ -13,7 +13,10 @@ const fields = {
       SYSCOM
       MIPSeries
       activityNumber
-      CMC
+      CMC {
+        id
+        code
+      }
     }
   `,
   WarningFields: gql`
@@ -374,6 +377,19 @@ export const queries = {
       }
     }
     ${fields.StepFields}
+  `,
+  Equipment: gql`
+    query Equipment {
+      equipment {
+        id
+        name
+        MELCode
+        CMC {
+          id
+          code
+        }
+      }
+    }
   `,
   WorkInstruction: gql`
     query WorkInstruction($id: Int!) {

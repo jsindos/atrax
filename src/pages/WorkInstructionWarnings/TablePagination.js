@@ -7,6 +7,8 @@ import {
 } from '@radix-ui/react-icons'
 import { Button } from '@/components/ui/button'
 
+export const PAGE_SIZE = 8
+
 export default ({ pageIndex, setPageIndex, pageCount, nextPage, previousPage, canGetPreviousPage, canGetNextPage }) => {
   return (
     <div className='flex items-center justify-between px-2 self-end'>
