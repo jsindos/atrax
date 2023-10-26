@@ -47,7 +47,8 @@ module.exports = ({ sequelize, models, services }, DataTypes) => {
       })
       WorkInstructions.belongsToMany(models.Equipment, {
         through: models.WorkInstructionsEquipments,
-        foreignKey: 'workInstructionId'
+        foreignKey: 'workInstructionId',
+        as: 'equipment'
       })
     }
   }
@@ -141,7 +142,7 @@ module.exports = ({ sequelize, models, services }, DataTypes) => {
     {
       timestamps: true,
       sequelize,
-      modelName: 'equipments'
+      modelName: 'equipment'
     }
   )
 

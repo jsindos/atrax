@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { BackButton, I } from './WorkInstructionDetail'
-import { ReloadIcon, TrashIcon } from '@radix-ui/react-icons'
+import { PaperPlaneIcon, ReloadIcon, TrashIcon } from '@radix-ui/react-icons'
 import { mutations, queries } from '@/queries'
 import { useMutation, useQuery } from '@apollo/client'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -117,6 +117,7 @@ export default () => {
               </div>
               <Textarea className='mt-8' style={{ minHeight: 150 }} value={content} onChange={(e) => setContent(e.target.value)} />
               <Button className='mt-8' onClick={() => navigate(`/work_instructions/${workInstructionId}/procedures/${procedureId}/steps/${stepId}/warnings`)}>
+                <PaperPlaneIcon className='mr-2' />
                 Warnings, Cautions and Notes ({step?.warnings.length || 0})
               </Button>
               <Tabs defaultValue='steps' className='mt-8'>

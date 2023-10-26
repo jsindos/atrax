@@ -80,6 +80,7 @@ const Query = `
     MIPSeries: String
     activityNumber: String
 
+    equipment: [Equipment]
     customer: Customer
     CMC: CMC
     procedures: [WorkInstructionProcedure]
@@ -182,6 +183,9 @@ const resolvers = {
     },
     CMC: async (workInstruction, args, context) => {
       return workInstruction.getCMC()
+    },
+    equipment: async (workInstruction, args, context) => {
+      return workInstruction.getEquipment()
     }
   },
   WorkInstructionProcedure: {
@@ -213,22 +217,35 @@ const resolvers = {
 const Mutation = `
   type Mutation {
     _empty: String
-    saveWorkInstruction(workInstruction: WorkInstructionInput!): WorkInstruction
-    saveStep(step: StepInput!): Step
+
     createWorkInstruction(workInstruction: WorkInstructionInput!): Customer
-    saveWarning(warning: WarningInput!): Warning
+    saveWorkInstruction(workInstruction: WorkInstructionInput!): WorkInstruction
     deleteWorkInstruction(id: ID!): Customer
-    createWarning(warning : WarningInput!): Warning
     duplicateWorkInstruction(existingWorkInstructionId: ID!, customerId: ID!, newActivityNumber: String!): Customer
+    assignProcedureToWorkInstruction(procedureId: ID!, workInstructionId: ID!, isDuplicating: Boolean): WorkInstruction
+
     createProcedure(procedure: ProcedureInput!): WorkInstruction
-    createStep(step: StepInput!): Procedure 
-    updateStepIndices(steps: [StepInput!]): [Step]
     updateProcedureIndices(procedures: [ProcedureInput!]!, workInstructionId: ID!): WorkInstruction
     deleteProcedure(id: ID!): WorkInstruction
+
+    saveStep(step: StepInput!): Step
+    createStep(step: StepInput!): Procedure 
+    updateStepIndices(steps: [StepInput!]): [Step]
     deleteStep(id: ID!): Procedure
-    assignProcedureToWorkInstruction(procedureId: ID!, workInstructionId: ID!, isDuplicating: Boolean): WorkInstruction
     createStepImage(stepId: ID!, image: Upload): Step
     deleteStepImage(imageId: ID!): Step
+
+    saveWarning(warning: WarningInput!): Warning
+    createWarning(warning : WarningInput!): Warning
+
+    createEquipment(equipment: EquipmentInput!, workInstructionId: Int!): Equipment
+    saveEquipment(equipment: EquipmentInput!): Equipment
+  }
+
+  input EquipmentInput {
+    id: Int
+    MELCode: String
+    name: String
   }
 
   input WarningInput {
@@ -258,6 +275,7 @@ const Mutation = `
 
     procedures: [ProcedureInput]
     warningIds: [Int]
+    equipmentIds: [Int]
   }
 
   input ProcedureInput {
@@ -280,6 +298,35 @@ const Mutation = `
 
 const mutations = {
   Mutation: {
+    async createEquipment (root, args, context) {
+      const { equipment: equipmentFields, workInstructionId } = args
+
+      /**
+       * when including CMC, must include it by its 'as' alias
+       * see test/models.test.js
+       */
+      const workInstruction = await context.models.WorkInstructions.findByPk(workInstructionId, {
+        include: [{ model: context.models.CMCs, as: 'CMC' }]
+      })
+
+      const equipment = await context.models.Equipment.create(equipmentFields)
+      await equipment.setCMC(workInstruction.CMC)
+
+      return equipment
+    },
+    async saveEquipment (root, args, context) {
+      const { equipment: equipmentFields } = args
+
+      // https://stackoverflow.com/a/40543424/3171685
+      // eslint-disable-next-line no-unused-vars
+      const [number, updatedRows] = await context.models.Equipment.update(equipmentFields, {
+        where: { id: equipmentFields.id },
+        returning: true
+      })
+      const equipment = updatedRows[0]
+
+      return equipment
+    },
     async createStepImage (root, args, context) {
       const { stepId, image } = args
 
@@ -351,7 +398,7 @@ const mutations = {
     },
     async saveWorkInstruction (root, args, context) {
       const {
-        workInstruction: { warningIds, CMC, ...workInstructionFields }
+        workInstruction: { warningIds, equipmentIds, CMC, ...workInstructionFields }
       } = args
 
       // https://stackoverflow.com/a/40543424/3171685
@@ -374,6 +421,13 @@ const mutations = {
           where: { workInstructionId: workInstruction.id }
         })
         await workInstruction.addWarnings(warningIds)
+      }
+
+      if (equipmentIds) {
+        await context.models.WorkInstructionsEquipments.destroy({
+          where: { workInstructionId: workInstruction.id }
+        })
+        await workInstruction.addEquipment(equipmentIds)
       }
 
       return workInstruction

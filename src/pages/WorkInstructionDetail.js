@@ -20,7 +20,7 @@ import { useMutation, useQuery } from '@apollo/client'
 import React, { forwardRef, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
-import { Cross2Icon, ReloadIcon } from '@radix-ui/react-icons'
+import { Cross2Icon, GlobeIcon, MagnifyingGlassIcon, PaperPlaneIcon, ReloadIcon } from '@radix-ui/react-icons'
 import { useToast } from '@/components/ui/use-toast'
 import { saveWithToast } from '@/utils'
 import { firstColumn, secondColumn, thirdColumn, fourthColumn } from '../../cmc'
@@ -106,7 +106,7 @@ export default () => {
       setMIPSeries(workInstruction.MIPSeries)
       setActivityNumber(workInstruction.activityNumber)
       setCustomer(workInstruction.customer)
-      setCMC(workInstruction.CMC.code)
+      setCMC(workInstruction.CMC?.code)
     }
   }, [workInstruction])
 
@@ -166,11 +166,23 @@ export default () => {
                 <CMCSelector setCMC={setCMC} />
               </div>
 
-              <div className='flex row items-end'>
-                <I label='Equipment' value={CMC} readOnly />
+              <div className='flex row items-end mt-8'>
+                {/* <I label='Equipment' value={CMC} readOnly /> */}
 
-                <Button className='ml-8' onClick={() => navigate(`/work_instructions/${id}/equipment`)}>
-                  Lookup Equipment
+                <Button
+                  // className='ml-8'
+                  onClick={() => {
+                    if (!workInstruction?.CMC) {
+                      toast({
+                        description: 'Must assign and save CMC before assigning equipment'
+                      })
+                    } else {
+                      navigate(`/work_instructions/${id}/equipment`)
+                    }
+                  }}
+                >
+                  <MagnifyingGlassIcon className='mr-2' />
+                  Lookup Equipment ({workInstruction?.equipment?.length || 0})
                 </Button>
               </div>
 
@@ -183,7 +195,7 @@ export default () => {
               >
                 <Dialog open={showLocationDialog} onOpenChange={setShowLocationDialog}>
                   <DialogTrigger className='pt-8'>
-                    <Button>Location Data</Button>
+                    <Button><GlobeIcon className='mr-2' /> Location Data</Button>
                   </DialogTrigger>
                   <DialogContent className='Dialog'>
                     <DialogHeader>
@@ -250,6 +262,7 @@ export default () => {
                   </DialogContent>
                 </Dialog>
                 <Button className='mt-8' onClick={() => navigate(`/work_instructions/${id}/warnings`)}>
+                  <PaperPlaneIcon className='mr-2' />
                   Warnings, Cautions and Notes ({workInstruction?.warnings.length || 0})
                 </Button>
               </div>

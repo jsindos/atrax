@@ -259,7 +259,13 @@ const WorkInstructionsPage = () => {
 
   const columns = [
     {
-      accessorKey: 'CMC',
+      cell: ({ row }) => {
+        const workInstruction = row.original
+
+        return (
+          <p>{workInstruction?.CMC?.code}</p>
+        )
+      },
       header: 'CMC'
     },
     {

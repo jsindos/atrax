@@ -21,7 +21,9 @@ describe('', () => {
     const workInstructions = await customer.getWorkInstructions()
     expect(workInstructions.length).toEqual(1)
 
-    const workInstruction = workInstructions[0]
+    let workInstruction
+
+    workInstruction = workInstructions[0]
 
     const procedures = await workInstruction.getProcedures()
     expect(procedures.length).toEqual(3)
@@ -49,8 +51,18 @@ describe('', () => {
     expect(stepWarnings.length).toEqual(1)
 
     // equipment
-    const equipment = await db.models.Equipment.findOne()
-    console.log(equipment)
+    const equipment = await workInstruction.getEquipment()
+
+    // when including CMC, must include it by its 'as' alias
+    workInstruction = await db.models.WorkInstructions.findByPk(workInstruction.id, {
+      // include: db.models.CMCs
+      include: [{ model: db.models.CMCs, as: 'CMC' }]
+    })
+
+    expect(workInstruction.CMC).not.toBeUndefined()
+
+    // const equipment = await db.models.Equipment.findOne()
+    // console.log(equipment)
 
     // expect(customerWarnings[0].id).toEqual(workInstructionWarnings[0].id)
     // expect(workInstructionWarnings[0].id).toEqual(stepWarnings[0].id)

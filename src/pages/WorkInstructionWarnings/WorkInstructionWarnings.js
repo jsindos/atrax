@@ -234,7 +234,7 @@ export const WarningsToAdd = ({ setWarningsAdded, warningsAdded, typeSelected, i
                     )
                   }
                   <TableCell>
-                    <Button variant='ghost' size='icon' disabled={warningsAdded?.find(ww => ww.id === w.id)} onClick={() => setWarningsAdded(wa => [...wa, w])}>
+                    <Button variant='ghost' size='icon' disabled={warningsAdded?.find(ww => ww.id === w.id)} onClick={() => setWarningsAdded(wa => [w, ...wa])}>
                       <ArrowRightIcon className='h-4 w-4' />
                     </Button>
                   </TableCell>
@@ -350,6 +350,7 @@ export const WarningsAdded = ({ warnings, setWarningsAdded, typeSelected, isByCu
   )
 }
 
+// `id` exists when editing a warning, but not when creating a new warning
 const CreateOrEditWarning = ({ id }) => {
   const { id: workInstructionId } = useParams()
 
@@ -451,9 +452,6 @@ const CreateOrEditWarning = ({ id }) => {
       'Warning saved',
       setIsSaving
     )
-    setCustomer()
-    setContent('')
-    setIsDefault()
     setShowDialog(false)
   }
 

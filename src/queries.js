@@ -39,6 +39,24 @@ const fields = {
 }
 
 export const mutations = {
+  CreateEquipment: gql`
+    mutation createEquipment($equipment: EquipmentInput!, $workInstructionId: Int!) {
+      createEquipment(equipment: $equipment, workInstructionId: $workInstructionId) {
+        id
+        MELCode
+        name
+      }
+    }
+  `,
+  SaveEquipment: gql`
+    mutation saveEquipment($equipment: EquipmentInput!) {
+      saveEquipment(equipment: $equipment) {
+        id
+        MELCode
+        name
+      }
+    }
+  `,
   DeleteStepImage: gql`
     mutation deleteStepImage($imageId: ID!) {
       deleteStepImage(imageId: $imageId) {
@@ -395,6 +413,11 @@ export const queries = {
     query WorkInstruction($id: Int!) {
       workInstruction(id: $id) {
         ...WorkInstructionFields
+        equipment {
+          id
+          name
+          MELCode
+        }
         warnings {
           ...WarningFields
           customer {
