@@ -116,6 +116,9 @@ export const mutations = {
         equipment {
           id
         }
+        warnings {
+          id
+        }
       }
     }
 
