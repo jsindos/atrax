@@ -35,7 +35,7 @@ const fields = {
       parentId
       index
     }
-  `
+  `,
 }
 
 export const mutations = {
@@ -43,17 +43,31 @@ export const mutations = {
     mutation createEquipment($equipment: EquipmentInput!, $workInstructionId: Int!) {
       createEquipment(equipment: $equipment, workInstructionId: $workInstructionId) {
         id
-        MELCode
-        name
+        equipment {
+          id
+          name
+          MELCode
+          CMC {
+            id
+            code
+          }
+        }
       }
     }
   `,
   SaveEquipment: gql`
-    mutation saveEquipment($equipment: EquipmentInput!) {
-      saveEquipment(equipment: $equipment) {
+    mutation createEquipment($equipment: EquipmentInput!, $workInstructionId: Int!) {
+      saveEquipment(equipment: $equipment, workInstructionId: $workInstructionId) {
         id
-        MELCode
-        name
+        equipment {
+          id
+          name
+          MELCode
+          CMC {
+            id
+            code
+          }
+        }
       }
     }
   `,
@@ -299,7 +313,7 @@ export const mutations = {
       }
     }
     ${fields.StepFields}
-  `
+  `,
 }
 
 export const queries = {
@@ -469,5 +483,5 @@ export const queries = {
       }
     }
     ${fields.StepFields}
-  `
+  `,
 }
