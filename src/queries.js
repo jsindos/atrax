@@ -35,7 +35,7 @@ const fields = {
       parentId
       index
     }
-  `
+  `,
 }
 
 export const mutations = {
@@ -113,8 +113,12 @@ export const mutations = {
     mutation SaveWorkInstruction($workInstruction: WorkInstructionInput!) {
       saveWorkInstruction(workInstruction: $workInstruction) {
         ...WorkInstructionFields
+        equipment {
+          id
+        }
       }
     }
+
     ${fields.WorkInstructionFields}
   `,
   CreateStep: gql`
@@ -299,7 +303,7 @@ export const mutations = {
       }
     }
     ${fields.StepFields}
-  `
+  `,
 }
 
 export const queries = {
@@ -469,5 +473,5 @@ export const queries = {
       }
     }
     ${fields.StepFields}
-  `
+  `,
 }
