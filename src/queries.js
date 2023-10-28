@@ -127,8 +127,15 @@ export const mutations = {
     mutation SaveWorkInstruction($workInstruction: WorkInstructionInput!) {
       saveWorkInstruction(workInstruction: $workInstruction) {
         ...WorkInstructionFields
+        equipment {
+          id
+        }
+        warnings {
+          id
+        }
       }
     }
+
     ${fields.WorkInstructionFields}
   `,
   CreateStep: gql`
