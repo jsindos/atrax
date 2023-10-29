@@ -282,6 +282,7 @@ const Mutation = `
     id: Int
     workInstructionId: Int
     title: String
+    type: String
     steps: [StepInput]
     index: Int
   }

@@ -1,5 +1,4 @@
 'use strict'
-
 const fs = require('fs')
 const path = require('path')
 const Sequelize = require('sequelize')
@@ -19,7 +18,7 @@ let sequelize
 if (process.env.USE_CONNECTION_STRING) {
   sequelize = new Sequelize('postgres://root:example@db:5432/atrax', {
     dialect: 'postgres',
-    logging: false
+    logging: false,
   })
 } else if (config.use_env_variable) {
   sequelize = new Sequelize(process.env[config.use_env_variable], config)
@@ -32,7 +31,7 @@ if (process.env.USE_CONNECTION_STRING) {
       console.log(msg.replace('Executing (default)', `\x1b[40m\x1b[37mExecuting ${count}\x1b[0m`))
       count++
     },
-    ...config
+    ...config,
   })
 }
 
@@ -41,7 +40,7 @@ const db = {
   services: {},
   sequelize,
   Sequelize,
-  initialize
+  initialize,
 }
 
 process.env.NODE_ENV === 'production' &&
@@ -86,11 +85,11 @@ fs.readdirSync(__dirname)
       })
   })
 
-async function initialize () {
+async function initialize() {
   if (process.env.NODE_ENV === 'test') return
 
   await db.sequelize.sync({
-    // force: true
+    // force: true,
   })
   await seed(db)
 }

@@ -337,6 +337,7 @@ export const queries = {
             procedure {
               id
               title
+              type
               steps {
                 ...StepFields
               }
@@ -388,6 +389,7 @@ export const queries = {
           procedure {
             id
             title
+            type
             steps {
               ...StepFields
             }
@@ -403,6 +405,7 @@ export const queries = {
       procedures {
         id
         title
+        type
         steps {
           ...StepFields
         }
