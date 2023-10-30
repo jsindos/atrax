@@ -99,6 +99,7 @@ const Query = `
     id: Int
     title: String
     steps: [Step]
+    type: String
     index: Int
     workInstructions: [WorkInstruction]
   }
