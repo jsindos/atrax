@@ -4,7 +4,7 @@ module.exports = async (db) => {
   console.log('seeding database')
 
   const { models } = db
-  const { Customers, WorkInstructions, Warnings, Procedures, Steps, CMCs, Equipment } = models
+  const { Customers, WorkInstructions, Warnings, Procedures, Steps, CMCs, Equipment, Inspections } = models
 
   let customers
   customers = await Customers.findAll()
@@ -116,6 +116,20 @@ module.exports = async (db) => {
     title:
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
   })
+
+  const inspection = await Inspections.create({
+    activity: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+    criteria: 'Dummy criteria',
+    verifyingDocument: 'Dummy document',
+    repairAuthority: 'Dummy authority',
+    shipStaff: 'Dummy staff',
+    classSociety: 'Dummy society',
+    hullInspector: 'Dummy inspector',
+    primeContractor: 'Dummy contractor',
+    SPO: 'Dummy SPO'
+  })
+
+  step.addInspection(inspection)
 
   let cmc1, cmc2
   if (process.env.NODE_ENV === 'test') {

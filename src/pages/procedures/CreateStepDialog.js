@@ -63,17 +63,17 @@ export default ({ isChild, procedureId, parentId, dialogTriggerClassName }) => {
         <DialogFooter>
           <Button type='submit' onClick={() => createStep(stepTitle)}>
             {
-            isCreatingStep
-              ? (
-                <>
-                  <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />
-                  Creating
-                </>
-                )
-              : (
-                  'Create Step'
-                )
-          }
+              isCreatingStep
+                ? (
+                  <>
+                    <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />
+                    Creating
+                  </>
+                  )
+                : (
+                    'Create Step'
+                  )
+            }
           </Button>
         </DialogFooter>
       </DialogContent>

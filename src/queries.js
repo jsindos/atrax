@@ -35,7 +35,7 @@ const fields = {
       parentId
       index
     }
-  `,
+  `
 }
 
 export const mutations = {
@@ -320,7 +320,7 @@ export const mutations = {
       }
     }
     ${fields.StepFields}
-  `,
+  `
 }
 
 export const queries = {
@@ -481,6 +481,18 @@ export const queries = {
         warnings {
           ...WarningFields
         }
+        inspections {
+          id
+          activity
+          criteria
+          verifyingDocument
+          repairAuthority
+          shipStaff
+          classSociety
+          hullInspector
+          primeContractor
+          SPO
+        }
       }
     }
     ${fields.StepFields}
@@ -493,5 +505,5 @@ export const queries = {
       }
     }
     ${fields.StepFields}
-  `,
+  `
 }

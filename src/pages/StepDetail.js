@@ -11,6 +11,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { buildTree, saveWithToast } from '@/utils'
 import NestedSteps from './procedures/NestedSteps'
 import CreateStepDialog from './procedures/CreateStepDialog'
+import Inspection from './steps/Inspection'
+import CreateInspectionDialog from './procedures/CreateInspectionDialog'
 
 export default () => {
   const { workInstructionId, procedureId, stepId } = useParams()
@@ -120,10 +122,11 @@ export default () => {
                 <PaperPlaneIcon className='mr-2' />
                 Warnings, Cautions and Notes ({step?.warnings.length || 0})
               </Button>
-              <Tabs defaultValue='steps' className='mt-8'>
+              <Tabs defaultValue='inspections' className='mt-8'>
                 <TabsList>
                   <TabsTrigger value='steps'>Child Steps</TabsTrigger>
                   <TabsTrigger value='images'>Images</TabsTrigger>
+                  <TabsTrigger value='inspections'>Inspection/Test</TabsTrigger>
                 </TabsList>
                 <TabsContent value='steps'>
                   <CreateStepDialog isChild parentId={Number(stepId)} procedureId={Number(procedureId)} dialogTriggerClassName='mt-6' />
@@ -173,6 +176,14 @@ export default () => {
                       })
                     }
                   </div>
+                </TabsContent>
+                <TabsContent value='inspections'>
+                  <CreateInspectionDialog isChild parentId={Number(stepId)} procedureId={Number(procedureId)} dialogTriggerClassName='mt-6 mb-8' />
+                  {
+                    step?.inspections?.length > 0
+                      ? step.inspections.map((inspection, i) => <Inspection key={i} inspection={inspection} />)
+                      : <p className='mt-8' style={{ color: '#999' }}>No inspections yet</p>
+                  }
                 </TabsContent>
               </Tabs>
 
