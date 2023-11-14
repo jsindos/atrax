@@ -505,6 +505,9 @@ export const queries = {
             title
             steps {
               ...StepFields
+              inspections {
+                ...InspectionFields
+              }
             }
           }
         }
@@ -513,6 +516,7 @@ export const queries = {
     ${fields.StepFields}
     ${fields.WorkInstructionFields}
     ${fields.WarningFields}
+    ${fields.InspectionFields}
   `,
   Step: gql`
     query Step($id: Int!) {

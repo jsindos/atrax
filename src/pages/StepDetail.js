@@ -122,7 +122,7 @@ export default () => {
                 <PaperPlaneIcon className='mr-2' />
                 Warnings, Cautions and Notes ({step?.warnings.length || 0})
               </Button>
-              <Tabs defaultValue='inspections' className='mt-8'>
+              <Tabs defaultValue='steps' className='mt-8'>
                 <TabsList>
                   <TabsTrigger value='steps'>Child Steps</TabsTrigger>
                   <TabsTrigger value='images'>Images</TabsTrigger>

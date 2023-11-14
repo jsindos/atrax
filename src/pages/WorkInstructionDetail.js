@@ -16,6 +16,12 @@ import {
   DialogTitle,
   DialogTrigger
 } from '@/components/ui/dialog'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger
+} from '@/components/ui/accordion'
 import { useMutation, useQuery } from '@apollo/client'
 import React, { forwardRef, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -24,6 +30,18 @@ import { Cross2Icon, GlobeIcon, MagnifyingGlassIcon, PaperPlaneIcon, ReloadIcon 
 import { useToast } from '@/components/ui/use-toast'
 import { saveWithToast } from '@/utils'
 import { firstColumn, secondColumn, thirdColumn, fourthColumn } from '../../cmc'
+import Inspection from './steps/Inspection'
+
+const aggregateInspections = workInstruction => {
+  if (!workInstruction) return
+  let inspections = []
+  workInstruction.procedures?.forEach(procedure => {
+    procedure.procedure.steps?.forEach(step => {
+      inspections = [...inspections, ...step.inspections.map(inspection => ({ inspection, step }))]
+    })
+  })
+  return inspections
+}
 
 export default () => {
   const { id } = useParams()
@@ -31,6 +49,8 @@ export default () => {
   const { data: { workInstruction } = {}, loading } = useQuery(queries.WorkInstruction, {
     variables: { id: Number(id) }
   })
+
+  const inspections = aggregateInspections(workInstruction)
 
   const [saveWorkInstructionMutation] = useMutation(mutations.SaveWorkInstruction)
 
@@ -266,6 +286,19 @@ export default () => {
                   Warnings, Cautions and Notes ({workInstruction?.warnings.length || 0})
                 </Button>
               </div>
+
+              <Accordion type='single' collapsible className='mt-8'>
+                <AccordionItem value='item-1' style={{ borderBottomWidth: 0 }}>
+                  <AccordionTrigger className='w-full max-w-xs'>Inspection and Test Plan ({inspections?.length || 0})</AccordionTrigger>
+                  <AccordionContent>
+                    {
+                      inspections?.length > 0
+                        ? inspections.map(({ inspection, step }, i) => <Inspection isFullDetail key={i} step={step} inspection={inspection} className='mb-8' />)
+                        : <p style={{ color: '#999' }}>No inspections yet</p>
+                    }
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
             </>
             )
       }
