@@ -253,6 +253,7 @@ const Mutation = `
     deleteStep(id: ID!): Procedure
 
     createInspection(inspection: InspectionInput): Step
+    saveInspection(inspection: InspectionInput): Inspection
 
     createEquipment(equipment: EquipmentInput!, workInstructionId: Int!): WorkInstruction
     saveEquipment(equipment: EquipmentInput!): WorkInstruction
@@ -651,6 +652,18 @@ const mutations = {
       const step = await inspection.getStep()
 
       return step
+    },
+    async saveInspection (root, args, context) {
+      const { inspection: inspectionFields } = args
+
+      // eslint-disable-next-line no-unused-vars
+      const [number, updatedRows] = await context.models.Inspections.update(inspectionFields, {
+        where: { id: inspectionFields.id },
+        returning: true
+      })
+      const inspection = updatedRows[0]
+
+      return inspection
     },
 
     /**********************************

@@ -1,8 +1,9 @@
 import React from 'react'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
-import { Pencil1Icon, TrashIcon } from '@radix-ui/react-icons'
+import { TrashIcon } from '@radix-ui/react-icons'
 import { cn } from '@/utils'
+import CreateOrEditInspectionDialog from '../procedures/CreateOrEditInspectionDialog'
 
 // activity: 'Dummy activity',
 // criteria: 'Dummy criteria',
@@ -56,9 +57,7 @@ export default ({ inspection, className }) => {
         </div>
       </div>
       <div className='flex flex-col gap-3'>
-        <Button variant='outline' size='icon'>
-          <Pencil1Icon className='h-4 w-4' />
-        </Button>
+        <CreateOrEditInspectionDialog isEditing inspection={inspection} />
         <Button variant='outline' size='icon'>
           <TrashIcon className='h-4 w-4' />
         </Button>

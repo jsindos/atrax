@@ -2,7 +2,7 @@ import { useToast } from '@/components/ui/use-toast'
 import { mutations } from '@/queries'
 import { saveWithToast } from '@/utils'
 import { useMutation } from '@apollo/client'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
-import { ReloadIcon } from '@radix-ui/react-icons'
+import { Pencil1Icon, ReloadIcon } from '@radix-ui/react-icons'
 import { Label } from '@/components/ui/label'
 import { S } from '../WorkInstructionDetail'
 import { useParams } from 'react-router-dom'
@@ -21,12 +21,13 @@ import { useParams } from 'react-router-dom'
 const DEFAULT_VALUE = { shortName: 'N/A', longName: 'Not Applicable' }
 const DUMMY_SELECT_VALUES = [DEFAULT_VALUE, { shortName: 'T', longName: 'Test' }]
 
-export default ({ dialogTriggerClassName }) => {
+export default ({ dialogTriggerClassName, isEditing, inspection }) => {
   const { toast } = useToast()
 
   const { stepId } = useParams()
 
   const [createInspectionMutation] = useMutation(mutations.CreateInspection)
+  const [saveInspectionMutation] = useMutation(mutations.SaveInspection)
 
   const [isCreatingInspection, setIsCreatingInspection] = useState()
   const [createInspectionDialog, setCreateInspectionDialog] = useState()
@@ -40,6 +41,48 @@ export default ({ dialogTriggerClassName }) => {
   const [hullInspector, setHullInspector] = useState(DEFAULT_VALUE)
   const [primeContractor, setPrimeContractor] = useState(DEFAULT_VALUE)
   const [SPO, setSPO] = useState(DEFAULT_VALUE)
+
+  useEffect(() => {
+    if (isEditing) {
+      setActivity(inspection.activity)
+      setCriteria(inspection.criteria)
+
+      setRepairAuthority(DUMMY_SELECT_VALUES.find(item => item.longName === inspection.repairAuthority) || DEFAULT_VALUE)
+      setShipStaff(DUMMY_SELECT_VALUES.find(item => item.longName === inspection.shipStaff) || DEFAULT_VALUE)
+      setClassSociety(DUMMY_SELECT_VALUES.find(item => item.longName === inspection.classSociety) || DEFAULT_VALUE)
+      setHullInspector(DUMMY_SELECT_VALUES.find(item => item.longName === inspection.hullInspector) || DEFAULT_VALUE)
+      setPrimeContractor(DUMMY_SELECT_VALUES.find(item => item.longName === inspection.primeContractor) || DEFAULT_VALUE)
+      setSPO(DUMMY_SELECT_VALUES.find(item => item.longName === inspection.SPO) || DEFAULT_VALUE)
+    }
+  }, [inspection])
+
+  const saveInspection = async () => {
+    const inspectionInput = {
+      id: inspection.id,
+      activity,
+      criteria,
+      repairAuthority: repairAuthority.longName,
+      shipStaff: shipStaff.longName,
+      classSociety: classSociety.longName,
+      hullInspector: hullInspector.longName,
+      primeContractor: primeContractor.longName,
+      SPO: SPO.longName
+    }
+
+    setIsCreatingInspection(true)
+    await saveWithToast(
+      () =>
+        saveInspectionMutation({
+          variables: {
+            inspection: inspectionInput
+          }
+        }),
+      toast,
+      'Inspection Saved',
+      setIsCreatingInspection
+    )
+    setCreateInspectionDialog(false)
+  }
 
   const createInspection = async () => {
     const inspectionInput = {
@@ -68,14 +111,23 @@ export default ({ dialogTriggerClassName }) => {
     )
     setCreateInspectionDialog(false)
   }
+
   return (
     <Dialog open={createInspectionDialog} onOpenChange={setCreateInspectionDialog}>
       <DialogTrigger asChild>
-        <Button className={dialogTriggerClassName}>Create New Inspection or Test</Button>
+        {
+          isEditing
+            ? (
+              <Button variant='outline' size='icon'>
+                <Pencil1Icon className='h-4 w-4' />
+              </Button>
+              )
+            : <Button className={dialogTriggerClassName}>Create New Inspection or Test</Button>
+        }
       </DialogTrigger>
       <DialogContent className='Dialog'>
         <DialogHeader>
-          <DialogTitle>New Inspection or Test</DialogTitle>
+          <DialogTitle>{isEditing ? 'Edit' : 'New'} Inspection or Test</DialogTitle>
         </DialogHeader>
         <div className='flex flex-row gap-16'>
           <div className='w-full max-w-lg'>
@@ -163,18 +215,16 @@ export default ({ dialogTriggerClassName }) => {
           </div>
         </div>
         <DialogFooter>
-          <Button type='submit' onClick={() => createInspection()}>
+          <Button type='submit' onClick={() => isEditing ? saveInspection() : createInspection()}>
             {
               isCreatingInspection
                 ? (
                   <>
                     <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />
-                    Creating
+                    {isEditing ? 'Saving' : 'Creating'}
                   </>
                   )
-                : (
-                    'Create'
-                  )
+                : isEditing ? 'Save' : 'Create'
             }
           </Button>
         </DialogFooter>

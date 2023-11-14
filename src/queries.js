@@ -53,6 +53,14 @@ const fields = {
 }
 
 export const mutations = {
+  SaveInspection: gql`
+    mutation saveInspection($inspection: InspectionInput!) {
+      saveInspection(inspection: $inspection) {
+        ...InspectionFields
+      }
+    }
+    ${fields.InspectionFields}
+  `,
   CreateInspection: gql`
     mutation createInspection($inspection: InspectionInput!) {
       createInspection(inspection: $inspection) {

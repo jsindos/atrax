@@ -12,7 +12,7 @@ import { buildTree, saveWithToast } from '@/utils'
 import NestedSteps from './procedures/NestedSteps'
 import CreateStepDialog from './procedures/CreateStepDialog'
 import Inspection from './steps/Inspection'
-import CreateInspectionDialog from './procedures/CreateInspectionDialog'
+import CreateOrEditInspectionDialog from './procedures/CreateOrEditInspectionDialog'
 
 export default () => {
   const { workInstructionId, procedureId, stepId } = useParams()
@@ -178,11 +178,11 @@ export default () => {
                   </div>
                 </TabsContent>
                 <TabsContent value='inspections'>
-                  <CreateInspectionDialog dialogTriggerClassName='mt-6 mb-8' />
+                  <CreateOrEditInspectionDialog dialogTriggerClassName='mt-6 mb-8' />
                   {
                     step?.inspections?.length > 0
                       ? step.inspections.map((inspection, i) => <Inspection key={i} inspection={inspection} className='mb-8' />)
-                      : <p className='mt-8' style={{ color: '#999' }}>No inspections yet</p>
+                      : <p style={{ color: '#999' }}>No inspections yet</p>
                   }
                 </TabsContent>
               </Tabs>
