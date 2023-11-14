@@ -178,10 +178,10 @@ export default () => {
                   </div>
                 </TabsContent>
                 <TabsContent value='inspections'>
-                  <CreateInspectionDialog isChild parentId={Number(stepId)} procedureId={Number(procedureId)} dialogTriggerClassName='mt-6 mb-8' />
+                  <CreateInspectionDialog dialogTriggerClassName='mt-6 mb-8' />
                   {
                     step?.inspections?.length > 0
-                      ? step.inspections.map((inspection, i) => <Inspection key={i} inspection={inspection} />)
+                      ? step.inspections.map((inspection, i) => <Inspection key={i} inspection={inspection} className='mb-8' />)
                       : <p className='mt-8' style={{ color: '#999' }}>No inspections yet</p>
                   }
                 </TabsContent>

@@ -6,6 +6,7 @@ const { transpileSchema } = require('graphql-s2s').graphqls2s
 const { makeExecutableSchema } = require('graphql-tools')
 const { merge } = require('lodash')
 const { GraphQLUpload } = require('graphql-upload')
+const { UserInputError } = require('apollo-server-express')
 
 const schemaParts = {}
 
@@ -250,16 +251,17 @@ const Mutation = `
     createStep(step: StepInput!): Procedure 
     updateStepIndices(steps: [StepInput!]): [Step]
     deleteStep(id: ID!): Procedure
-    createStepImage(stepId: ID!, image: Upload): Step
-    deleteStepImage(imageId: ID!): Step
 
     createInspection(inspection: InspectionInput): Step
+
+    createEquipment(equipment: EquipmentInput!, workInstructionId: Int!): WorkInstruction
+    saveEquipment(equipment: EquipmentInput!): WorkInstruction
 
     saveWarning(warning: WarningInput!): Warning
     createWarning(warning : WarningInput!): Warning
 
-    createEquipment(equipment: EquipmentInput!, workInstructionId: Int!): WorkInstruction
-    saveEquipment(equipment: EquipmentInput!): WorkInstruction
+    createStepImage(stepId: ID!, image: Upload): Step
+    deleteStepImage(imageId: ID!): Step
   }
 
   input EquipmentInput {
@@ -327,12 +329,17 @@ const Mutation = `
     hullInspector: String
     primeContractor: String
     SPO: String
+    stepId: Int
   }
 `
 
 const mutations = {
   Mutation: {
-    // WorkInstruction
+
+    /**********************************
+     * WorkInstruction mutations      *
+     **********************************/
+
     async createWorkInstruction (root, args, context) {
       const { workInstruction: workInstructionFields } = args
 
@@ -475,7 +482,11 @@ const mutations = {
 
       return workInstruction
     },
-    // Procedure
+
+    /**********************************
+     * Procedure mutations            *
+     **********************************/
+
     async createProcedure (root, args, context) {
       const { procedure: procedureFields } = args
 
@@ -525,7 +536,11 @@ const mutations = {
       // Return the updated work instruction.
       return updatedWorkInstruction
     },
-    // Step
+
+    /**********************************
+     * Step mutations                 *
+     **********************************/
+
     async createStep (root, args, context) {
       const { step: stepFields } = args
 
@@ -620,7 +635,28 @@ const mutations = {
       // Return the array of updated steps
       return updatedSteps
     },
-    // Equipment
+
+    /**********************************
+     * Inspection mutations           *
+     **********************************/
+
+    async createInspection (root, args, context) {
+      const { inspection: inspectionFields } = args
+
+      if (!inspectionFields?.stepId) throw new UserInputError('You must include a stepId')
+
+      // Create the inspection
+      const inspection = await context.models.Inspections.create(inspectionFields)
+
+      const step = await inspection.getStep()
+
+      return step
+    },
+
+    /**********************************
+     * Equipment mutations            *
+     **********************************/
+
     async createEquipment (root, args, context) {
       const { equipment: equipmentFields, workInstructionId } = args
 
@@ -667,7 +703,9 @@ const mutations = {
 
       return updatedWorkInstruction
     },
-    // Warning
+    /**********************************
+     * Warning mutations              *
+     **********************************/
     async createWarning (root, args, context) {
       const { warning: warningFields } = args
 
@@ -688,7 +726,9 @@ const mutations = {
 
       return warning
     },
-    // Image
+    /**********************************
+     * Image mutations                *
+     **********************************/
     async createStepImage (root, args, context) {
       const { stepId, image } = args
 

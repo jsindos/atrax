@@ -16,18 +16,23 @@ import { Textarea } from '@/components/ui/textarea'
 import { ReloadIcon } from '@radix-ui/react-icons'
 import { Label } from '@/components/ui/label'
 import { S } from '../WorkInstructionDetail'
+import { useParams } from 'react-router-dom'
 
 const DEFAULT_VALUE = { shortName: 'N/A', longName: 'Not Applicable' }
 const DUMMY_SELECT_VALUES = [DEFAULT_VALUE, { shortName: 'T', longName: 'Test' }]
 
-export default ({ isChild, procedureId, parentId, dialogTriggerClassName }) => {
+export default ({ dialogTriggerClassName }) => {
   const { toast } = useToast()
 
-  // const [createInspectionMutation] = useMutation(mutations.CreateInspection)
+  const { stepId } = useParams()
+
+  const [createInspectionMutation] = useMutation(mutations.CreateInspection)
 
   const [isCreatingInspection, setIsCreatingInspection] = useState()
-  const [inspectionTitle, setInspectionTitle] = useState('')
   const [createInspectionDialog, setCreateInspectionDialog] = useState()
+
+  const [activity, setActivity] = useState('')
+  const [criteria, setCriteria] = useState('')
 
   const [repairAuthority, setRepairAuthority] = useState(DEFAULT_VALUE)
   const [shipStaff, setShipStaff] = useState(DEFAULT_VALUE)
@@ -36,11 +41,17 @@ export default ({ isChild, procedureId, parentId, dialogTriggerClassName }) => {
   const [primeContractor, setPrimeContractor] = useState(DEFAULT_VALUE)
   const [SPO, setSPO] = useState(DEFAULT_VALUE)
 
-  const createInspection = async (inspectionTitle) => {
+  const createInspection = async () => {
     const inspectionInput = {
-      title: inspectionTitle,
-      parentId,
-      procedureId
+      activity,
+      criteria,
+      repairAuthority: repairAuthority.longName,
+      shipStaff: shipStaff.longName,
+      classSociety: classSociety.longName,
+      hullInspector: hullInspector.longName,
+      primeContractor: primeContractor.longName,
+      SPO: SPO.longName,
+      stepId: Number(stepId)
     }
 
     setIsCreatingInspection(true)
@@ -72,16 +83,16 @@ export default ({ isChild, procedureId, parentId, dialogTriggerClassName }) => {
               <Label>Inspection/Test Activity</Label>
               <Textarea
                 style={{ minHeight: 150 }}
-                value={inspectionTitle}
-                onChange={(e) => setInspectionTitle(e.target.value)}
+                value={activity}
+                onChange={(e) => setActivity(e.target.value)}
               />
             </div>
             <div className='flex-col gap-3 flex mt-8'>
               <Label>Inspection/Test Criteria</Label>
               <Textarea
                 style={{ minHeight: 150 }}
-                value={inspectionTitle}
-                onChange={(e) => setInspectionTitle(e.target.value)}
+                value={criteria}
+                onChange={(e) => setCriteria(e.target.value)}
               />
             </div>
           </div>
@@ -152,7 +163,7 @@ export default ({ isChild, procedureId, parentId, dialogTriggerClassName }) => {
           </div>
         </div>
         <DialogFooter>
-          <Button type='submit' onClick={() => createInspection(inspectionTitle)}>
+          <Button type='submit' onClick={() => createInspection()}>
             {
               isCreatingInspection
                 ? (

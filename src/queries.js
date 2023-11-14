@@ -35,10 +35,35 @@ const fields = {
       parentId
       index
     }
+  `,
+  InspectionFields: gql`
+    fragment InspectionFields on Inspection {
+      id
+      activity
+      criteria
+      verifyingDocument
+      repairAuthority
+      shipStaff
+      classSociety
+      hullInspector
+      primeContractor
+      SPO
+    }
   `
 }
 
 export const mutations = {
+  CreateInspection: gql`
+    mutation createInspection($inspection: InspectionInput!) {
+      createInspection(inspection: $inspection) {
+        id
+        inspections {
+          ...InspectionFields
+        }
+      }
+    }
+    ${fields.InspectionFields}
+  `,
   CreateEquipment: gql`
     mutation createEquipment($equipment: EquipmentInput!, $workInstructionId: Int!) {
       createEquipment(equipment: $equipment, workInstructionId: $workInstructionId) {
@@ -482,21 +507,13 @@ export const queries = {
           ...WarningFields
         }
         inspections {
-          id
-          activity
-          criteria
-          verifyingDocument
-          repairAuthority
-          shipStaff
-          classSociety
-          hullInspector
-          primeContractor
-          SPO
+          ...InspectionFields
         }
       }
     }
     ${fields.StepFields}
     ${fields.WarningFields}
+    ${fields.InspectionFields}
   `,
   Steps: gql`
     query Steps {

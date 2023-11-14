@@ -2,6 +2,7 @@ import React from 'react'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Pencil1Icon, TrashIcon } from '@radix-ui/react-icons'
+import { cn } from '@/utils'
 
 // activity: 'Dummy activity',
 // criteria: 'Dummy criteria',
@@ -15,9 +16,9 @@ import { Pencil1Icon, TrashIcon } from '@radix-ui/react-icons'
 
 // RA, SS, CS, NHI, Prim, SPO
 
-export default ({ inspection }) => {
+export default ({ inspection, className }) => {
   return (
-    <div className='shadow border rounded-xl p-8 flex row justify-between'>
+    <div className={cn('shadow border rounded-xl p-8 flex row justify-between', className)}>
       <div>
         <div className='flex-col gap-3 flex w-full max-w-lg'>
           <Label>Activity</Label>
