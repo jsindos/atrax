@@ -49,10 +49,38 @@ const fields = {
       primeContractor
       SPO
     }
+  `,
+  IsolationFields: gql`
+    fragment IsolationFields on Isolation {
+      id
+      UDC
+      compartment
+      isolationType
+      isolationDevice
+    }
   `
 }
 
 export const mutations = {
+  CreateIsolation: gql`
+    mutation createIsolation($isolation: IsolationInput!, $equipmentId: Int!) {
+      createIsolation(isolation: $isolation, equipmentId: $equipmentId) {
+        id
+        isolations {
+          ...IsolationFields
+        }
+      }
+    }
+    ${fields.IsolationFields}
+  `,
+  SaveIsolation: gql`
+    mutation saveIsolation($isolation: IsolationInput!) {
+      saveIsolation(isolation: $isolation) {
+        ...IsolationFields
+      }
+    }
+    ${fields.IsolationFields}
+  `,
   DeleteInspection: gql`
     mutation deleteInspection($inspectionId: Int!) {
       deleteInspection(inspectionId: $inspectionId) {
@@ -100,17 +128,14 @@ export const mutations = {
     }
   `,
   SaveEquipment: gql`
-    mutation createEquipment($equipment: EquipmentInput!, $workInstructionId: Int!) {
-      saveEquipment(equipment: $equipment, workInstructionId: $workInstructionId) {
+    mutation createEquipment($equipment: EquipmentInput!) {
+      saveEquipment(equipment: $equipment) {
         id
-        equipment {
+        name
+        MELCode
+        CMC {
           id
-          name
-          MELCode
-          CMC {
-            id
-            code
-          }
+          code
         }
       }
     }
@@ -368,6 +393,18 @@ export const mutations = {
 }
 
 export const queries = {
+  Isolations: gql`
+    query Isolations {
+      isolations {
+        ...IsolationFields
+        equipment {
+          id
+          name
+        }
+      }
+    }
+    ${fields.IsolationFields}
+  `,
   Customers: gql`
     query Customers {
       customers {
@@ -485,6 +522,9 @@ export const queries = {
           id
           name
           MELCode
+          isolations {
+            ...IsolationFields
+          }
         }
         warnings {
           ...WarningFields
@@ -517,6 +557,7 @@ export const queries = {
     ${fields.WorkInstructionFields}
     ${fields.WarningFields}
     ${fields.InspectionFields}
+    ${fields.IsolationFields}
   `,
   Step: gql`
     query Step($id: Int!) {

@@ -5,7 +5,7 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
+  TableRow
 } from '@/components/ui/table'
 import {
   Dialog,
@@ -13,7 +13,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  DialogTrigger
 } from '@/components/ui/dialog'
 
 import TablePagination, { PAGE_SIZE } from './TablePagination'
@@ -32,7 +32,7 @@ export default () => {
   const { id } = useParams()
 
   const { data: { workInstruction } = {} } = useQuery(queries.WorkInstruction, {
-    variables: { id: Number(id) },
+    variables: { id: Number(id) }
   })
 
   const [equipmentAdded, setEquipmentAdded] = useState([])
@@ -56,9 +56,9 @@ export default () => {
           variables: {
             workInstruction: {
               id: Number(id),
-              equipmentIds: equipmentAdded.map((e) => e.id),
-            },
-          },
+              equipmentIds: equipmentAdded.map((e) => e.id)
+            }
+          }
         }),
       toast,
       null,
@@ -69,31 +69,35 @@ export default () => {
   const navigate = useNavigate()
 
   return (
-    <div className="container mx-auto px-4 pb-8">
-      <div className="flex justify-between row pt-8">
+    <div className='container mx-auto px-4 pb-8'>
+      <div className='flex justify-between row pt-8'>
         <h3>{workInstruction?.title} Equipment</h3>
         <BackButton onClick={() => navigate(`/work_instructions/${id}`)} />
       </div>
-      <div className="flex-col flex pt-8">
-        <Button disabled={isSaving} className="self-end flex" onClick={() => saveEquipment()}>
-          {isSaving ? (
-            <>
-              <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
-              Saving
-            </>
-          ) : (
-            'Save Changes'
-          )}
+      <div className='flex-col flex pt-8'>
+        <Button disabled={isSaving} className='self-end flex' onClick={() => saveEquipment()}>
+          {
+            isSaving
+              ? (
+                <>
+                  <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />
+                  Saving
+                </>
+                )
+              : (
+                  'Save Changes'
+                )
+          }
         </Button>
       </div>
       <CreateOrEditEquipment />
-      <div className="pt-8">
-        <div className="grid items-center gap-3 max-w-sm">
+      <div className='pt-8'>
+        <div className='grid items-center gap-3 max-w-sm'>
           <Label>CMC</Label>
           <Input value={workInstruction?.CMC?.code} readOnly />
         </div>
       </div>
-      <div className="flex w-full space-x-10 pt-8">
+      <div className='flex w-full space-x-10 pt-8'>
         <EquipmentToAdd {...{ setEquipmentAdded, equipmentAdded }} />
         <EquipmentAdded {...{ setEquipmentAdded, equipmentAdded }} />
       </div>
@@ -136,7 +140,7 @@ const EquipmentToAdd = ({ equipmentAdded, setEquipmentAdded }) => {
   const canGetPreviousPage = pageIndex > 0
 
   return (
-    <div className="w-full" style={{ display: 'flex', rowGap: '0.75rem', flexDirection: 'column' }}>
+    <div className='w-full' style={{ display: 'flex', rowGap: '0.75rem', flexDirection: 'column' }}>
       <Label>All Equipment</Label>
       <Table>
         <TableHeader>
@@ -157,12 +161,12 @@ const EquipmentToAdd = ({ equipmentAdded, setEquipmentAdded }) => {
                 <TableCell>{e.name}</TableCell>
                 <TableCell>
                   <Button
-                    variant="ghost"
-                    size="icon"
+                    variant='ghost'
+                    size='icon'
                     disabled={equipmentAdded?.find((ea) => ea.id === e.id)}
                     onClick={() => setEquipmentAdded((ea) => [e, ...ea])}
                   >
-                    <ArrowRightIcon className="h-4 w-4" />
+                    <ArrowRightIcon className='h-4 w-4' />
                   </Button>
                 </TableCell>
               </TableRow>
@@ -203,7 +207,7 @@ const EquipmentAdded = ({ equipmentAdded, setEquipmentAdded }) => {
   const canGetPreviousPage = pageIndex > 0
 
   return (
-    <div className="w-full" style={{ display: 'flex', rowGap: '0.75rem', flexDirection: 'column' }}>
+    <div className='w-full' style={{ display: 'flex', rowGap: '0.75rem', flexDirection: 'column' }}>
       <Label>Assigned Equipment</Label>
       <Table>
         <TableHeader>
@@ -224,11 +228,11 @@ const EquipmentAdded = ({ equipmentAdded, setEquipmentAdded }) => {
                 <TableCell>{e.name}</TableCell>
                 <TableCell>
                   <Button
-                    variant="ghost"
-                    size="icon"
+                    variant='ghost'
+                    size='icon'
                     onClick={() => setEquipmentAdded((ea) => ea.filter((ee) => ee.id !== e.id))}
                   >
-                    <Cross2Icon className="h-4 w-4" />
+                    <Cross2Icon className='h-4 w-4' />
                   </Button>
                 </TableCell>
               </TableRow>
@@ -254,7 +258,7 @@ const CreateOrEditEquipment = ({ id }) => {
   const { id: workInstructionId } = useParams()
 
   const { data: { workInstruction } = {} } = useQuery(queries.WorkInstruction, {
-    variables: { id: Number(workInstructionId) },
+    variables: { id: Number(workInstructionId) }
   })
   const { data: { equipment } = {} } = useQuery(queries.Equipment)
 
@@ -283,27 +287,27 @@ const CreateOrEditEquipment = ({ id }) => {
           variables: {
             equipment: {
               MELCode,
-              name,
+              name
             },
-            workInstructionId: workInstruction.id,
+            workInstructionId: workInstruction.id
           },
-          update(cache, { data: { createEquipment: equipment } }) {
+          update (cache, { data: { createEquipment: equipment } }) {
             cache.modify({
               fields: {
-                equipment(existingEquipment = []) {
+                equipment (existingEquipment = []) {
                   const newEquipmentRef = cache.writeFragment({
                     data: equipment,
                     fragment: gql`
                       fragment NewEquipment on Equipment {
                         id
                       }
-                    `,
+                    `
                   })
                   return [...existingEquipment, newEquipmentRef]
-                },
-              },
+                }
+              }
             })
-          },
+          }
         }),
       toast,
       'Equipment created',
@@ -324,9 +328,9 @@ const CreateOrEditEquipment = ({ id }) => {
             equipment: {
               id,
               MELCode,
-              name,
-            },
-          },
+              name
+            }
+          }
         }),
       toast,
       'Equipment saved',
@@ -340,53 +344,59 @@ const CreateOrEditEquipment = ({ id }) => {
   return (
     <Dialog open={showDialog} onOpenChange={setShowDialog}>
       <DialogTrigger>
-        {id ? (
-          <Button variant="ghost" size="icon">
-            <Pencil1Icon className="h-4 w-4" />
-          </Button>
-        ) : (
-          <Button className="self-end flex max-w-sm mt-4">Create new</Button>
-        )}
+        {id
+          ? (
+            <Button variant='ghost' size='icon'>
+              <Pencil1Icon className='h-4 w-4' />
+            </Button>
+            )
+          : (
+            <Button className='self-end flex max-w-sm mt-4'>Create new</Button>
+            )}
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{id ? 'Edit Equipment' : 'Create Equipment'}</DialogTitle>
-          <div className="pt-8">
-            <div className="grid w-full items-center gap-3">
+          <div className='pt-8'>
+            <div className='grid w-full items-center gap-3'>
               <Label>CMC</Label>
               <Input value={workInstruction?.CMC?.code} readOnly />
             </div>
           </div>
-          <div className="pt-8">
-            <div className="grid w-full items-center gap-3">
+          <div className='pt-8'>
+            <div className='grid w-full items-center gap-3'>
               <Label>MEL Code</Label>
               <Input value={MELCode} onChange={(e) => setMELCode(e.target.value)} />
             </div>
           </div>
-          <div className="pt-8">
-            <div className="grid w-full items-center gap-3">
+          <div className='pt-8'>
+            <div className='grid w-full items-center gap-3'>
               <Label>Name</Label>
               <Input value={name} onChange={(e) => setName(e.target.value)} />
             </div>
           </div>
         </DialogHeader>
         <DialogFooter>
-          <div className="flex-col flex pt-8">
+          <div className='flex-col flex pt-8'>
             <Button
               disabled={isSaving}
-              className="self-end flex"
+              className='self-end flex'
               onClick={() => (id ? saveEquipment() : createEquipment())}
             >
-              {isSaving ? (
-                <>
-                  <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
-                  {id ? 'Saving' : 'Creating'}
-                </>
-              ) : id ? (
-                'Save changes'
-              ) : (
-                'Create'
-              )}
+              {isSaving
+                ? (
+                  <>
+                    <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />
+                    {id ? 'Saving' : 'Creating'}
+                  </>
+                  )
+                : id
+                  ? (
+                      'Save changes'
+                    )
+                  : (
+                      'Create'
+                    )}
             </Button>
           </div>
         </DialogFooter>

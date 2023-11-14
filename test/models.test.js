@@ -51,7 +51,7 @@ describe('', () => {
     expect(stepWarnings.length).toEqual(1)
 
     // equipment
-    const equipment = await workInstruction.getEquipment()
+    // const equipment = await workInstruction.getEquipment()
 
     // when including CMC, must include it by its 'as' alias
     workInstruction = await db.models.WorkInstructions.findByPk(workInstruction.id, {
@@ -61,7 +61,8 @@ describe('', () => {
 
     expect(workInstruction.CMC).not.toBeUndefined()
 
-    // const equipment = await db.models.Equipment.findOne()
+    const equipment = await db.models.Equipment.findOne()
+    await equipment.getIsolations()
     // console.log(equipment)
 
     // expect(customerWarnings[0].id).toEqual(workInstructionWarnings[0].id)

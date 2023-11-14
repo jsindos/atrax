@@ -134,7 +134,7 @@ export default ({ dialogTriggerClassName, isEditing, inspection }) => {
             <div className='flex-col gap-3 flex'>
               <Label>Inspection/Test Activity</Label>
               <Textarea
-                style={{ minHeight: 150 }}
+                style={{ minHeight: 200 }}
                 value={activity}
                 onChange={(e) => setActivity(e.target.value)}
               />
@@ -142,7 +142,7 @@ export default ({ dialogTriggerClassName, isEditing, inspection }) => {
             <div className='flex-col gap-3 flex mt-8'>
               <Label>Inspection/Test Criteria</Label>
               <Textarea
-                style={{ minHeight: 150 }}
+                style={{ minHeight: 200 }}
                 value={criteria}
                 onChange={(e) => setCriteria(e.target.value)}
               />

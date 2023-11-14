@@ -38,6 +38,7 @@ const Query = `
     steps: [Step]
     warnings: [Warning]
     procedures: [Procedure]
+    isolations: [Isolation]
   }
 
   type Customer {
@@ -62,11 +63,21 @@ const Query = `
     name: String
     MELCode: String
     CMC: CMC
+    isolations: [Isolation]
   }
 
   type CMC {
     id: Int
     code: String
+  }
+
+  type Isolation {
+    id: Int
+    UDC: String
+    compartment: String
+    isolationType: String
+    isolationDevice: String
+    equipment: Equipment
   }
 
   type WorkInstruction {
@@ -86,6 +97,7 @@ const Query = `
     CMC: CMC
     procedures: [WorkInstructionProcedure]
     warnings: [Warning]
+    isolations: [Isolation]
   }
 
   # used to associate an index for a procedure in a particular work instruction
@@ -160,11 +172,22 @@ const resolvers = {
     },
     async equipment (root, args, context) {
       return context.models.Equipment.findAll()
+    },
+    async isolations (root, args, context) {
+      return context.models.Isolations.findAll()
     }
   },
   Equipment: {
     CMC: async (equipment, args, context) => {
       return equipment.getCMC()
+    },
+    isolations: async (equipment, args, context) => {
+      return equipment.getIsolations()
+    }
+  },
+  Isolation: {
+    equipment: async (isolation, args, context) => {
+      return isolation.getEquipment()
     }
   },
   Customer: {
@@ -202,6 +225,9 @@ const resolvers = {
     },
     equipment: async (workInstruction, args, context) => {
       return workInstruction.getEquipment()
+    },
+    isolations: async (workInstruction, args, context) => {
+      return workInstruction.getIsolations()
     }
   },
   WorkInstructionProcedure: {
@@ -257,7 +283,10 @@ const Mutation = `
     deleteInspection(inspectionId: Int!): Step
 
     createEquipment(equipment: EquipmentInput!, workInstructionId: Int!): WorkInstruction
-    saveEquipment(equipment: EquipmentInput!): WorkInstruction
+    saveEquipment(equipment: EquipmentInput!): Equipment
+
+    createIsolation(isolation: IsolationInput!, equipmentId: Int!): Equipment
+    saveIsolation(isolation: IsolationInput!): Isolation
 
     saveWarning(warning: WarningInput!): Warning
     createWarning(warning : WarningInput!): Warning
@@ -332,6 +361,14 @@ const Mutation = `
     primeContractor: String
     SPO: String
     stepId: Int
+  }
+
+  input IsolationInput {
+    id: Int
+    UDC: String
+    compartment: String
+    isolationType: String
+    isolationDevice: String
   }
 `
 
@@ -689,25 +726,12 @@ const mutations = {
     async createEquipment (root, args, context) {
       const { equipment: equipmentFields, workInstructionId } = args
 
-      const workInstruction = await context.models.WorkInstructions.findByPk(workInstructionId, {
-        include: [{ model: context.models.CMCs, as: 'CMC' }]
-      })
+      const workInstruction = await context.models.WorkInstructions.findByPk(workInstructionId, { include: [{ model: context.models.CMCs, as: 'CMC' }] })
 
       const equipment = await context.models.Equipment.create(equipmentFields)
       await equipment.setCMC(workInstruction.CMC)
 
-      // Refetch the work instruction to get the updated data
-      const updatedWorkInstruction = await context.models.WorkInstructions.findByPk(
-        workInstructionId,
-        {
-          include: [
-            { model: context.models.CMCs, as: 'CMC' },
-            { model: context.models.Equipment } // Include Equipment in the fetched data
-          ]
-        }
-      )
-
-      return updatedWorkInstruction
+      return workInstruction
     },
     async saveEquipment (root, args, context) {
       const { equipment: equipmentFields } = args
@@ -719,22 +743,40 @@ const mutations = {
       })
       const equipment = updatedRows[0]
 
-      // Refetch the work instruction to get the updated data
-      const updatedWorkInstruction = await context.models.WorkInstructions.findByPk(
-        equipment.workInstructionId,
-        {
-          include: [
-            { model: context.models.CMCs, as: 'CMC' },
-            { model: context.models.Equipment } // Include Equipment in the fetched data
-          ]
-        }
-      )
-
-      return updatedWorkInstruction
+      return equipment
     },
+
+    /**********************************
+     * Isolation mutations            *
+     **********************************/
+
+    async createIsolation (root, args, context) {
+      const { isolation: isolationFields, equipmentId } = args
+
+      const equipmentItem = await context.models.Equipment.findByPk(equipmentId)
+
+      const isolation = await context.models.Isolations.create(isolationFields)
+      await isolation.setEquipment(equipmentItem)
+
+      return equipmentItem
+    },
+    async saveIsolation (root, args, context) {
+      const { isolation: isolationFields } = args
+
+      // eslint-disable-next-line no-unused-vars
+      const [number, updatedRows] = await context.models.Isolations.update(isolationFields, {
+        where: { id: isolationFields.id },
+        returning: true
+      })
+      const isolation = updatedRows[0]
+
+      return isolation
+    },
+
     /**********************************
      * Warning mutations              *
      **********************************/
+
     async createWarning (root, args, context) {
       const { warning: warningFields } = args
 
@@ -755,9 +797,11 @@ const mutations = {
 
       return warning
     },
+
     /**********************************
      * Image mutations                *
      **********************************/
+
     async createStepImage (root, args, context) {
       const { stepId, image } = args
 

@@ -26,7 +26,7 @@ import { useMutation, useQuery } from '@apollo/client'
 import React, { forwardRef, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
-import { Cross2Icon, GlobeIcon, MagnifyingGlassIcon, PaperPlaneIcon, ReloadIcon } from '@radix-ui/react-icons'
+import { Cross2Icon, GlobeIcon, MagnifyingGlassIcon, MinusCircledIcon, PaperPlaneIcon, ReloadIcon } from '@radix-ui/react-icons'
 import { useToast } from '@/components/ui/use-toast'
 import { saveWithToast } from '@/utils'
 import { firstColumn, secondColumn, thirdColumn, fourthColumn } from '../../cmc'
@@ -285,6 +285,10 @@ export default () => {
                   <PaperPlaneIcon className='mr-2' />
                   Warnings, Cautions and Notes ({workInstruction?.warnings.length || 0})
                 </Button>
+                <Button className='mt-8' onClick={() => navigate(`/work_instructions/${id}/isolations`)}>
+                  <MinusCircledIcon className='mr-2' />
+                  Isolations
+                </Button>
               </div>
 
               <Accordion type='single' collapsible className='mt-8'>
@@ -456,13 +460,14 @@ export const S = ({
   valueKey,
   placeholder,
   handleSelectChange,
-  style
+  style,
+  isDisabled
 }) => {
   return (
     <div className={'pt-8 ' + className} style={style}>
       <div className='grid w-full max-w-sm items-center gap-3'>
         <Label>{label}</Label>
-        <Select value={currentValue && currentValue[valueKey]} onValueChange={handleSelectChange}>
+        <Select value={currentValue && currentValue[valueKey]} onValueChange={handleSelectChange} disabled={isDisabled}>
           <SelectTrigger className='w-[180px]'>
             <SelectValue placeholder={placeholder} />
           </SelectTrigger>

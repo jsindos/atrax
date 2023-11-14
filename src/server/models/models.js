@@ -50,6 +50,10 @@ module.exports = ({ sequelize, models, services }, DataTypes) => {
         foreignKey: 'workInstructionId',
         as: 'equipment'
       })
+      WorkInstructions.belongsToMany(models.Isolations, {
+        through: models.WorkInstructionsIsolations,
+        foreignKey: 'workInstructionId'
+      })
     }
   }
 
@@ -80,6 +84,63 @@ module.exports = ({ sequelize, models, services }, DataTypes) => {
       timestamps: true,
       sequelize,
       modelName: 'workInstructions'
+    }
+  )
+
+  // Isolations
+  class Isolations extends Model {
+    static associate (models) {
+      Isolations.belongsTo(models.Equipment, {
+        foreignKey: 'equipmentId',
+        as: 'equipment'
+      })
+      Isolations.belongsToMany(models.WorkInstructions, {
+        through: models.WorkInstructionsIsolations,
+        foreignKey: 'isolationId'
+      })
+    }
+  }
+
+  Isolations.modelName = 'Isolations'
+
+  Isolations.init(
+    {
+      id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+      },
+      UDC: DataTypes.STRING,
+      compartment: DataTypes.STRING,
+      isolationType: DataTypes.STRING,
+      isolationDevice: DataTypes.STRING
+    },
+    {
+      timestamps: true,
+      sequelize,
+      modelName: 'isolations'
+    }
+  )
+
+  // WorkInstructionsIsolations
+  class WorkInstructionsIsolations extends Model {
+    static associate (models) {}
+  }
+
+  WorkInstructionsIsolations.modelName = 'WorkInstructionsIsolations'
+
+  WorkInstructionsIsolations.init(
+    {
+      id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+      }
+    },
+    {
+      timestamps: true,
+      sequelize,
+      modelName: 'workInstructionsIsolations'
     }
   )
 
@@ -122,6 +183,9 @@ module.exports = ({ sequelize, models, services }, DataTypes) => {
       })
       Equipment.belongsToMany(models.WorkInstructions, {
         through: models.WorkInstructionsEquipments,
+        foreignKey: 'equipmentId'
+      })
+      Equipment.hasMany(models.Isolations, {
         foreignKey: 'equipmentId'
       })
     }
@@ -414,6 +478,8 @@ module.exports = ({ sequelize, models, services }, DataTypes) => {
     CMCs,
     Equipment,
     WorkInstructionsEquipments,
-    Inspections
+    Inspections,
+    Isolations,
+    WorkInstructionsIsolations
   ]
 }
