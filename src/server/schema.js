@@ -253,6 +253,8 @@ const Mutation = `
     createStepImage(stepId: ID!, image: Upload): Step
     deleteStepImage(imageId: ID!): Step
 
+    createInspection(inspection: InspectionInput): Step
+
     saveWarning(warning: WarningInput!): Warning
     createWarning(warning : WarningInput!): Warning
 
@@ -312,6 +314,19 @@ const Mutation = `
     parentId: Int
     index: Int
     warningIds: [Int]
+  }
+
+  input InspectionInput {
+    id: Int
+    activity: String
+    criteria: String
+    verifyingDocument: String
+    repairAuthority: String
+    shipStaff: String
+    classSociety: String
+    hullInspector: String
+    primeContractor: String
+    SPO: String
   }
 `
 

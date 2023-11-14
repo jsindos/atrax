@@ -509,7 +509,7 @@ const CreateOrEditWarning = ({ id }) => {
           <div className='pt-8'>
             <div className='grid w-full items-center gap-3'>
               <Label>Text</Label>
-              <Textarea style={{ minHeight: 100 }} value={content} onChange={(e) => setContent(e.target.value)} />
+              <Textarea style={{ minHeight: 200 }} value={content} onChange={(e) => setContent(e.target.value)} />
             </div>
           </div>
           <div className='pt-8'>
