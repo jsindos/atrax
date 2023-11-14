@@ -1,23 +1,44 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
-import { TrashIcon } from '@radix-ui/react-icons'
-import { cn } from '@/utils'
+import { ReloadIcon, TrashIcon } from '@radix-ui/react-icons'
+import { cn, saveWithToast } from '@/utils'
 import CreateOrEditInspectionDialog from '../procedures/CreateOrEditInspectionDialog'
-
-// activity: 'Dummy activity',
-// criteria: 'Dummy criteria',
-// verifyingDocument: 'Dummy document',
-// repairAuthority: 'Dummy authority',
-// shipStaff: 'Dummy staff',
-// classSociety: 'Dummy society',
-// hullInspector: 'Dummy inspector',
-// primeContractor: 'Dummy contractor',
-// SPO: 'Dummy SPO'
-
-// RA, SS, CS, NHI, Prim, SPO
+import { mutations } from '@/queries'
+import { useMutation } from '@apollo/client'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
+} from '@/components/ui/dialog'
+import { useToast } from '@/components/ui/use-toast'
 
 export default ({ inspection, className }) => {
+  const [deleteInspectionMutation] = useMutation(mutations.DeleteInspection)
+  const [showDialog, setShowDialog] = useState()
+  const { toast } = useToast()
+  const [isDeletingInspection, setIsDeletingInspection] = useState(false)
+
+  const deleteInspection = async () => {
+    setIsDeletingInspection(true)
+    await saveWithToast(
+      () =>
+        deleteInspectionMutation({
+          variables: {
+            inspectionId: inspection.id
+          }
+        }),
+      toast,
+      'Inspection Deleted',
+      setIsDeletingInspection
+    )
+    setShowDialog(false)
+  }
+
   return (
     <div className={cn('shadow border rounded-xl p-8 flex row justify-between', className)}>
       <div>
@@ -58,9 +79,26 @@ export default ({ inspection, className }) => {
       </div>
       <div className='flex flex-col gap-3'>
         <CreateOrEditInspectionDialog isEditing inspection={inspection} />
-        <Button variant='outline' size='icon'>
-          <TrashIcon className='h-4 w-4' />
-        </Button>
+        <Dialog open={showDialog} onOpenChange={setShowDialog}>
+          <DialogTrigger asChild>
+            <Button variant='outline' size='icon'>
+              {
+                isDeletingInspection ? <ReloadIcon className='h-4 w-4 animate-spin' /> : <TrashIcon className='h-4 w-4' />
+              }
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Delete inspection</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete this inspection?
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button onClick={() => deleteInspection()}>Delete</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )

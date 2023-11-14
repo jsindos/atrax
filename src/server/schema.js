@@ -254,6 +254,7 @@ const Mutation = `
 
     createInspection(inspection: InspectionInput): Step
     saveInspection(inspection: InspectionInput): Inspection
+    deleteInspection(inspectionId: Int!): Step
 
     createEquipment(equipment: EquipmentInput!, workInstructionId: Int!): WorkInstruction
     saveEquipment(equipment: EquipmentInput!): WorkInstruction
@@ -644,7 +645,7 @@ const mutations = {
     async createInspection (root, args, context) {
       const { inspection: inspectionFields } = args
 
-      if (!inspectionFields?.stepId) throw new UserInputError('You must include a stepId')
+      if (!inspectionFields?.stepId) throw new UserInputError('You must include a stepId.')
 
       // Create the inspection
       const inspection = await context.models.Inspections.create(inspectionFields)
@@ -664,6 +665,21 @@ const mutations = {
       const inspection = updatedRows[0]
 
       return inspection
+    },
+    async deleteInspection (root, args, context) {
+      const { inspectionId } = args
+
+      const inspection = await context.models.Inspections.findByPk(inspectionId)
+
+      if (!inspection) throw new UserInputError('Inspection not found.')
+
+      await inspection.destroy()
+
+      const step = await context.models.Steps.findOne({
+        where: { id: inspection.stepId }
+      })
+
+      return step
     },
 
     /**********************************
