@@ -42,6 +42,32 @@ export default () => {
 
   const [isSaving, setIsSaving] = useState()
   const [isolationsAdded, setIsolationsAdded] = useState([])
+  const [saveWorkInstructionMutation] = useMutation(mutations.SaveWorkInstruction)
+
+  const { toast } = useToast()
+
+  useEffect(() => {
+    if (workInstruction) {
+      setIsolationsAdded(workInstruction?.isolations || [])
+    }
+  }, [workInstruction])
+
+  const saveIsolations = async () => {
+    await saveWithToast(
+      () =>
+        saveWorkInstructionMutation({
+          variables: {
+            workInstruction: {
+              id: Number(id),
+              isolationIds: isolationsAdded.map((e) => e.id)
+            }
+          }
+        }),
+      toast,
+      null,
+      setIsSaving
+    )
+  }
 
   return (
     <div className='container mx-auto px-4 pb-8'>
@@ -50,7 +76,7 @@ export default () => {
         <BackButton onClick={() => navigate(`/work_instructions/${id}`)} />
       </div>
       <div className='flex-col flex pt-8'>
-        <Button disabled={isSaving} className='self-end flex' onClick={() => saveWarnings()}>
+        <Button disabled={isSaving} className='self-end flex' onClick={() => saveIsolations()}>
           {
             isSaving
               ? (

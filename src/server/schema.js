@@ -329,6 +329,7 @@ const Mutation = `
     procedures: [ProcedureInput]
     warningIds: [Int]
     equipmentIds: [Int]
+    isolationIds: [Int]
   }
 
   input ProcedureInput {
@@ -394,7 +395,7 @@ const mutations = {
     },
     async saveWorkInstruction (root, args, context) {
       const {
-        workInstruction: { warningIds, equipmentIds, CMC, ...workInstructionFields }
+        workInstruction: { warningIds, equipmentIds, isolationIds, CMC, ...workInstructionFields }
       } = args
 
       // https://stackoverflow.com/a/40543424/3171685
@@ -424,6 +425,13 @@ const mutations = {
           where: { workInstructionId: workInstruction.id }
         })
         await workInstruction.addEquipment(equipmentIds)
+      }
+
+      if (isolationIds) {
+        await context.models.WorkInstructionsIsolations.destroy({
+          where: { workInstructionId: workInstruction.id }
+        })
+        await workInstruction.addIsolations(isolationIds)
       }
 
       return workInstruction

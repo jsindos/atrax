@@ -202,6 +202,9 @@ export const mutations = {
         warnings {
           id
         }
+        isolations {
+          id
+        }
       }
     }
 
@@ -524,6 +527,13 @@ export const queries = {
           MELCode
           isolations {
             ...IsolationFields
+          }
+        }
+        isolations {
+          ...IsolationFields
+          equipment {
+            id
+            name
           }
         }
         warnings {
