@@ -4,14 +4,16 @@ import { useMutation } from '@apollo/client'
 import { mutations } from '@/queries'
 import { useToast } from '@/components/ui/use-toast'
 import { ReloadIcon } from '@radix-ui/react-icons'
-import { buildTree, flattenTree } from '@/utils'
+import usePrevious, { buildTree, flattenTree } from '@/utils'
 
-export default ({ steps, parentId = null }) => {
+export default ({ steps, parentId = null, selectedProcedure }) => {
   const tree = buildTree(steps, parentId)
+
+  const previousSelectedProcedure = usePrevious(selectedProcedure)
 
   useEffect(() => {
     // must compare to `tree` instead of `steps`, as `tree` is pruned with `parentId` in `buildTree(steps, parentId)` (used in StepDetail)
-    if (flattenTree(tree).length !== flattenTree(nestedSteps).length) {
+    if (flattenTree(tree).length !== flattenTree(nestedSteps).length || selectedProcedure?.id !== previousSelectedProcedure?.id) {
       const tree = buildTree(steps, parentId)
       setNestedSteps(tree)
     }

@@ -350,12 +350,24 @@ export const mutations = {
             title
             steps {
               ...StepFields
+              images {
+                id
+                uri
+              }
+              warnings {
+                ...WarningFields
+              }
+              inspections {
+                ...InspectionFields
+              }
             }
           }
         }
       }
     }
     ${fields.StepFields}
+    ${fields.WarningFields}
+    ${fields.InspectionFields}
   `,
 
   UnassignProcedureFromWorkInstruction: gql`

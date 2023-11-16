@@ -1,6 +1,8 @@
 import { clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 
+import { useEffect, useRef } from 'react'
+
 export function cn (...inputs) {
   return twMerge(clsx(inputs))
 }
@@ -47,6 +49,15 @@ export const saveWithToast = async (fn, toast, toastSuccessMessage, setIsSaving)
   } finally {
     setIsSaving && setIsSaving(false)
   }
+}
+
+// https://stackoverflow.com/questions/53446020/how-to-compare-oldvalues-and-newvalues-on-react-hooks-useeffect
+export default function usePrevious (value) {
+  const ref = useRef()
+  useEffect(() => {
+    ref.current = value
+  })
+  return ref.current
 }
 
 export function buildTree (steps, parentId = null) {

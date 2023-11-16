@@ -87,15 +87,13 @@ module.exports = async (db) => {
   // const image = await Images.create()
 
   const step = await Steps.create({
-    title:
-      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+    title: 'This is a random sentence.'
   })
   await step.setProcedure(procedure)
   await step.addWarning(warning)
 
   const step2 = await Steps.create({
-    title:
-      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+    title: 'This is another random sentence.',
     index: 1
   })
   await step2.setProcedure(procedure)
@@ -103,8 +101,7 @@ module.exports = async (db) => {
   await step2.setParent(step)
 
   const step3 = await Steps.create({
-    title:
-      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+    title: 'Yet another random sentence here.',
     index: 0
   })
   await step3.setProcedure(procedure)
@@ -112,10 +109,9 @@ module.exports = async (db) => {
   await step3.setParent(step)
 
   // another step
-  await Steps.create({
-    title:
-      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
-  })
+  // await Steps.create({
+  //   title: 'Finally, one more random sentence.'
+  // })
 
   const inspection = await Inspections.create({
     activity: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
@@ -129,7 +125,7 @@ module.exports = async (db) => {
     SPO: 'Dummy SPO'
   })
 
-  step.addInspection(inspection)
+  await step.addInspection(inspection)
 
   let cmc1, cmc2
   if (process.env.NODE_ENV === 'test') {

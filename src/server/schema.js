@@ -3,7 +3,7 @@
 const fs = require('fs')
 const path = require('path')
 const { transpileSchema } = require('graphql-s2s').graphqls2s
-const { makeExecutableSchema } = require('graphql-tools')
+const { makeExecutableSchema } = require('@graphql-tools/schema')
 const { merge } = require('lodash')
 const { GraphQLUpload } = require('graphql-upload')
 const { UserInputError } = require('apollo-server-express')
@@ -527,10 +527,81 @@ const mutations = {
       const index = procedures.length + 1
 
       if (isDuplicating) {
+        // also duplicate Steps, and Images and Inspections on those Steps
+        // when duplicating Steps, re-assign the same Warnings applied to the old Steps
+        // Duplicate the procedure
         const newProcedureData = Object.entries(procedure.dataValues)
           .filter(([key]) => key !== 'id')
           .reduce((obj, [key, value]) => ({ ...obj, [key]: value }), {})
         const newProcedure = await context.models.Procedures.create(newProcedureData)
+
+        // Get the steps of the old procedure
+        const steps = await procedure.getSteps()
+        const stepsTree = buildTree(steps)
+
+        // same as in utils
+        function buildTree (steps, parentId = null) {
+          return steps
+            ?.filter(step => step.parentId === parentId)
+            .sort((a, b) => a.index - b.index)
+            .map(step => ({
+              step,
+              children: buildTree(steps, step.id)
+            }))
+        }
+
+        const duplicateInspectionsAndImages = async (step, newStep) => {
+          // Add the new step to the new procedure
+          await newProcedure.addStep(newStep)
+
+          // Duplicate inspections
+          const inspections = await step.getInspections()
+          for (const inspection of inspections) {
+            const newInspectionData = Object.entries(inspection.dataValues)
+              .filter(([key]) => key !== 'id')
+              .reduce((obj, [key, value]) => ({ ...obj, [key]: value }), {})
+            const newInspection = await context.models.Inspections.create(newInspectionData)
+            await newStep.addInspection(newInspection)
+          }
+
+          // Duplicate images
+          const images = await step.getImages()
+          for (const image of images) {
+            const newImageData = Object.entries(image.dataValues)
+              .filter(([key]) => key !== 'id')
+              .reduce((obj, [key, value]) => ({ ...obj, [key]: value }), {})
+            const newImage = await context.models.Images.create(newImageData)
+            await newStep.addImage(newImage)
+          }
+
+          // Re-assign warnings
+          const warnings = await step.getWarnings()
+          for (const warning of warnings) {
+            await newStep.addWarning(warning)
+          }
+        }
+
+        // Function to duplicate steps recursively
+        const duplicateSteps = async (steps, parentId = null) => {
+          for (const step of steps) {
+            const newStepData = Object.entries(step.step.dataValues)
+              .filter(([key]) => key !== 'id' && key !== 'parentId')
+              .reduce((obj, [key, value]) => ({ ...obj, [key]: value }), {})
+            if (step.step.dataValues.parentId) {
+              newStepData.parentId = parentId
+            }
+            const newStep = await context.models.Steps.create(newStepData)
+            await duplicateInspectionsAndImages(step.step, newStep)
+            if (step.children && step.children.length > 0) {
+              await duplicateSteps(step.children, newStep.id)
+            }
+          }
+        }
+
+        // Duplicate each step and its inspections, images, and warnings
+        await duplicateSteps(stepsTree)
+
+        // Add the new procedure to the work instruction
         await newProcedure.addWorkInstruction(workInstruction, {
           through: { procedureIndex: index }
         })
@@ -918,3 +989,5 @@ module.exports = makeExecutableSchema({
     ...Object.values(schemaParts).map(({ resolvers }) => resolvers)
   )
 })
+
+module.exports.mutations = mutations

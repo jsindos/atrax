@@ -16,7 +16,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from '@/components/ui/select'
 
 import {
@@ -26,7 +26,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  DialogTrigger
 } from '@/components/ui/dialog'
 
 import { MoreHorizontal } from 'lucide-react'
@@ -34,7 +34,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import { Textarea } from '@/components/ui/textarea'
 import NestedSteps from './NestedSteps'
@@ -46,9 +46,9 @@ const ProceduresPage = () => {
   const {
     data: { workInstruction } = {},
     loading,
-    refetch,
+    refetch
   } = useQuery(queries.WorkInstruction, {
-    variables: { id: Number(workInstructionId) },
+    variables: { id: Number(workInstructionId) }
   })
 
   const [selectedRow, setSelectedRow] = useState(null)
@@ -64,13 +64,13 @@ const ProceduresPage = () => {
     return procedure
   })
 
-  console.log(workInstruction)
-
   let selectedProcedure
 
   if (procedures && selectedRow) {
     selectedProcedure = procedures.find((procedure) => procedure.id === selectedRow.id)
   }
+
+  console.log(selectedProcedure)
 
   const [createProcedureDialog, setCreateProcedureDialog] = useState()
   const [useExistingProcedureDialog, setUseExistingProcedureDialog] = useState()
@@ -80,7 +80,7 @@ const ProceduresPage = () => {
   const [title, setTitle] = useState('')
 
   const [createProcedureMutation] = useMutation(mutations.CreateProcedure, {
-    refetchQueries: [{ query: queries.Procedures }],
+    refetchQueries: [{ query: queries.Procedures }]
   })
 
   const [isCreating, setIsCreating] = useState()
@@ -90,7 +90,7 @@ const ProceduresPage = () => {
     const procedureInput = {
       title: procedureTitle,
       type: procedureType,
-      workInstructionId: Number(workInstructionId),
+      workInstructionId: Number(workInstructionId)
     }
 
     setIsCreating(true)
@@ -99,8 +99,8 @@ const ProceduresPage = () => {
         () =>
           createProcedureMutation({
             variables: {
-              procedure: procedureInput,
-            },
+              procedure: procedureInput
+            }
           }),
         toast,
         'Procedure Created',
@@ -114,16 +114,14 @@ const ProceduresPage = () => {
     }
   }
 
-  console.log(procedures)
-
   const columns = [
     {
       accessorKey: 'title',
-      header: 'Procedure',
+      header: 'Procedure'
     },
     {
       accessorKey: 'type',
-      header: 'Type',
+      header: 'Type'
     },
     {
       id: 'actions',
@@ -131,41 +129,44 @@ const ProceduresPage = () => {
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
-                <MoreHorizontal className="h-4 w-4" />
+              <Button variant='ghost' className='h-8 w-8 p-0'>
+                <span className='sr-only'>Open menu</span>
+                <MoreHorizontal className='h-4 w-4' />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align='end'>
               <DropdownMenuItem onClick={() => deleteProcedure(row.original.id)}>
-                {isDeletingProcedure ? (
-                  <>
-                    <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
-                    Deleting
-                  </>
-                ) : (
-                  'Delete Procedure'
-                )}
+                {isDeletingProcedure
+                  ? (
+                    <>
+                      <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />
+                      Deleting
+                    </>
+                    )
+                  : (
+                      'Delete Procedure'
+                    )}
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() =>
-                  unassignProcedureFromWorkInstruction(row.original.id, workInstruction.id)
-                }
+                  unassignProcedureFromWorkInstruction(row.original.id, workInstruction.id)}
               >
-                {isCreating ? (
-                  <>
-                    <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
-                    Unassigning
-                  </>
-                ) : (
-                  'Unassign Procedure'
-                )}
+                {isCreating
+                  ? (
+                    <>
+                      <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />
+                      Unassigning
+                    </>
+                    )
+                  : (
+                      'Unassign Procedure'
+                    )}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         )
-      },
-    },
+      }
+    }
   ]
 
   const [isDeletingProcedure, setIsDeletingProcedure] = useState()
@@ -179,8 +180,8 @@ const ProceduresPage = () => {
         () =>
           deleteProcedureMutation({
             variables: {
-              id,
-            },
+              id
+            }
           }),
         toast,
         'Procedure Deleted',
@@ -199,11 +200,11 @@ const ProceduresPage = () => {
   const columnsUseExisting = [
     {
       accessorKey: 'procedureTitle',
-      header: 'Title',
+      header: 'Title'
     },
     {
       accessorKey: 'customerName',
-      header: 'Customer',
+      header: 'Customer'
     },
     {
       id: 'select',
@@ -218,13 +219,13 @@ const ProceduresPage = () => {
               row.toggleSelected(!!value)
               setSelectedRow(value ? row : null)
             }}
-            aria-label="Select row"
+            aria-label='Select row'
           />
         )
       },
       enableSorting: false,
-      enableHiding: false,
-    },
+      enableHiding: false
+    }
   ]
 
   const { data: { procedures: allProcedures } = {} } = useQuery(queries.Procedures)
@@ -240,7 +241,7 @@ const ProceduresPage = () => {
     procedureId: procedure.id,
     procedureTitle: procedure.title,
     customerId: procedure.workInstructions[0]?.customer?.id || null,
-    customerName: procedure.workInstructions[0]?.customer?.name || null,
+    customerName: procedure.workInstructions[0]?.customer?.name || null
   }))
 
   const [assignProcedureMutation] = useMutation(mutations.AssignProcedureToWorkInstruction)
@@ -257,8 +258,8 @@ const ProceduresPage = () => {
             variables: {
               procedureId: procedureId,
               workInstructionId: workInstructionId,
-              isDuplicating,
-            },
+              isDuplicating
+            }
           }),
         toast,
         'Procedure Created',
@@ -283,8 +284,8 @@ const ProceduresPage = () => {
           unassignProcedureMutation({
             variables: {
               procedureId: procedureId,
-              workInstructionId: workInstructionId,
-            },
+              workInstructionId: workInstructionId
+            }
           }),
         toast,
         'Procedure Unassigned',
@@ -300,44 +301,46 @@ const ProceduresPage = () => {
     }
   }
 
-  let procedureTypes = ['INTERNAL', 'EXTERNAL', 'STANDARD']
+  const procedureTypes = ['INTERNAL', 'EXTERNAL', 'STANDARD']
   const [selectedType, setSelectedType] = React.useState('')
 
   return (
-    <div className="container mx-auto px-4">
-      <div className="flex justify-between row pt-8">
+    <div className='container mx-auto px-4'>
+      <div className='flex justify-between row pt-8'>
         <h3> Procedures </h3>
         <BackButton
           onClick={() => navigate(`/customers/${workInstruction.customer.id}/work_instructions`)}
         />
       </div>
-      {loading ? (
-        <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
-      ) : (
-        <>
-          <div />
-        </>
-      )}
+      {loading
+        ? (
+          <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />
+          )
+        : (
+          <>
+            <div />
+          </>
+          )}
 
-      <div className="mx-auto flex pt-8">
-        <div className="w-2/5 pr-2">
+      <div className='mx-auto flex pt-8'>
+        <div className='w-2/5 pr-2'>
           <Dialog open={createProcedureDialog} onOpenChange={setCreateProcedureDialog}>
             <DialogTrigger asChild>
               <Button>Create Procedure</Button>
             </DialogTrigger>
-            <DialogContent className="Dialog">
+            <DialogContent className='Dialog'>
               <DialogHeader>
                 <DialogTitle>Create Procedure</DialogTitle>
               </DialogHeader>
               <Textarea
-                className="mt-8"
+                className='mt-8'
                 style={{ minHeight: 150 }}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
               />
-              <Select className="mt-8" onValueChange={setSelectedType}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Procedure Type" />
+              <Select className='mt-8' onValueChange={setSelectedType}>
+                <SelectTrigger className='w-[180px]'>
+                  <SelectValue placeholder='Procedure Type' />
                 </SelectTrigger>
                 <SelectContent>
                   {procedureTypes.map((type, index) => (
@@ -348,31 +351,33 @@ const ProceduresPage = () => {
                 </SelectContent>
               </Select>
               <DialogFooter>
-                <Button type="submit" onClick={() => createProcedure(title, selectedType)}>
-                  {isCreating ? (
-                    <>
-                      <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
-                      Creating
-                    </>
-                  ) : (
-                    'Create Procedure'
-                  )}
+                <Button type='submit' onClick={() => createProcedure(title, selectedType)}>
+                  {isCreating
+                    ? (
+                      <>
+                        <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />
+                        Creating
+                      </>
+                      )
+                    : (
+                        'Create Procedure'
+                      )}
                 </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
           <Dialog open={useExistingProcedureDialog} onOpenChange={setUseExistingProcedureDialog}>
             <DialogTrigger asChild>
-              <Button className="ml-2">Use Existing Procedure</Button>
+              <Button className='ml-2'>Use Existing Procedure</Button>
             </DialogTrigger>
 
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className='sm:max-w-[425px]'>
               <DialogHeader>
                 <DialogTitle>Use Existing Procedure</DialogTitle>
                 <DialogDescription>Info about duplicating/importing procedure</DialogDescription>
               </DialogHeader>
 
-              <div className="container mx-auto py-10">
+              <div className='container mx-auto py-10'>
                 <DataTableUseExisting
                   setSelectedDialogRow={setSelectedDialogRow}
                   columns={columnsUseExisting}
@@ -385,7 +390,7 @@ const ProceduresPage = () => {
 
               <DialogFooter>
                 <Button
-                  type="submit"
+                  type='submit'
                   onClick={() => {
                     if (selectedDialogRow) {
                       assignProcedureToWorkInstruction(
@@ -396,17 +401,19 @@ const ProceduresPage = () => {
                     }
                   }}
                 >
-                  {isCreating ? (
-                    <>
-                      <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
-                      Creating
-                    </>
-                  ) : (
-                    'Duplicate procedure'
-                  )}
+                  {isCreating
+                    ? (
+                      <>
+                        <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />
+                        Creating
+                      </>
+                      )
+                    : (
+                        'Duplicate procedure'
+                      )}
                 </Button>
                 <Button
-                  type="submit"
+                  type='submit'
                   onClick={() => {
                     if (selectedDialogRow) {
                       assignProcedureToWorkInstruction(
@@ -416,14 +423,16 @@ const ProceduresPage = () => {
                     }
                   }}
                 >
-                  {isCreating ? (
-                    <>
-                      <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
-                      Creating
-                    </>
-                  ) : (
-                    'Import procedure'
-                  )}
+                  {isCreating
+                    ? (
+                      <>
+                        <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />
+                        Creating
+                      </>
+                      )
+                    : (
+                        'Import procedure'
+                      )}
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -438,20 +447,23 @@ const ProceduresPage = () => {
             />
           )}
         </div>
-        <div className="w-3/5 pl-2">
+        <div className='w-3/5 pl-2'>
           {selectedProcedure && <CreateStepDialog procedureId={selectedProcedure.id} />}
-          {selectedProcedure && selectedProcedure.steps.length > 0 ? (
-            <NestedSteps
-              steps={selectedProcedure.steps.map((s) => ({
-                ...s,
-                procedureId: selectedProcedure.id,
-              }))}
-            />
-          ) : (
-            <p className="mt-8" style={{ color: '#999' }}>
-              No steps yet
-            </p>
-          )}
+          {selectedProcedure && selectedProcedure.steps.length > 0
+            ? (
+              <NestedSteps
+                steps={selectedProcedure.steps.map((s) => ({
+                  ...s,
+                  procedureId: selectedProcedure.id
+                }))}
+                selectedProcedure={selectedProcedure}
+              />
+              )
+            : (
+              <p className='mt-8' style={{ color: '#999' }}>
+                No steps yet
+              </p>
+              )}
         </div>
       </div>
     </div>
