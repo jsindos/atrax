@@ -108,7 +108,7 @@ const MaterialsAdded = ({ materialsAdded, setMaterialsAdded }) => {
 
   return (
     <div className='w-full mt-8' style={{ display: 'flex', rowGap: '0.75rem', flexDirection: 'column' }}>
-      <Label>Assigned Materials</Label>
+      <Label>Assigned Parts, Tools and Materials</Label>
       <Table>
         <TableHeader>
           <TableRow>
@@ -258,12 +258,12 @@ const CreateOrEditMaterial = ({ id }) => {
                 <Pencil1Icon className='h-4 w-4' />
               </Button>
               )
-            : <Button>Create Material</Button>
+            : <Button>Create new</Button>
         }
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{id ? 'Edit Material' : 'Create Material'}</DialogTitle>
+          <DialogTitle>{id ? 'Edit' : 'Create'}</DialogTitle>
           <I label='Stock Code' value={stockCode} handleInputChange={(e) => setStockCode(e.target.value)} />
           <I label='Part Number' value={partNo} handleInputChange={(e) => setPartNo(e.target.value)} />
           <I label='Item Name' value={itemName} handleInputChange={(e) => setItemName(e.target.value)} />

@@ -217,7 +217,7 @@ export default () => {
 
                 <Button className='mt-8' onClick={() => navigate(`/work_instructions/${id}/materials`)}>
                   <CubeIcon className='mr-2' />
-                  Materials ({workInstruction?.materials?.length || 0})
+                  Parts, Tools and Materials ({workInstruction?.materials?.length || 0})
                 </Button>
               </div>
 
