@@ -16,6 +16,7 @@ import WorkInstructionWarnings from './pages/WorkInstructionWarnings/WorkInstruc
 import StepWarnings from './pages/StepWarnings.js'
 import WorkInstructionEquipment from './pages/WorkInstructionWarnings/WorkInstructionEquipment.js'
 import WorkInstructionIsolations from './pages/WorkInstructionIsolations.js'
+import WorkInstructionMaterials from './pages/WorkInstructionMaterials.js'
 
 const BASE_URL = 'http://localhost:8080'
 
@@ -41,6 +42,7 @@ const App = () => {
           <Route path='/work_instructions/:id/warnings' element={<WorkInstructionWarnings />} />
           <Route path='/work_instructions/:id/equipment' element={<WorkInstructionEquipment />} />
           <Route path='/work_instructions/:id/isolations' element={<WorkInstructionIsolations />} />
+          <Route path='/work_instructions/:id/materials' element={<WorkInstructionMaterials />} />
           <Route path='/' element={<Navigate to='/customers/1/work_instructions' />} />
           <Route path='/customers/:customerId/work_instructions' element={<WorkInstructionsPage />} />
           <Route path='/work_instructions/:workInstructionId/procedures' element={<ProceduresPage />} />

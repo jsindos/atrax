@@ -62,6 +62,33 @@ const fields = {
 }
 
 export const mutations = {
+  SaveMaterial: gql`
+    mutation saveMaterial($material: MaterialInput!) {
+      saveMaterial(material: $material) {
+        id
+        stockCode
+        partNo
+        itemName
+        useCase
+        quantity
+      }
+    }
+  `,
+  CreateMaterial: gql`
+    mutation createMaterial($material: MaterialInput!) {
+      createMaterial(material: $material) {
+        id
+        materials {
+          id
+          stockCode
+          partNo
+          itemName
+          useCase
+          quantity
+        }
+      }
+    }
+  `,
   CreateIsolation: gql`
     mutation createIsolation($isolation: IsolationInput!, $equipmentId: Int!) {
       createIsolation(isolation: $isolation, equipmentId: $equipmentId) {
@@ -203,6 +230,9 @@ export const mutations = {
           id
         }
         isolations {
+          id
+        }
+        materials {
           id
         }
       }
@@ -535,6 +565,14 @@ export const queries = {
             id
             name
           }
+        }
+        materials {
+          id
+          stockCode
+          partNo
+          itemName
+          useCase
+          quantity
         }
         warnings {
           ...WarningFields

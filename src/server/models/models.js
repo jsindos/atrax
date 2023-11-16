@@ -54,6 +54,7 @@ module.exports = ({ sequelize, models, services }, DataTypes) => {
         through: models.WorkInstructionsIsolations,
         foreignKey: 'workInstructionId'
       })
+      WorkInstructions.hasMany(models.Materials)
     }
   }
 
@@ -84,6 +85,35 @@ module.exports = ({ sequelize, models, services }, DataTypes) => {
       timestamps: true,
       sequelize,
       modelName: 'workInstructions'
+    }
+  )
+
+  // Materials
+  class Materials extends Model {
+    static associate (models) {
+      Materials.belongsTo(models.WorkInstructions)
+    }
+  }
+
+  Materials.modelName = 'Materials'
+
+  Materials.init(
+    {
+      id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+      },
+      stockCode: DataTypes.STRING,
+      partNo: DataTypes.STRING,
+      itemName: DataTypes.STRING,
+      useCase: DataTypes.STRING,
+      quantity: DataTypes.FLOAT
+    },
+    {
+      timestamps: true,
+      sequelize,
+      modelName: 'materials'
     }
   )
 
@@ -480,6 +510,7 @@ module.exports = ({ sequelize, models, services }, DataTypes) => {
     WorkInstructionsEquipments,
     Inspections,
     Isolations,
-    WorkInstructionsIsolations
+    WorkInstructionsIsolations,
+    Materials
   ]
 }

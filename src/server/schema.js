@@ -80,6 +80,15 @@ const Query = `
     equipment: Equipment
   }
 
+  type Material {
+    id: Int
+    stockCode: String
+    partNo: String
+    itemName: String
+    useCase: String
+    quantity: Float
+  }
+
   type WorkInstruction {
     id: Int
     title: String
@@ -98,6 +107,7 @@ const Query = `
     procedures: [WorkInstructionProcedure]
     warnings: [Warning]
     isolations: [Isolation]
+    materials: [Material]
   }
 
   # used to associate an index for a procedure in a particular work instruction
@@ -228,6 +238,9 @@ const resolvers = {
     },
     isolations: async (workInstruction, args, context) => {
       return workInstruction.getIsolations()
+    },
+    materials: async (workInstruction, args, context) => {
+      return workInstruction.getMaterials()
     }
   },
   WorkInstructionProcedure: {
@@ -282,6 +295,9 @@ const Mutation = `
     saveInspection(inspection: InspectionInput): Inspection
     deleteInspection(inspectionId: Int!): Step
 
+    createMaterial(material: MaterialInput!): WorkInstruction
+    saveMaterial(material: MaterialInput!): Material
+
     createEquipment(equipment: EquipmentInput!, workInstructionId: Int!): WorkInstruction
     saveEquipment(equipment: EquipmentInput!): Equipment
 
@@ -330,6 +346,7 @@ const Mutation = `
     warningIds: [Int]
     equipmentIds: [Int]
     isolationIds: [Int]
+    materialIds: [Int]
   }
 
   input ProcedureInput {
@@ -371,6 +388,16 @@ const Mutation = `
     isolationType: String
     isolationDevice: String
   }
+
+  input MaterialInput {
+    id: Int
+    stockCode: String
+    partNo: String
+    itemName: String
+    useCase: String
+    quantity: Float
+    workInstructionId: Int
+  }
 `
 
 const mutations = {
@@ -395,7 +422,7 @@ const mutations = {
     },
     async saveWorkInstruction (root, args, context) {
       const {
-        workInstruction: { warningIds, equipmentIds, isolationIds, CMC, ...workInstructionFields }
+        workInstruction: { warningIds, equipmentIds, isolationIds, materialIds, CMC, ...workInstructionFields }
       } = args
 
       // https://stackoverflow.com/a/40543424/3171685
@@ -432,6 +459,10 @@ const mutations = {
           where: { workInstructionId: workInstruction.id }
         })
         await workInstruction.addIsolations(isolationIds)
+      }
+
+      if (materialIds) {
+        await workInstruction.setMaterials(materialIds)
       }
 
       return workInstruction
@@ -725,6 +756,32 @@ const mutations = {
       })
 
       return step
+    },
+
+    /**********************************
+     * Material mutations             *
+     **********************************/
+
+    async createMaterial (root, args, context) {
+      const { material: materialFields } = args
+
+      const workInstruction = await context.models.WorkInstructions.findByPk(materialFields.workInstructionId)
+
+      await context.models.Materials.create(materialFields)
+
+      return workInstruction
+    },
+    async saveMaterial (root, args, context) {
+      const { material: materialFields } = args
+
+      // eslint-disable-next-line no-unused-vars
+      const [number, updatedRows] = await context.models.Materials.update(materialFields, {
+        where: { id: materialFields.id },
+        returning: true
+      })
+      const material = updatedRows[0]
+
+      return material
     },
 
     /**********************************

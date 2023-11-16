@@ -26,7 +26,7 @@ import { useMutation, useQuery } from '@apollo/client'
 import React, { forwardRef, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
-import { Cross2Icon, GlobeIcon, MagnifyingGlassIcon, MinusCircledIcon, PaperPlaneIcon, ReloadIcon } from '@radix-ui/react-icons'
+import { Cross2Icon, CubeIcon, GlobeIcon, MagnifyingGlassIcon, MinusCircledIcon, PaperPlaneIcon, ReloadIcon } from '@radix-ui/react-icons'
 import { useToast } from '@/components/ui/use-toast'
 import { saveWithToast } from '@/utils'
 import { firstColumn, secondColumn, thirdColumn, fourthColumn } from '../../cmc'
@@ -213,6 +213,11 @@ export default () => {
                 <Button className='mt-8' onClick={() => navigate(`/work_instructions/${id}/isolations`)}>
                   <MinusCircledIcon className='mr-2' />
                   Isolations ({workInstruction?.isolations?.length || 0})
+                </Button>
+
+                <Button className='mt-8' onClick={() => navigate(`/work_instructions/${id}/materials`)}>
+                  <CubeIcon className='mr-2' />
+                  Materials ({workInstruction?.materials?.length || 0})
                 </Button>
               </div>
 
