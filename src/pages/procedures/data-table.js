@@ -12,18 +12,18 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow
+  TableRow,
 } from '@/components/ui/table'
 import { useParams } from 'react-router-dom'
 import { ReloadIcon } from '@radix-ui/react-icons'
 
 // Define the DataTable function
-export function DataTable ({ columns, data, setSelectedRow }) {
+export function DataTable({ columns, data, setSelectedRow }) {
   const sortedData = [...data].sort((a, b) => a.index - b.index)
   const table = useReactTable({
     data: sortedData,
     columns,
-    getCoreRowModel: getCoreRowModel()
+    getCoreRowModel: getCoreRowModel(),
   })
 
   // Use the useEffect hook to select the first row after the component has rendered
@@ -34,11 +34,9 @@ export function DataTable ({ columns, data, setSelectedRow }) {
     }
   }, [table])
 
-  const [updateProcedureIndices, { loading }] = useMutation(
-    mutations.UpdateProcedureIndices
-  )
+  const [updateProcedureIndices, { loading }] = useMutation(mutations.UpdateProcedureIndices)
 
-  const { id } = useParams()
+  const { workInstructionId } = useParams()
 
   const onDragEnd = (result) => {
     if (!result.destination) return
@@ -52,15 +50,20 @@ export function DataTable ({ columns, data, setSelectedRow }) {
       const { __typename, ...rest } = item
       return {
         ...rest,
-        index: index + 1 // assuming index starts from 1
+        index: index + 1, // assuming index starts from 1
       }
     })
 
-    updateProcedureIndices({ variables: { procedures: updatedItems.map(i => ({ id: i.id })), workInstructionId: Number(id) } })
+    updateProcedureIndices({
+      variables: {
+        procedures: updatedItems.map((i) => ({ id: i.id })),
+        workInstructionId: Number(workInstructionId),
+      },
+    })
   }
   return (
-    <div className='rounded-md border mt-8'>
-      {loading && <ReloadIcon className='mr-2 h-4 w-4 animate-spin' />}
+    <div className="rounded-md border mt-8">
+      {loading && <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />}
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
@@ -78,44 +81,42 @@ export function DataTable ({ columns, data, setSelectedRow }) {
           ))}
         </TableHeader>
         <DragDropContext onDragEnd={onDragEnd}>
-          <Droppable droppableId='table'>
+          <Droppable droppableId="table">
             {(provided) => (
               <TableBody ref={provided.innerRef} {...provided.droppableProps}>
-                {table.getRowModel().rows?.length
-                  ? (
-                      table.getRowModel().rows.map((row, index) => (
-                        <Draggable key={row.id} draggableId={row.id} index={index}>
-                          {(provided) => (
-                            <TableRow
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              {...provided.dragHandleProps}
-                              key={row.id}
-                              data-state={row.getIsSelected() && 'selected'}
-                              onClick={() => {
-                                table.getRowModel().rows.forEach((r) => r.toggleSelected(false)) // Deselect all rows
-                                row.toggleSelected(true) // Select the clicked row
-                                // HERE how do i get the data associated with this row rather than just row variable
-                                setSelectedRow(row.original)
-                              }}
-                            >
-                              {row.getVisibleCells().map((cell) => (
-                                <TableCell key={cell.id}>
-                                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                </TableCell>
-                              ))}
-                            </TableRow>
-                          )}
-                        </Draggable>
-                      ))
-                    )
-                  : (
-                    <TableRow>
-                      <TableCell colSpan={columns.length} className='h-24 text-center'>
-                        No results.
-                      </TableCell>
-                    </TableRow>
-                    )}
+                {table.getRowModel().rows?.length ? (
+                  table.getRowModel().rows.map((row, index) => (
+                    <Draggable key={row.id} draggableId={row.id} index={index}>
+                      {(provided) => (
+                        <TableRow
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                          key={row.id}
+                          data-state={row.getIsSelected() && 'selected'}
+                          onClick={() => {
+                            table.getRowModel().rows.forEach((r) => r.toggleSelected(false)) // Deselect all rows
+                            row.toggleSelected(true) // Select the clicked row
+                            // HERE how do i get the data associated with this row rather than just row variable
+                            setSelectedRow(row.original)
+                          }}
+                        >
+                          {row.getVisibleCells().map((cell) => (
+                            <TableCell key={cell.id}>
+                              {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                      )}
+                    </Draggable>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={columns.length} className="h-24 text-center">
+                      No results.
+                    </TableCell>
+                  </TableRow>
+                )}
                 {provided.placeholder}
               </TableBody>
             )}
